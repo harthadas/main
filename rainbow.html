@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>קשת בענן</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: same calm column as the color lab; three zones top-to-bottom (what to paint, the rainbow, the paint pots). Paint is the only saturated color on screen. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --sky: #eef4fa;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --glass: #97a3b6;
+  --good: #2f8a55;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+a { color: inherit; text-decoration: none; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+svg { display: block; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+
+/* ---------- home ---------- */
+.home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 32px; padding-block: 24px; }
+.home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.home .logo { width: min(260px, 70vw); }
+.levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 560px; }
+.level {
+  position: relative;
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 24px 20px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-family: var(--display); font-size: 1.45rem; font-weight: 500; line-height: 1.5;
+  transition: border-color .15s, transform .15s;
+}
+.level:hover { border-color: var(--glass); }
+.level:active { transform: scale(.98); }
+.level small { font-size: 1.05rem; color: var(--ink-soft); font-weight: 400; }
+.level .art { height: 76px; display: flex; align-items: center; gap: 10px; }
+.level .art svg { width: 64px; height: 64px; }
+.level .art .word { font-size: 1.8rem; font-weight: 700; }
+.level .done { position: absolute; top: 12px; inset-inline-start: 12px; width: 30px; height: 30px; color: var(--good); }
+.back-lab { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-soft); font-family: var(--display); font-size: 1.1rem; padding: 8px 12px; border-radius: 999px; }
+.back-lab svg { width: 22px; height: 22px; }
+
+/* ---------- what to paint ---------- */
+.ask {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 8px 16px; flex: 1; min-width: 0; min-height: 84px;
+}
+.ask .pic { width: 64px; height: 64px; flex: none; }
+.ask .pic.reveal { animation: pop .4s ease-out; }
+.ask small { display: block; color: var(--ink-soft); font-size: .95rem; line-height: 1.4; }
+.ask strong { display: block; font-family: var(--display); font-size: 2rem; font-weight: 700; line-height: 1.4; }
+.dots { display: flex; gap: 5px; margin-inline-start: auto; flex: none; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ---------- rainbow ---------- */
+.play { display: flex; flex-direction: column; gap: 20px; padding-top: 18px; flex: 1; }
+.sky {
+  background: var(--sky); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 18px 10px 8px; display: flex; justify-content: center;
+}
+.sky svg { width: 100%; max-width: 560px; height: auto; }
+.band.fresh { animation: brush .9s cubic-bezier(.4,.1,.3,1) forwards; }
+@keyframes brush { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+.guide { animation: breathe 1.8s ease-in-out infinite; }
+@keyframes breathe { 0%, 100% { opacity: .35; } 50% { opacity: .9; } }
+.sparkle { opacity: 0; transform-box: fill-box; transform-origin: center; animation: twinkle 1.6s ease-out forwards; }
+@keyframes twinkle { 0% { opacity: 0; transform: scale(.2); } 40% { opacity: 1; transform: scale(1.1); } 100% { opacity: .85; transform: scale(1); } }
+
+/* ---------- paint pots ---------- */
+.pots { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 14px; max-width: 560px; align-self: center; }
+.pot {
+  border: 0; background: none; padding: 6px; border-radius: 50%;
+  touch-action: manipulation;
+}
+.pot .paint {
+  position: relative; display: block;
+  width: 64px; height: 64px; border-radius: 50%;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), inset 0 0 0 2px rgba(29,36,49,.14);
+  transition: transform .15s;
+}
+.pot .paint::after { /* soft highlight so the blob reads as wet paint */
+  content: ""; position: absolute; top: 12px; inset-inline-end: 14px;
+  width: 14px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.45);
+}
+.pot:not(:disabled):active .paint { transform: scale(.92); }
+.pot.miss .paint { animation: shake .45s ease-in-out; }
+.pot.hint .paint { animation: glow 1.4s ease-in-out infinite; }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+@keyframes glow {
+  0%, 100% { box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), 0 0 0 4px var(--paper), 0 0 0 7px var(--ink); }
+  50% { box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), 0 0 0 4px var(--paper), 0 0 0 7px rgba(29,36,49,.15); }
+}
+.say {
+  min-height: 2.2em; text-align: center;
+  font-family: var(--display); font-size: 1.35rem; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.say .chip { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); flex: none; }
+
+/* ---------- finished ---------- */
+.cheer { display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--good); font-size: 1.8rem; }
+.cheer svg { width: 36px; height: 36px; }
+.names {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 14px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 14px 12px; max-width: 560px; align-self: center;
+}
+.names span { display: inline-flex; align-items: center; gap: 6px; font-family: var(--display); font-size: 1.2rem; font-weight: 500; }
+.names .chip { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.2rem;
+  padding: 10px 24px; min-height: 56px;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.act svg { width: 24px; height: 24px; }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .ask { padding-inline: 12px; gap: 10px; }
+  .ask .pic { width: 52px; height: 52px; }
+  .ask strong { font-size: 1.7rem; }
+  .dots { display: none; }
+  .pots { gap: 8px 6px; }
+  .pot .paint { width: 56px; height: 56px; }
+  .pot .paint::after { top: 10px; inset-inline-end: 12px; width: 12px; height: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .band.fresh { stroke-dashoffset: 0; }
+  .sparkle { opacity: .85; }
+}
+</style>
+</head>
+<body>
+<div id="app" lang="he" dir="rtl"></div>
+
+<script>
+(() => {
+/* ================= colors =================
+   Outer arc first, the way a rainbow is read. Every color has a picture
+   of something that is always that color, used as the clue in level 1. */
+const COLORS = [
+  { id: 'red',    name: 'אָדֹם',   hex: '#e23b36', dark: '#a8231f', thing: 'תַּפּוּחַ' },
+  { id: 'orange', name: 'כָּתֹם',   hex: '#f5871f', dark: '#b85d0c', thing: 'תַּפּוּז' },
+  { id: 'yellow', name: 'צָהֹב',   hex: '#fbd33a', dark: '#c99a0a', thing: 'שֶׁמֶשׁ' },
+  { id: 'green',  name: 'יָרֹק',   hex: '#3fa34d', dark: '#24702f', thing: 'עָלֶה' },
+  { id: 'light',  name: 'תְּכֵלֶת', hex: '#5cc6f0', dark: '#2a8fbd', thing: 'טִפַּת מַיִם' },
+  { id: 'blue',   name: 'כָּחֹל',   hex: '#2457c5', dark: '#163a8a', thing: 'דָּג' },
+  { id: 'purple', name: 'סָגֹל',   hex: '#8a3fb0', dark: '#5f2580', thing: 'עֲנָבִים' },
+];
+const BY_ID = Object.fromEntries(COLORS.map(c => [c.id, c]));
+
+/* ================= pictures (64×64) ================= */
+const PIC = {
+  red: c => `<path d="M32 19c-4-3-10-4-15-1-7 4-8 14-5 22 3 8 9 15 14 15 3 0 4-1 6-1s3 1 6 1c5 0 11-7 14-15 3-8 2-18-5-22-5-3-11-2-15 1z" fill="${c.hex}"/>
+    <path d="M32 19c0-5 1-8 4-12" fill="none" stroke="#6d4c41" stroke-width="3.5" stroke-linecap="round"/>
+    <ellipse cx="21" cy="30" rx="4" ry="6" fill="#fff" fill-opacity=".4" transform="rotate(20 21 30)"/>`,
+  orange: c => `<circle cx="32" cy="35" r="22" fill="${c.hex}"/>
+    ${[[24,28],[38,25],[44,38],[30,44],[20,39],[34,34]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.4" fill="${c.dark}" fill-opacity=".55"/>`).join('')}
+    <circle cx="32" cy="14" r="2.5" fill="#6d4c41"/>
+    <ellipse cx="22" cy="26" rx="4" ry="6" fill="#fff" fill-opacity=".35" transform="rotate(30 22 26)"/>`,
+  yellow: c => `<g stroke="${c.hex}" stroke-width="5" stroke-linecap="round">
+      ${[0,45,90,135,180,225,270,315].map(a => `<path d="M32 6v8" transform="rotate(${a} 32 32)"/>`).join('')}
+    </g>
+    <circle cx="32" cy="32" r="13" fill="${c.hex}"/>`,
+  green: c => `<path d="M12 52C12 27 29 11 54 10c0 24-15 42-42 42z" fill="${c.hex}"/>
+    <path d="M12 52L42 23M24 40l-2-10M30 34l9 1" fill="none" stroke="${c.dark}" stroke-width="2.5" stroke-linecap="round"/>`,
+  light: c => `<path d="M32 6C32 6 13 30 13 42a19 19 0 0 0 38 0C51 30 32 6 32 6z" fill="${c.hex}"/>
+    <path d="M22 42a10 10 0 0 0 7 9" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="3.5" stroke-linecap="round"/>`,
+  blue: c => `<path d="M46 36Q53 28 60 20q-3 13 1 26-8-3-15-10z" fill="${c.hex}"/>
+    <ellipse cx="27" cy="37" rx="22" ry="14" fill="${c.hex}"/>
+    <path d="M9 42q18 10 36 0" fill="none" stroke="${c.dark}" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="16" cy="33" r="2.6" fill="#1d2431"/>`,
+  purple: c => `<path d="M32 14c0-4 2-7 5-9" fill="none" stroke="#6d4c41" stroke-width="3.5" stroke-linecap="round"/>
+    ${[[18,23],[32,22],[46,23],[25,36],[39,36],[32,49]]
+      .map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7.5"fill="${c.hex}" stroke="${c.dark}" stroke-width="1.5"/>`).join('')}`,
+};
+const picSVG = (id, cls = 'pic') => `<svg class="${cls}" viewBox="0 0 64 64" role="img" aria-label="${BY_ID[id].thing}">${PIC[id](BY_ID[id])}</svg>`;
+
+/* ================= rainbow drawing =================
+   Seven arcs around one center, standing on two clouds. A painted arc is
+   drawn with pathLength=1 so the brush animation is one dash offset. */
+const RB = { w: 400, h: 248, cx: 200, cy: 206, outer: 182, band: 20 };
+const arcR = i => RB.outer - RB.band / 2 - i * RB.band;
+// starts on the right, the way Hebrew is written
+const arcPath = r => `M${RB.cx + r} ${RB.cy} A${r} ${r} 0 0 0 ${RB.cx - r} ${RB.cy}`;
+
+function cloud(x, y) {
+  const puffs = [[-34, 6, 18], [-14, -6, 22], [10, -10, 24], [32, 2, 19], [0, 10, 20], [-24, 14, 14], [22, 14, 15]];
+  const shape = (grow, fill) => puffs.map(([dx, dy, r]) => `<circle cx="${x + dx}" cy="${y + dy}" r="${r + grow}" fill="${fill}"/>`).join('');
+  return `<g>${shape(2.5, '#cfd7e2')}${shape(0, '#ffffff')}</g>`;
+}
+
+const SPARKS = [[60, 70], [338, 64], [200, 8], [110, 22], [292, 24], [26, 140], [376, 136]];
+const star = (x, y, s) => `<path d="M${x} ${y - s}L${x + s * .3} ${y - s * .3} ${x + s} ${y} ${x + s * .3} ${y + s * .3} ${x} ${y + s} ${x - s * .3} ${y + s * .3} ${x - s} ${y} ${x - s * .3} ${y - s * .3}Z"`;
+
+function rainbowSVG({ painted, current = -1, fresh = -1, sparkle = false, label }) {
+  let arcs = '';
+  for (let i = 0; i < COLORS.length; i++) {
+    const r = arcR(i), d = arcPath(r);
+    arcs += `<path d="${d}" fill="none" stroke="#ffffff" stroke-width="${RB.band - 2}"/>`;
+    arcs += `<path d="${d}" fill="none" stroke="#e1e7ef" stroke-width="${RB.band - 4}"/>`;
+    if (i < painted) {
+      arcs += `<path class="band${i === fresh ? ' fresh' : ''}" d="${d}" pathLength="1" stroke-dasharray="1" stroke-dashoffset="${i === fresh ? 1 : 0}"
+        fill="none" stroke="${COLORS[i].hex}" stroke-width="${RB.band + .6}"/>`;
+    } else if (i === current) {
+      arcs += `<path class="guide" d="${d}" fill="none" stroke="#1d2431" stroke-width="3" stroke-dasharray="2 9" stroke-linecap="round"/>`;
+    }
+  }
+  const sparks = sparkle
+    ? SPARKS.map(([x, y], k) => `${star(x, y, k % 2 ? 9 : 12)} class="sparkle" fill="${COLORS[k].hex}" style="animation-delay:${.15 * k}s"/>`).join('')
+    : '';
+  const footX = RB.outer - RB.band * 3.5;
+  return `<svg viewBox="0 0 ${RB.w} ${RB.h}" role="img" aria-label="${label}">
+    ${arcs}${sparks}
+    ${cloud(RB.cx + footX, RB.cy + 4)}${cloud(RB.cx - footX, RB.cy + 4)}
+  </svg>`;
+}
+
+/* ================= state ================= */
+const LEVELS = {
+  1: { title: 'צֶבַע וּתְמוּנָה' },
+  2: { title: 'רַק מִלָּה' },
+};
+const state = { view: 'home', game: 0, level: 1, step: 0, pots: [], wrong: 0, miss: null, fresh: -1, busy: false };
+const DONE_KEY = 'rainbow-done';
+let done = new Set();
+try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); } catch (e) {}
+const saveDone = () => { try { localStorage.setItem(DONE_KEY, JSON.stringify([...done])); } catch (e) {} };
+
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* ================= icons ================= */
+const I = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
+  redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+};
+
+/* ================= views ================= */
+const app = document.getElementById('app');
+
+function render() {
+  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  app.innerHTML = ({ home: homeView, play: playView, done: doneView })[state.view]();
+  if (focusKey) {
+    const el = app.querySelector(`[data-key="${focusKey}"]`);
+    if (el && !el.disabled) el.focus();
+  }
+}
+
+function homeView() {
+  const badge = n => done.has(n) ? `<span class="done" aria-label="הַצְלָחָה">${I.star}</span>` : '';
+  return `<div class="bar">
+      <a class="back-lab" href="index.html">${I.back}מַעְבֶּדֶת צְבָעִים</a>
+    </div>
+    <div class="home">
+      <div class="logo">${rainbowSVG({ painted: COLORS.length, label: 'קֶשֶׁת בֶּעָנָן' })}</div>
+      <h1>קֶשֶׁת בֶּעָנָן</h1>
+      <div class="levels">
+        <button class="level" data-act="start" data-level="1" data-key="l1">
+          ${badge(1)}
+          <span class="art">${picSVG('red')}<span class="word">אָדֹם</span></span>
+          <span>שָׁלָב 1</span>
+          <small>${LEVELS[1].title}</small>
+        </button>
+        <button class="level" data-act="start" data-level="2" data-key="l2">
+          ${badge(2)}
+          <span class="art"><span class="word">אָדֹם</span></span>
+          <span>שָׁלָב 2</span>
+          <small>${LEVELS[2].title}</small>
+        </button>
+      </div>
+    </div>`;
+}
+
+function askCard() {
+  const c = COLORS[state.step];
+  // level 2 shows only the word; after two misses the picture comes in as a hint
+  const showPic = state.level === 1 || state.wrong >= 2;
+  const dots = COLORS.map((k, i) => `<i style="${i < state.step ? `background:${k.hex}` : ''}"></i>`).join('');
+  return `<div class="ask">
+    ${showPic ? picSVG(c.id, state.level === 2 ? 'pic reveal' : 'pic') : ''}
+    <div><small>בַּחֲרוּ צֶבַע</small><strong>${c.name}</strong></div>
+    <div class="dots" aria-hidden="true">${dots}</div>
+  </div>`;
+}
+
+function potsRow() {
+  const c = COLORS[state.step];
+  const hintAt = state.level === 1 ? 2 : 3;
+  return `<div class="pots">${state.pots.map(id => {
+    const cls = [id === state.miss ? 'miss' : '', !state.busy && state.wrong >= hintAt && id === c.id ? 'hint' : ''].join(' ').trim();
+    return `<button class="pot ${cls}" data-act="paint" data-id="${id}" data-key="pot-${id}" aria-label="${BY_ID[id].name}">
+      <span class="paint" style="background:${BY_ID[id].hex}"></span></button>`;
+  }).join('')}</div>`;
+}
+
+function playView() {
+  const finished = state.step >= COLORS.length;
+  const miss = state.miss && BY_ID[state.miss];
+  const say = miss
+    ? `<span class="chip" style="background:${miss.hex}"></span>זֶה ${miss.name}. נַסּוּ שׁוּב`
+    : '';
+  return `<div class="bar">
+      <button class="icon-btn" data-act="home" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${finished ? '' : askCard()}
+    </div>
+    <div class="play">
+      <div class="sky">${rainbowSVG({ painted: state.step, current: state.step, fresh: state.fresh, label: 'הַקֶּשֶׁת שֶׁלָּכֶם' })}</div>
+      <div class="say" role="status">${say}</div>
+      ${finished ? '' : potsRow()}
+    </div>`;
+}
+
+function doneView() {
+  const names = COLORS.map(c => `<span><i class="chip" style="background:${c.hex}"></i>${c.name}</span>`).join('');
+  const next = state.level === 1
+    ? `<button class="act primary" data-act="start" data-level="2" data-key="next">שָׁלָב 2${I.next}</button>` : '';
+  return `<div class="bar">
+      <button class="icon-btn" data-act="home" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+    </div>
+    <div class="play">
+      <div class="sky">${rainbowSVG({ painted: COLORS.length, sparkle: true, label: 'הַקֶּשֶׁת שֶׁלָּכֶם' })}</div>
+      <h2 class="cheer">${I.star}כָּל הַכָּבוֹד!</h2>
+      <div class="names">${names}</div>
+      <div class="actions">
+        ${next}
+        <button class="act${next ? '' : ' primary'}" data-act="start" data-level="${state.level}" data-key="again">${I.redo}עוֹד פַּעַם</button>
+        <button class="act" data-act="home" data-key="home">${I.home}הַבַּיְתָה</button>
+      </div>
+    </div>`;
+}
+
+/* ================= actions ================= */
+const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function go(view) { state.view = view; render(); window.scrollTo(0, 0); }
+
+function start(level) {
+  Object.assign(state, { game: state.game + 1, level, step: 0, wrong: 0, miss: null, fresh: -1, busy: false, pots: shuffle(COLORS.map(c => c.id)) });
+  go('play');
+}
+
+function paint(id) {
+  if (state.busy) return;
+  const c = COLORS[state.step];
+  if (id !== c.id) {
+    state.wrong++; state.miss = id; render();
+    return;
+  }
+  Object.assign(state, { fresh: state.step, step: state.step + 1, wrong: 0, miss: null, busy: true });
+  render();
+  const game = state.game;
+  setTimeout(() => {
+    if (game !== state.game || state.view !== 'play') return;   // left the game mid-brush
+    state.busy = false; state.fresh = -1;
+    if (state.step >= COLORS.length) { done.add(state.level); saveDone(); go('done'); }
+    else render();
+  }, reduced() ? 250 : 950);
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  switch (b.dataset.act) {
+    case 'home': state.busy = false; go('home'); break;
+    case 'start': start(+b.dataset.level); break;
+    case 'paint': paint(b.dataset.id); break;
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>

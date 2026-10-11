@@ -73,6 +73,8 @@ svg { display: block; }
 .mode:hover { border-color: var(--glass); }
 .mode:active { transform: scale(.98); }
 .mode svg { width: 76px; height: 76px; }
+a.mode { text-decoration: none; }
+.modes > .mode:last-child:nth-child(odd) { grid-column: 1 / -1; }
 
 /* ---------- missions grid ---------- */
 .missions { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding-block: 16px; }
@@ -438,6 +440,13 @@ function homeView() {
         </svg>
         מְשִׂימוֹת
       </button>
+      <a class="mode" href="rainbow.html" data-key="rainbow">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          ${['#e23b36', '#f5871f', '#fbd33a', '#3fa34d', '#5cc6f0', '#2457c5', '#8a3fb0'].map((c, i) =>
+            `<path d="M${60 - i * 4} 50A${28 - i * 4} ${28 - i * 4} 0 0 0 ${4 + i * 4} 50" fill="none" stroke="${c}" stroke-width="4.2"/>`).join('')}
+        </svg>
+        קֶשֶׁת בֶּעָנָן
+      </a>
     </div>
   </div>`;
 }
