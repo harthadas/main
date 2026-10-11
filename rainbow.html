@@ -1,0 +1,678 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>קשת בענן</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: one calm column; level picker, then three steps (read, build, answer). The seven rainbow colors are the only saturated paint on screen. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --track: #e8ecf2;
+  --glass: #97a3b6;
+  --good: #2f8a55;
+  --good-soft: #e6f3eb;
+  --near: #b7791f;
+  --near-soft: #fbf1e1;
+  --red: #e0362c;
+  --orange: #f2871b;
+  --yellow: #f5cc19;
+  --green: #3a9a47;
+  --cyan: #35b0e6;
+  --blue: #2447c0;
+  --violet: #7b39a6;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+p { margin: 0; }
+svg { display: block; }
+[hidden] { display: none !important; }
+.card { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+
+/* ---------- header ---------- */
+.head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.head h1 { font-size: clamp(1.8rem, 6vw, 2.4rem); display: flex; align-items: center; gap: 12px; }
+.head h1 svg { width: 52px; height: 30px; flex: none; }
+
+.levels { display: flex; gap: 8px; }
+.level {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 16px;
+  padding: 6px 12px 4px; min-width: 76px;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  font-family: var(--display); font-weight: 500; font-size: 1rem; line-height: 1.6;
+}
+.level .stars { display: flex; gap: 2px; height: 18px; align-items: center; }
+.level .stars svg { width: 16px; height: 16px; fill: var(--line); }
+.level .stars svg.on { fill: var(--near); }
+.level[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--surface); }
+.level[aria-pressed="true"] .stars svg.on { fill: var(--yellow); }
+.level[aria-pressed="true"] .stars svg:not(.on) { fill: rgba(255,255,255,.22); }
+
+/* ---------- step tabs ---------- */
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tab {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  padding: 8px 6px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--display); font-weight: 500; font-size: 1.1rem; line-height: 1.5;
+}
+.tab .n {
+  width: 28px; height: 28px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; font-size: .95rem;
+  background: var(--track); color: var(--ink-soft);
+}
+.tab[aria-selected="true"] { border-color: var(--ink); }
+.tab[aria-selected="true"] .n { background: var(--ink); color: var(--surface); }
+
+/* ---------- shared buttons ---------- */
+.row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  min-height: 54px; padding: 8px 24px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--display); font-weight: 500; font-size: 1.2rem; line-height: 1.5;
+}
+.act svg { width: 24px; height: 24px; flex: none; }
+.act:hover { border-color: var(--glass); }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act:active { transform: scale(.98); }
+
+.panel { display: flex; flex-direction: column; gap: 18px; }
+.lead { font-family: var(--display); font-size: 1.3rem; font-weight: 500; text-align: center; line-height: 1.7; text-wrap: balance; }
+
+/* ---------- read ---------- */
+.reading { padding: 22px 22px 18px; display: flex; flex-direction: column; gap: 14px; }
+.story { font-size: 1.35rem; line-height: 2.2; max-width: 34em; }
+.story.lvl1 { display: flex; flex-direction: column; gap: 10px; font-size: 1.45rem; }
+.story.lvl1 .sent { display: block; }
+.cw { white-space: nowrap; }
+.cw::before {
+  content: ""; display: inline-block; vertical-align: .05em;
+  width: .62em; height: .62em; border-radius: 50%;
+  background: var(--c); margin-inline-end: .22em;
+  box-shadow: inset 0 0 0 1.5px rgba(29,36,49,.15);
+}
+.story.lvl3 .cw::before { display: none; }
+.listen { align-self: flex-start; min-height: 46px; padding: 6px 18px; font-size: 1.05rem; }
+
+.prism { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+#prism { width: 100%; max-width: 480px; height: auto; }
+.prism .cap { font-family: var(--display); font-size: 1.15rem; font-weight: 500; text-align: center; min-height: 1.8em; }
+.beam, .ray { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .6s ease-out; }
+.raylabel { opacity: 0; transition: opacity .4s; }
+.lit .beam { stroke-dashoffset: 0; }
+.lit .ray { stroke-dashoffset: 0; transition-delay: calc(.55s + var(--i) * .09s); }
+.lit .raylabel { opacity: 1; transition-delay: calc(.9s + var(--i) * .09s); }
+.reset .beam, .reset .ray, .reset .raylabel { transition: none !important; }
+
+/* ---------- build ---------- */
+.stage { padding: 14px 12px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.stage svg { width: 100%; max-width: 520px; height: auto; }
+.track { fill: none; stroke: var(--track); stroke-width: 21; }
+.track.next { stroke: var(--glass); animation: glow 1.6s ease-in-out infinite; }
+.band { fill: none; stroke-width: 21; stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset .7s ease-out; }
+.band.on { stroke-dashoffset: 0; }
+.rb-label { font-family: var(--display); font-size: 15px; font-weight: 500; fill: var(--ink-soft); }
+@keyframes glow { 0%, 100% { opacity: .35; } 50% { opacity: .9; } }
+.count { font-family: var(--display); color: var(--ink-soft); font-size: 1rem; font-variant-numeric: tabular-nums; }
+
+.msg { font-family: var(--display); font-size: 1.25rem; font-weight: 500; text-align: center; min-height: 2.2em; line-height: 1.7; text-wrap: balance; }
+.msg.good { color: var(--good); }
+.msg.near { color: var(--near); }
+
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 12px; }
+.chip {
+  border: 0; background: none; padding: 4px; width: 80px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--display); font-size: 1.15rem; font-weight: 500; line-height: 1.6;
+  border-radius: 16px; transition: opacity .2s;
+}
+.chip .paint {
+  position: relative; width: 60px; height: 60px; border-radius: 50%;
+  background: var(--c);
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), inset 0 0 0 2px rgba(29,36,49,.14);
+  transition: transform .15s;
+}
+.chip .paint::after {
+  content: ""; position: absolute; top: 11px; inset-inline-end: 13px;
+  width: 13px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.45);
+}
+.chips.plain .chip .paint { background: var(--track); }
+.chips.plain .chip .paint::after { display: none; }
+.chips.plain .chip { width: auto; min-width: 80px; }
+.chip:not(:disabled):active .paint { transform: scale(.94); }
+.chip:disabled { opacity: .25; }
+.chip.hint .paint { animation: nudge 1.4s ease-in-out infinite; box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--near); }
+.chip.shake { animation: shake .4s; }
+@keyframes nudge { 0%, 60%, 100% { transform: translateY(0); } 75% { transform: translateY(-7px); } 90% { transform: translateY(0); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+
+/* ---------- quiz ---------- */
+.qhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--track); display: block; }
+.dots i.done { background: var(--good); }
+.dots i.now { background: var(--ink); }
+.question { padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.question h2 { font-size: 1.45rem; line-height: 1.8; }
+.opts { display: grid; gap: 12px; }
+.opts.two { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.opt {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  min-height: 64px; padding: 10px 18px;
+  display: flex; align-items: center; gap: 14px; text-align: start;
+  font-family: var(--display); font-size: 1.2rem; font-weight: 500; line-height: 1.7;
+  transition: border-color .15s, background-color .15s;
+}
+.opt:hover:not(:disabled) { border-color: var(--glass); }
+.opt .sw { width: 36px; height: 36px; border-radius: 50%; flex: none; background: var(--c); box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); }
+.opt.num { justify-content: center; font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+.opt .strip { display: flex; flex: 1; height: 34px; border-radius: 10px; overflow: hidden; box-shadow: inset 0 0 0 2px rgba(29,36,49,.1); }
+.opt .strip span { flex: 1; background: var(--c); }
+.opt .mark { margin-inline-start: auto; width: 28px; height: 28px; flex: none; }
+.opt.right { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--line); opacity: .45; }
+.opt:disabled { cursor: default; }
+.feedback { display: flex; flex-direction: column; gap: 8px; }
+.quote {
+  border-inline-start: 4px solid var(--glass); padding-inline-start: 14px;
+  color: var(--ink-soft); font-size: 1.15rem; line-height: 2;
+}
+.quote b { color: var(--ink); font-weight: 600; }
+
+.finish { padding: 24px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.finish svg { width: 100%; max-width: 320px; height: auto; }
+.finish h2 { font-size: 1.8rem; }
+.finish p { font-size: 1.2rem; line-height: 1.8; }
+
+@media (max-width: 460px) {
+  .tab { font-size: 1rem; gap: 6px; padding-inline: 4px; }
+  .tab .n { width: 24px; height: 24px; }
+  .level { min-width: 0; flex: 1; padding-inline: 6px; }
+  .levels { width: 100%; }
+  .story { font-size: 1.25rem; }
+  .story.lvl1 { font-size: 1.3rem; }
+  .question { padding: 18px 14px; }
+  .question h2 { font-size: 1.3rem; }
+  .opt { font-size: 1.1rem; padding-inline: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="head">
+    <h1>
+      <svg viewBox="0 0 52 30" aria-hidden="true">
+        <g fill="none" stroke-width="3">
+          <path d="M3 28a23 23 0 0 1 46 0" stroke="var(--red)"/>
+          <path d="M6 28a20 20 0 0 1 40 0" stroke="var(--orange)"/>
+          <path d="M9 28a17 17 0 0 1 34 0" stroke="var(--yellow)"/>
+          <path d="M12 28a14 14 0 0 1 28 0" stroke="var(--green)"/>
+          <path d="M15 28a11 11 0 0 1 22 0" stroke="var(--cyan)"/>
+          <path d="M18 28a8 8 0 0 1 16 0" stroke="var(--blue)"/>
+          <path d="M21 28a5 5 0 0 1 10 0" stroke="var(--violet)"/>
+        </g>
+      </svg>
+      קֶשֶׁת בֶּעָנָן
+    </h1>
+    <div class="levels" role="group" aria-label="רָמָה">
+      <button class="level" id="lvl1" data-level="1" aria-pressed="true"><span class="stars" data-n="1"></span>קַל</button>
+      <button class="level" id="lvl2" data-level="2" aria-pressed="false"><span class="stars" data-n="2"></span>בֵּינוֹנִי</button>
+      <button class="level" id="lvl3" data-level="3" aria-pressed="false"><span class="stars" data-n="3"></span>מִתְקַדֵּם</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" id="tab-read" role="tab" data-go="read" aria-selected="true"><span class="n">1</span>קוֹרְאִים</button>
+    <button class="tab" id="tab-build" role="tab" data-go="build" aria-selected="false"><span class="n">2</span>בּוֹנִים</button>
+    <button class="tab" id="tab-quiz" role="tab" data-go="quiz" aria-selected="false"><span class="n">3</span>עוֹנִים</button>
+  </nav>
+
+  <!-- ===== step 1: read ===== -->
+  <section class="panel" id="read" role="tabpanel">
+    <div class="card reading">
+      <p class="story" id="story"></p>
+      <button class="act listen" id="listen" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+        הַקְשִׁיבוּ
+      </button>
+    </div>
+
+    <figure class="card prism" style="margin:0">
+      <svg id="prism" viewBox="0 0 360 190" direction="ltr" role="img" aria-label="אוֹר הַשֶּׁמֶשׁ עוֹבֵר דֶּרֶךְ טִפַּת גֶּשֶׁם וּמִתְפָּרֵק לְשִׁבְעָה צְבָעִים">
+        <g stroke="var(--near)" stroke-width="3" stroke-linecap="round">
+          <line x1="310" y1="14" x2="310" y2="20"/><line x1="310" y1="76" x2="310" y2="82"/>
+          <line x1="276" y1="48" x2="282" y2="48"/><line x1="338" y1="48" x2="344" y2="48"/>
+          <line x1="286" y1="24" x2="290" y2="28"/><line x1="330" y1="68" x2="334" y2="72"/>
+          <line x1="334" y1="24" x2="330" y2="28"/><line x1="290" y1="68" x2="286" y2="72"/>
+        </g>
+        <circle cx="310" cy="48" r="22" fill="var(--yellow)"/>
+        <line class="beam" pathLength="1" x1="292" y1="60" x2="190" y2="100" stroke="var(--glass)" stroke-width="10" stroke-linecap="round"/>
+        <line class="beam" pathLength="1" x1="292" y1="60" x2="190" y2="100" stroke="var(--surface)" stroke-width="6" stroke-linecap="round"/>
+        <g id="rays"></g>
+        <path d="M180 68 C172 84 160 98 160 112 A20 20 0 0 0 200 112 C200 98 188 84 180 68 Z" fill="#cfe7f8" stroke="#7fb1d6" stroke-width="2.5"/>
+        <ellipse cx="173" cy="108" rx="4" ry="7" fill="rgba(255,255,255,.75)"/>
+      </svg>
+      <figcaption class="cap" id="prismCap">לַחֲצוּ עַל הַכַּפְתּוֹר וּרְאוּ מָה קוֹרֶה לָאוֹר.</figcaption>
+      <button class="act" id="shine">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="var(--yellow)"/><g stroke="var(--near)" stroke-width="2" stroke-linecap="round"><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="5" y1="5" x2="6.4" y2="6.4"/><line x1="17.6" y1="17.6" x2="19" y2="19"/><line x1="5" y1="19" x2="6.4" y2="17.6"/><line x1="17.6" y1="6.4" x2="19" y2="5"/></g></svg>
+        <span id="shineLabel">שִׁלְחוּ אוֹר</span>
+      </button>
+    </figure>
+
+    <div class="row"><button class="act primary" data-go="build">לִבְנוֹת קֶשֶׁת ←</button></div>
+  </section>
+
+  <!-- ===== step 2: build ===== -->
+  <section class="panel" id="build" role="tabpanel" hidden>
+    <p class="lead" id="buildLead"></p>
+    <div class="card stage">
+      <svg id="builder" viewBox="0 0 400 225" role="img" aria-label="קֶשֶׁת לִבְנִיָּה"></svg>
+      <span class="count" id="buildCount"></span>
+    </div>
+    <p class="msg" id="buildMsg" aria-live="polite"></p>
+    <div class="chips" id="chips"></div>
+    <div class="row" id="buildDone" hidden>
+      <button class="act" id="buildAgain">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>
+        עוֹד פַּעַם
+      </button>
+      <button class="act primary" data-go="quiz">לַשְּׁאֵלוֹת ←</button>
+    </div>
+  </section>
+
+  <!-- ===== step 3: quiz ===== -->
+  <section class="panel" id="quiz" role="tabpanel" hidden>
+    <div id="quizBody"></div>
+  </section>
+
+</div>
+
+<script>
+const COLORS = [
+  { id: 'red',    name: 'אָדֹם' },
+  { id: 'orange', name: 'כָּתֹם' },
+  { id: 'yellow', name: 'צָהֹב' },
+  { id: 'green',  name: 'יָרֹק' },
+  { id: 'cyan',   name: 'תְּכֵלֶת' },
+  { id: 'blue',   name: 'כָּחֹל' },
+  { id: 'violet', name: 'סָגֹל' },
+];
+const byId = Object.fromEntries(COLORS.map(c => [c.id, c]));
+const cvar = id => `var(--${id})`;
+
+const SENTENCES = [
+  'קֶשֶׁת בֶּעָנָן נוֹצֶרֶת כְּשֶׁאוֹר הַשֶּׁמֶשׁ עוֹבֵר דֶּרֶךְ טִפּוֹת גֶּשֶׁם.',
+  'הָאוֹר מִתְפָּרֵק לְשִׁבְעָה צְבָעִים בְּסֵדֶר קָבוּעַ: {red}, {orange}, {yellow}, {green}, {cyan}, {blue} וְ{violet}.',
+  'הָאָדֹם נִמְצָא תָּמִיד בַּחֵלֶק הַחִיצוֹנִי, וְהַסָּגֹל בַּחֵלֶק הַפְּנִימִי.',
+  'הַסֵּדֶר הַזֶּה אֵינוֹ מִשְׁתַּנֶּה לְעוֹלָם.',
+];
+const ORDER_QUOTE = 'אָדֹם, כָּתֹם, צָהֹב, יָרֹק, תְּכֵלֶת, כָּחֹל וְסָגֹל.';
+
+/* Each level changes all three steps:
+   read  - 1: one sentence per line + color dots; 2: paragraph + dots; 3: plain paragraph
+   build - 1: colors+names, outside in, glowing slot, help after 1 miss
+           2: colors+names, inside out, glowing slot, help after 2 misses
+           3: names only, outside in, no glowing slot, help after 3 misses
+   quiz  - 1: 5 questions, 2 answers; 2: 7 questions, 3 answers; 3: 7 harder questions, 4 answers */
+const LEVELS = {
+  1: { reverse: false, colored: true,  guide: true,  pulseAfter: 1, quoteAfter: 1 },
+  2: { reverse: true,  colored: true,  guide: true,  pulseAfter: 2, quoteAfter: 1 },
+  3: { reverse: false, colored: false, guide: false, pulseAfter: 3, quoteAfter: 2 },
+};
+
+/* kind: text (default) | num | color (options are color ids) | strip (options are color-id arrays) */
+const QUESTIONS = {
+  1: [
+    { q: 'מָתַי נוֹצֶרֶת קֶשֶׁת בֶּעָנָן?', o: ['כְּשֶׁאוֹר הַשֶּׁמֶשׁ עוֹבֵר דֶּרֶךְ טִפּוֹת גֶּשֶׁם', 'כְּשֶׁהַיָּרֵחַ זוֹרֵחַ בַּלַּיְלָה'], a: 0, quote: SENTENCES[0] },
+    { q: 'לְכַמָּה צְבָעִים מִתְפָּרֵק הָאוֹר?', kind: 'num', o: ['3', '7'], a: 1, quote: 'הָאוֹר מִתְפָּרֵק <b>לְשִׁבְעָה</b> צְבָעִים.' },
+    { q: 'אֵיזֶה צֶבַע נִמְצָא בַּחוּץ?', kind: 'color', o: ['violet', 'red'], a: 1, quote: '<b>הָאָדֹם</b> נִמְצָא תָּמִיד בַּחֵלֶק הַחִיצוֹנִי.' },
+    { q: 'אֵיזֶה צֶבַע נִמְצָא בִּפְנִים?', kind: 'color', o: ['violet', 'red'], a: 0, quote: 'וְ<b>הַסָּגֹל</b> בַּחֵלֶק הַפְּנִימִי.' },
+    { q: 'הַאִם סֵדֶר הַצְּבָעִים מִשְׁתַּנֶּה?', o: ['כֵּן', 'לֹא'], a: 1, quote: 'הַסֵּדֶר הַזֶּה <b>אֵינוֹ מִשְׁתַּנֶּה</b> לְעוֹלָם.' },
+  ],
+  2: [
+    { q: 'מָתַי נוֹצֶרֶת קֶשֶׁת בֶּעָנָן?', o: ['כְּשֶׁנּוֹשֶׁבֶת רוּחַ חֲזָקָה', 'כְּשֶׁאוֹר הַשֶּׁמֶשׁ עוֹבֵר דֶּרֶךְ טִפּוֹת גֶּשֶׁם', 'כְּשֶׁהַיָּרֵחַ זוֹרֵחַ בַּלַּיְלָה'], a: 1, quote: SENTENCES[0] },
+    { q: 'לְכַמָּה צְבָעִים מִתְפָּרֵק הָאוֹר?', kind: 'num', o: ['5', '7', '10'], a: 1, quote: 'הָאוֹר מִתְפָּרֵק <b>לְשִׁבְעָה</b> צְבָעִים.' },
+    { q: 'אֵיזֶה צֶבַע נִמְצָא תָּמִיד בַּחֵלֶק הַחִיצוֹנִי?', kind: 'color', o: ['green', 'violet', 'red'], a: 2, quote: '<b>הָאָדֹם</b> נִמְצָא תָּמִיד בַּחֵלֶק הַחִיצוֹנִי.' },
+    { q: 'אֵיזֶה צֶבַע נִמְצָא בַּחֵלֶק הַפְּנִימִי?', kind: 'color', o: ['violet', 'yellow', 'red'], a: 0, quote: 'וְ<b>הַסָּגֹל</b> בַּחֵלֶק הַפְּנִימִי.' },
+    { q: 'אֵיזֶה צֶבַע בָּא אַחֲרֵי צָהֹב?', kind: 'color', o: ['orange', 'green', 'blue'], a: 1, quote: 'אָדֹם, כָּתֹם, צָהֹב, <b>יָרֹק</b>, תְּכֵלֶת, כָּחֹל וְסָגֹל.' },
+    { q: 'אֵיזֶה צֶבַע נִמְצָא בֵּין תְּכֵלֶת לְסָגֹל?', kind: 'color', o: ['green', 'red', 'blue'], a: 2, quote: 'אָדֹם, כָּתֹם, צָהֹב, יָרֹק, תְּכֵלֶת, <b>כָּחֹל</b> וְסָגֹל.' },
+    { q: 'הַאִם סֵדֶר הַצְּבָעִים יָכוֹל לְהִשְׁתַּנּוֹת?', o: ['כֵּן, לִפְעָמִים', 'לֹא, לְעוֹלָם לֹא', 'רַק כְּשֶׁיֵּשׁ הַרְבֵּה גֶּשֶׁם'], a: 1, quote: 'הַסֵּדֶר הַזֶּה <b>אֵינוֹ מִשְׁתַּנֶּה לְעוֹלָם</b>.' },
+  ],
+  3: [
+    { q: 'הַשְׁלִימוּ: קֶשֶׁת בֶּעָנָן נוֹצֶרֶת כְּשֶׁאוֹר הַשֶּׁמֶשׁ עוֹבֵר דֶּרֶךְ ______.', o: ['עֲנָנִים', 'טִפּוֹת גֶּשֶׁם', 'פְּתִיתֵי שֶׁלֶג', 'אֲוִיר חַם'], a: 1, quote: 'כְּשֶׁאוֹר הַשֶּׁמֶשׁ עוֹבֵר דֶּרֶךְ <b>טִפּוֹת גֶּשֶׁם</b>.' },
+    { q: 'מָה צָרִיךְ כְּדֵי שֶׁתִּהְיֶה קֶשֶׁת בֶּעָנָן?', o: ['רַק גֶּשֶׁם', 'רַק שֶׁמֶשׁ', 'שֶׁמֶשׁ וְגֶשֶׁם', 'רוּחַ וַעֲנָנִים'], a: 2, quote: 'כְּשֶׁאוֹר <b>הַשֶּׁמֶשׁ</b> עוֹבֵר דֶּרֶךְ טִפּוֹת <b>גֶּשֶׁם</b>.' },
+    { q: 'מָה הַצֶּבַע הַשְּׁלִישִׁי מִבַּחוּץ?', kind: 'color', o: ['orange', 'yellow', 'green', 'cyan'], a: 1, quote: 'אָדֹם, כָּתֹם, <b>צָהֹב</b>, יָרֹק, תְּכֵלֶת, כָּחֹל וְסָגֹל.' },
+    { q: 'אֵיזֶה צֶבַע נִמְצָא בְּדִיּוּק בָּאֶמְצַע הַקֶּשֶׁת?', kind: 'color', o: ['yellow', 'cyan', 'blue', 'green'], a: 3, quote: 'אָדֹם, כָּתֹם, צָהֹב, <b>יָרֹק</b>, תְּכֵלֶת, כָּחֹל וְסָגֹל.' },
+    { q: 'אֵיזֶה צֶבַע הֲכִי קָרוֹב לַחֵלֶק הַפְּנִימִי?', kind: 'color', o: ['orange', 'green', 'cyan', 'blue'], a: 3, quote: 'תְּכֵלֶת, <b>כָּחֹל</b> וְסָגֹל. הַסָּגֹל בַּחֵלֶק הַפְּנִימִי.' },
+    { q: 'מָה פֵּרוּשׁ "בְּסֵדֶר קָבוּעַ"?', o: ['הַצְּבָעִים תָּמִיד בְּאוֹתוֹ סֵדֶר', 'הַסֵּדֶר מִשְׁתַּנֶּה כָּל יוֹם', 'יֵשׁ מְעַט צְבָעִים', 'הַצְּבָעִים מְעֹרְבָּבִים'], a: 0, quote: 'הַסֵּדֶר הַזֶּה <b>אֵינוֹ מִשְׁתַּנֶּה לְעוֹלָם</b>.' },
+    { q: 'בְּאֵיזוֹ קֶשֶׁת הַסֵּדֶר נָכוֹן? (מִבַּחוּץ פְּנִימָה)', kind: 'strip', o: [
+        ['red', 'yellow', 'orange', 'green', 'cyan', 'blue', 'violet'],
+        ['red', 'orange', 'yellow', 'green', 'blue', 'cyan', 'violet'],
+        ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'violet'],
+        ['orange', 'red', 'yellow', 'green', 'cyan', 'blue', 'violet'],
+      ], a: 2, quote: ORDER_QUOTE },
+  ],
+};
+
+const SVGNS = 'http://www.w3.org/2000/svg';
+const $ = id => document.getElementById(id);
+function svgEl(tag, attrs) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  return n;
+}
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const CHECK = '<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const STAR = 'M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z';
+
+const state = { level: 1, step: 'read' };
+try { const s = Number(localStorage.getItem('rainbow-level')); if (LEVELS[s]) state.level = s; } catch (e) {}
+
+/* ---------- header: levels + tabs ---------- */
+document.querySelectorAll('.level .stars').forEach(box => {
+  const n = Number(box.dataset.n);
+  box.innerHTML = [1, 2, 3].map(i => `<svg viewBox="0 0 24 24" class="${i <= n ? 'on' : ''}" aria-hidden="true"><path d="${STAR}"/></svg>`).join('');
+});
+document.querySelectorAll('.level').forEach(b => b.addEventListener('click', () => setLevel(Number(b.dataset.level))));
+
+function setLevel(n) {
+  state.level = n;
+  try { localStorage.setItem('rainbow-level', String(n)); } catch (e) {}
+  document.querySelectorAll('.level').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.level) === n)));
+  renderStory();
+  resetBuild();
+  resetQuiz();
+}
+
+function go(step) {
+  state.step = step;
+  ['read', 'build', 'quiz'].forEach(s => {
+    $(s).hidden = s !== step;
+    $('tab-' + s).setAttribute('aria-selected', String(s === step));
+  });
+  window.scrollTo({ top: 0 });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go]');
+  if (b) go(b.dataset.go);
+});
+
+/* ---------- step 1: read ---------- */
+function renderStory() {
+  const story = $('story');
+  story.className = 'story lvl' + state.level;
+  story.innerHTML = SENTENCES.map(s =>
+    '<span class="sent">' + s.replace(/\{(\w+)\}/g, (m, id) => `<span class="cw" style="--c:${cvar(id)}">${byId[id].name}</span>`) + '</span>'
+  ).join(' ');
+}
+
+const prism = $('prism');
+COLORS.forEach((c, i) => {
+  const y = 34 + i * 21;
+  const ray = svgEl('line', { class: 'ray', pathLength: 1, x1: 166, y1: 110, x2: 72, y2: y, 'stroke-width': 6, 'stroke-linecap': 'round' });
+  ray.style.stroke = cvar(c.id);
+  ray.style.setProperty('--i', i);
+  const label = svgEl('text', { class: 'raylabel rb-label', x: 64, y: y + 5, 'text-anchor': 'end' });
+  label.style.setProperty('--i', i);
+  label.textContent = c.name;
+  $('rays').append(ray, label);
+});
+let shone = false;
+$('shine').addEventListener('click', () => {
+  if (shone) {
+    prism.classList.add('reset');
+    prism.classList.remove('lit');
+    void prism.getBoundingClientRect();
+    prism.classList.remove('reset');
+  }
+  requestAnimationFrame(() => requestAnimationFrame(() => prism.classList.add('lit')));
+  shone = true;
+  $('shineLabel').textContent = 'עוֹד פַּעַם';
+  $('prismCap').textContent = 'הָאוֹר הַלָּבָן מִתְפָּרֵק לְשִׁבְעָה צְבָעִים.';
+});
+
+/* read-aloud, only where the device has a Hebrew voice */
+function hebrewVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  return speechSynthesis.getVoices().find(v => /^(he|iw)\b/i.test(v.lang)) || null;
+}
+function checkVoice() { $('listen').hidden = !hebrewVoice(); }
+if ('speechSynthesis' in window) {
+  checkVoice();
+  speechSynthesis.addEventListener?.('voiceschanged', checkVoice);
+}
+$('listen').addEventListener('click', () => {
+  const v = hebrewVoice();
+  if (!v) return;
+  speechSynthesis.cancel();
+  const text = SENTENCES.map(s => s.replace(/\{(\w+)\}/g, (m, id) => byId[id].name)).join(' ');
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = v; u.lang = v.lang; u.rate = .85;
+  speechSynthesis.speak(u);
+});
+
+/* ---------- step 2: build ---------- */
+function drawRainbow(svg, withLabels) {
+  COLORS.forEach((c, i) => {
+    const r = 179 - 22 * i;
+    const d = `M ${200 + r} 195 A ${r} ${r} 0 0 0 ${200 - r} 195`;
+    const band = svgEl('path', { d, class: 'band', 'data-id': c.id, pathLength: 1 });
+    band.style.stroke = cvar(c.id);
+    svg.append(svgEl('path', { d, class: 'track', 'data-id': c.id }), band);
+  });
+  if (withLabels) {
+    const out = svgEl('text', { class: 'rb-label', x: 379, y: 216, 'text-anchor': 'middle' });
+    out.textContent = 'בַּחוּץ';
+    const inn = svgEl('text', { class: 'rb-label', x: 200, y: 190, 'text-anchor': 'middle' });
+    inn.textContent = 'בִּפְנִים';
+    svg.append(out, inn);
+  }
+}
+drawRainbow($('builder'), true);
+
+const B = { placed: 0, misses: 0, order: [], shake: null };
+const seq = () => LEVELS[state.level].reverse ? [...COLORS].reverse() : COLORS;
+
+function resetBuild() {
+  B.placed = 0; B.misses = 0; B.shake = null;
+  const s = seq();
+  do { B.order = shuffle(COLORS.map(c => c.id)); } while (B.order.every((id, i) => id === s[i].id));
+  const L = LEVELS[state.level];
+  $('buildLead').textContent = (L.colored ? 'בְּנוּ אֶת הַקֶּשֶׁת ' : 'קִרְאוּ אֶת הַשֵּׁמוֹת וּבְנוּ אֶת הַקֶּשֶׁת ')
+    + (L.reverse ? 'מִבִּפְנִים הַחוּצָה.' : 'מִבַּחוּץ פְּנִימָה.');
+  setMsg('', '');
+  renderBuild();
+}
+
+function setMsg(text, tone) {
+  const m = $('buildMsg');
+  m.textContent = text;
+  m.className = 'msg' + (tone ? ' ' + tone : '');
+}
+
+function hintText() {
+  const reverse = LEVELS[state.level].reverse;
+  if (B.placed === 0) return reverse ? 'אֵיזֶה צֶבַע תָּמִיד בִּפְנִים?' : 'אֵיזֶה צֶבַע תָּמִיד בַּחוּץ?';
+  const prev = seq()[B.placed - 1].name;
+  return reverse ? `מָה בָּא לִפְנֵי ${prev}?` : `מָה בָּא אַחֲרֵי ${prev}?`;
+}
+
+function renderBuild() {
+  const L = LEVELS[state.level], s = seq();
+  const next = s[B.placed];
+  const done = new Set(s.slice(0, B.placed).map(c => c.id));
+  const svg = $('builder');
+  svg.querySelectorAll('.track').forEach(t => t.classList.toggle('next', L.guide && !!next && t.dataset.id === next.id));
+  svg.querySelectorAll('.band').forEach(b => b.classList.toggle('on', done.has(b.dataset.id)));
+  $('buildCount').textContent = `${B.placed} / 7`;
+
+  const chips = $('chips');
+  chips.className = 'chips' + (L.colored ? '' : ' plain');
+  chips.innerHTML = '';
+  B.order.forEach(id => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.disabled = done.has(id);
+    b.style.setProperty('--c', cvar(id));
+    b.innerHTML = `<span class="paint"></span><span>${byId[id].name}</span>`;
+    if (next && id === next.id && B.misses >= L.pulseAfter) b.classList.add('hint');
+    if (id === B.shake) b.classList.add('shake');
+    b.addEventListener('click', () => pick(id));
+    chips.append(b);
+  });
+  B.shake = null;
+  $('buildDone').hidden = B.placed < 7;
+  chips.hidden = B.placed >= 7;
+}
+
+function pick(id) {
+  const next = seq()[B.placed];
+  if (!next) return;
+  if (id === next.id) {
+    B.placed++; B.misses = 0;
+    if (B.placed === 7) setMsg('כָּל הַכָּבוֹד! הַקֶּשֶׁת שְׁלֵמָה.', 'good');
+    else setMsg('נָכוֹן!', 'good');
+  } else {
+    B.misses++; B.shake = id;
+    setMsg('לֹא זֶה. ' + hintText(), 'near');
+  }
+  renderBuild();
+}
+$('buildAgain').addEventListener('click', resetBuild);
+
+/* ---------- step 3: quiz ---------- */
+const Z = { i: 0, firstTry: 0, misses: 0, solved: false };
+
+function resetQuiz() {
+  Z.i = 0; Z.firstTry = 0; Z.misses = 0; Z.solved = false;
+  renderQuiz();
+}
+
+function optionHTML(q, o) {
+  if (q.kind === 'color') return `<span class="sw" style="--c:${cvar(o)}"></span><span>${byId[o].name}</span>`;
+  if (q.kind === 'strip') return `<span class="strip">${o.map(id => `<span style="--c:${cvar(id)}"></span>`).join('')}</span>`;
+  return `<span>${o}</span>`;
+}
+
+function renderQuiz() {
+  const list = QUESTIONS[state.level];
+  const body = $('quizBody');
+  if (Z.i >= list.length) return renderFinish(list.length);
+  const q = list[Z.i];
+  const L = LEVELS[state.level];
+  const dots = list.map((_, k) => `<i class="${k < Z.i ? 'done' : k === Z.i ? 'now' : ''}"></i>`).join('');
+  const two = q.kind !== 'strip' && q.o.length <= 4 && q.o.every(o => typeof o !== 'string' || o.length < 24);
+  body.innerHTML = `
+    <div class="panel">
+      <div class="qhead">
+        <span class="count">שְׁאֵלָה ${Z.i + 1} מִתּוֹךְ ${list.length}</span>
+        <div class="dots" aria-hidden="true">${dots}</div>
+      </div>
+      <div class="card question">
+        <h2>${q.q}</h2>
+        <div class="opts${two ? ' two' : ''}" id="opts"></div>
+        <div class="feedback" id="fb" aria-live="polite"></div>
+      </div>
+      <div class="row" id="qNext" hidden>
+        <button class="act primary" id="nextQ">${Z.i + 1 < list.length ? 'לַשְּׁאֵלָה הַבָּאָה ←' : 'לְסִיּוּם ←'}</button>
+      </div>
+    </div>`;
+  const opts = $('opts');
+  q.o.forEach((o, k) => {
+    const b = document.createElement('button');
+    b.className = 'opt' + (q.kind === 'num' ? ' num' : '');
+    b.id = `opt-${Z.i}-${k}`;
+    b.innerHTML = optionHTML(q, o);
+    if (q.kind === 'strip') b.setAttribute('aria-label', o.map(id => byId[id].name).join(', '));
+    b.addEventListener('click', () => answer(k, b));
+    opts.append(b);
+  });
+  $('nextQ').addEventListener('click', () => { Z.i++; Z.misses = 0; Z.solved = false; renderQuiz(); window.scrollTo({ top: 0 }); });
+
+  function answer(k, b) {
+    if (Z.solved) return;
+    const fb = $('fb');
+    if (k === q.a) {
+      Z.solved = true;
+      if (Z.misses === 0) Z.firstTry++;
+      b.classList.add('right');
+      b.insertAdjacentHTML('beforeend', CHECK);
+      opts.querySelectorAll('.opt').forEach(x => { x.disabled = true; });
+      fb.innerHTML = `<p class="msg good" style="text-align:start">נָכוֹן!</p><p class="quote">בַּטֶּקְסְט: ${q.quote}</p>`;
+      $('qNext').hidden = false;
+      $('nextQ').focus();
+    } else {
+      Z.misses++;
+      b.classList.add('wrong');
+      b.disabled = true;
+      let html = '<p class="msg near" style="text-align:start">לֹא בְּדִיּוּק. נַסּוּ שׁוּב.</p>';
+      if (Z.misses >= L.quoteAfter) html += `<p class="quote">רֶמֶז מֵהַטֶּקְסְט: ${q.quote}</p>`;
+      fb.innerHTML = html;
+    }
+  }
+}
+
+function renderFinish(total) {
+  const body = $('quizBody');
+  const next = state.level < 3 ? `<button class="act primary" id="levelUp">לָרָמָה הַבָּאָה ←</button>` : '';
+  body.innerHTML = `
+    <div class="card finish">
+      <svg id="finishRainbow" viewBox="0 0 400 200" aria-hidden="true"></svg>
+      <h2>סִיַּמְתֶּם!</h2>
+      <p>עֲנִיתֶם נָכוֹן בַּנִּסָּיוֹן הָרִאשׁוֹן עַל ${Z.firstTry} מִתּוֹךְ ${total} שְׁאֵלוֹת.</p>
+      <div class="row">
+        <button class="act" id="quizAgain">עוֹד פַּעַם</button>
+        ${next}
+      </div>
+    </div>`;
+  const svg = $('finishRainbow');
+  drawRainbow(svg, false);
+  requestAnimationFrame(() => requestAnimationFrame(() => svg.querySelectorAll('.band').forEach(b => b.classList.add('on'))));
+  $('quizAgain').addEventListener('click', resetQuiz);
+  if (next) $('levelUp').addEventListener('click', () => { setLevel(state.level + 1); go('read'); });
+}
+
+setLevel(state.level);
+</script>
+</body>
+</html>
