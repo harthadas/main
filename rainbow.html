@@ -76,7 +76,8 @@ svg { display: block; }
 .level small { font-size: 1.05rem; color: var(--ink-soft); font-weight: 400; }
 .level .art { height: 76px; display: flex; align-items: center; gap: 10px; }
 .level .art svg { width: 64px; height: 64px; }
-.level .art .word { font-size: 1.8rem; font-weight: 700; }
+.level .art .paint { width: 52px; height: 52px; }
+.level .art .word { border: 2px solid var(--line); border-radius: 999px; padding: 2px 20px; font-size: 1.6rem; font-weight: 700; }
 .level .done { position: absolute; top: 12px; inset-inline-start: 12px; width: 30px; height: 30px; color: var(--good); }
 .back-lab { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-soft); font-family: var(--display); font-size: 1.1rem; padding: 8px 12px; border-radius: 999px; }
 .back-lab svg { width: 22px; height: 22px; }
@@ -87,13 +88,10 @@ svg { display: block; }
   background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
   padding: 8px 16px; flex: 1; min-width: 0; min-height: 84px;
 }
-.ask .pic { width: 64px; height: 64px; flex: none; }
-.ask .pic.reveal { animation: pop .4s ease-out; }
-.ask small { display: block; color: var(--ink-soft); font-size: .95rem; line-height: 1.4; }
-.ask strong { display: block; font-family: var(--display); font-size: 2rem; font-weight: 700; line-height: 1.4; }
+.ask .paint { width: 60px; height: 60px; flex: none; }
+.ask strong { display: block; font-family: var(--display); font-size: 1.4rem; font-weight: 700; line-height: 1.5; }
 .dots { display: flex; gap: 5px; margin-inline-start: auto; flex: none; }
 .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--line); }
-@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* ---------- rainbow ---------- */
 .play { display: flex; flex-direction: column; gap: 20px; padding-top: 18px; flex: 1; }
@@ -110,28 +108,35 @@ svg { display: block; }
 @keyframes twinkle { 0% { opacity: 0; transform: scale(.2); } 40% { opacity: 1; transform: scale(1.1); } 100% { opacity: .85; transform: scale(1); } }
 
 /* ---------- paint pots ---------- */
-.pots { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px 14px; max-width: 560px; align-self: center; }
-.pot {
-  border: 0; background: none; padding: 6px; border-radius: 50%;
-  touch-action: manipulation;
-}
-.pot .paint {
+.pots { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; max-width: 640px; align-self: center; }
+/* a blob of wet paint: used in the prompt, the choices and the level cards */
+.paint {
   position: relative; display: block;
-  width: 64px; height: 64px; border-radius: 50%;
+  width: 52px; height: 52px; border-radius: 50%;
   box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), inset 0 0 0 2px rgba(29,36,49,.14);
-  transition: transform .15s;
 }
-.pot .paint::after { /* soft highlight so the blob reads as wet paint */
-  content: ""; position: absolute; top: 12px; inset-inline-end: 14px;
-  width: 14px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.45);
+.paint::after { /* soft highlight so the blob reads as wet paint */
+  content: ""; position: absolute; top: 18%; inset-inline-end: 22%;
+  width: 22%; height: 14%; border-radius: 50%; background: rgba(255,255,255,.45);
 }
-.pot:not(:disabled):active .paint { transform: scale(.92); }
-.pot.miss .paint { animation: shake .45s ease-in-out; }
-.pot.hint .paint { animation: glow 1.4s ease-in-out infinite; }
+.pot {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 8px 10px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  touch-action: manipulation; transition: border-color .15s, transform .15s;
+}
+.pot:hover { border-color: var(--glass); }
+.pot:not(:disabled):active { transform: scale(.95); }
+.pot .pic { width: 40px; height: 40px; }
+.pot.word {
+  border-radius: 999px; min-width: 104px; min-height: 60px; padding: 6px 22px; justify-content: center;
+  font-family: var(--display); font-size: 1.55rem; font-weight: 700; line-height: 1.4;
+}
+.pot.miss { animation: shake .45s ease-in-out; }
+.pot.hint { animation: glow 1.4s ease-in-out infinite; }
 @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 @keyframes glow {
-  0%, 100% { box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), 0 0 0 4px var(--paper), 0 0 0 7px var(--ink); }
-  50% { box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), 0 0 0 4px var(--paper), 0 0 0 7px rgba(29,36,49,.15); }
+  0%, 100% { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink); }
+  50% { border-color: var(--line); box-shadow: 0 0 0 3px transparent; }
 }
 .say {
   min-height: 2.2em; text-align: center;
@@ -163,12 +168,14 @@ svg { display: block; }
 @media (max-width: 420px) {
   body { font-size: 17px; }
   .ask { padding-inline: 12px; gap: 10px; }
-  .ask .pic { width: 52px; height: 52px; }
-  .ask strong { font-size: 1.7rem; }
+  .ask .paint { width: 52px; height: 52px; }
+  .ask strong { font-size: 1.25rem; }
   .dots { display: none; }
-  .pots { gap: 8px 6px; }
-  .pot .paint { width: 56px; height: 56px; }
-  .pot .paint::after { top: 10px; inset-inline-end: 12px; width: 12px; height: 8px; }
+  .pots { gap: 8px; }
+  .pot { padding: 6px 7px; }
+  .pot .paint { width: 46px; height: 46px; }
+  .pot .pic { width: 34px; height: 34px; }
+  .pot.word { min-width: 96px; font-size: 1.4rem; padding-inline: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -312,7 +319,7 @@ function homeView() {
       <div class="levels">
         <button class="level" data-act="start" data-level="1" data-key="l1">
           ${badge(1)}
-          <span class="art">${picSVG('red')}<span class="word">אָדֹם</span></span>
+          <span class="art"><span class="paint" style="background:${BY_ID.red.hex}"></span>${picSVG('red')}</span>
           <span>שָׁלָב 1</span>
           <small>${LEVELS[1].title}</small>
         </button>
@@ -326,25 +333,24 @@ function homeView() {
     </div>`;
 }
 
+// The prompt is the next arc's color; the child answers with a color+picture (level 1) or with its written name (level 2).
 function askCard() {
   const c = COLORS[state.step];
-  // level 2 shows only the word; after two misses the picture comes in as a hint
-  const showPic = state.level === 1 || state.wrong >= 2;
   const dots = COLORS.map((k, i) => `<i style="${i < state.step ? `background:${k.hex}` : ''}"></i>`).join('');
   return `<div class="ask">
-    ${showPic ? picSVG(c.id, state.level === 2 ? 'pic reveal' : 'pic') : ''}
-    <div><small>בַּחֲרוּ צֶבַע</small><strong>${c.name}</strong></div>
+    <span class="paint" style="background:${c.hex}" role="img" aria-label="${c.name}"></span>
+    <strong>בַּחֲרוּ אֶת הַצֶּבַע הַזֶּה</strong>
     <div class="dots" aria-hidden="true">${dots}</div>
   </div>`;
 }
 
 function potsRow() {
   const c = COLORS[state.step];
-  const hintAt = state.level === 1 ? 2 : 3;
   return `<div class="pots">${state.pots.map(id => {
-    const cls = [id === state.miss ? 'miss' : '', !state.busy && state.wrong >= hintAt && id === c.id ? 'hint' : ''].join(' ').trim();
-    return `<button class="pot ${cls}" data-act="paint" data-id="${id}" data-key="pot-${id}" aria-label="${BY_ID[id].name}">
-      <span class="paint" style="background:${BY_ID[id].hex}"></span></button>`;
+    const k = BY_ID[id];
+    const cls = [state.level === 2 ? 'word' : '', id === state.miss ? 'miss' : '', !state.busy && state.wrong >= 2 && id === c.id ? 'hint' : ''].join(' ').trim();
+    const face = state.level === 2 ? k.name : `<span class="paint" style="background:${k.hex}"></span>${picSVG(id)}`;
+    return `<button class="pot ${cls}" data-act="paint" data-id="${id}" data-key="pot-${id}" aria-label="${k.name}">${face}</button>`;
   }).join('')}</div>`;
 }
 
