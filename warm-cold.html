@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>חם או קר</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: one calm column. Card on top, two bins below (warm on the right, cold on the left). The card's color is the only strong color on screen. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --warm: #e8742a;
+  --warm-tint: #fff1e5;
+  --warm-edge: #f2c29b;
+  --cold: #2f74c9;
+  --cold-tint: #e9f2fc;
+  --cold-edge: #a9c8ec;
+  --good: #2f8a55;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+svg { display: block; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.bar .grow { flex: 1; min-width: 0; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn[aria-pressed="false"] { opacity: .55; }
+
+.progress { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.progress i {
+  width: 12px; height: 12px; border-radius: 50%;
+  background: var(--line);
+}
+.progress i.now { background: var(--ink); transform: scale(1.25); }
+.progress i.ok { background: var(--good); }
+
+/* ---------- home ---------- */
+.home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 16px; }
+.home h1 { font-size: clamp(2.1rem, 8vw, 3rem); }
+.teach { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 560px; }
+.teach > div {
+  border-radius: 18px; padding: 14px 12px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;
+  font-family: var(--display); font-size: 1.1rem; line-height: 1.5;
+}
+.teach .w { background: var(--warm-tint); }
+.teach .c { background: var(--cold-tint); }
+.teach svg { width: 52px; height: 52px; }
+.teach strong { font-size: 1.4rem; }
+.teach .chips { display: flex; gap: 6px; }
+.teach .chips span { width: 26px; height: 26px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.1); }
+.levels { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; width: 100%; max-width: 560px; }
+.level {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 22px 18px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-family: var(--display); font-size: 1.4rem; font-weight: 500; line-height: 1.5;
+  transition: border-color .15s, transform .15s;
+}
+.level:hover { border-color: #97a3b6; }
+.level:active { transform: scale(.98); }
+.level small { font-family: var(--body); font-size: 1rem; color: var(--ink-soft); font-weight: 400; }
+.level .pv { height: 84px; display: grid; place-items: center; }
+.level .pv svg { width: 84px; height: 84px; }
+.level .pv b { font-family: var(--display); font-size: 2.4rem; font-weight: 700; }
+.other { color: var(--ink-soft); font-size: 1rem; }
+
+/* ---------- play ---------- */
+.play { flex: 1; display: flex; flex-direction: column; gap: 14px; padding-top: 10px; }
+.ask { text-align: center; font-family: var(--display); font-size: 1.35rem; font-weight: 500; }
+.stage { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.card {
+  position: relative;
+  width: min(260px, 74vw);
+  min-height: 250px;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 26px;
+  box-shadow: 0 6px 18px rgba(29,36,49,.08);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  padding: 18px 14px 20px;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  cursor: grab;
+  animation: pop .35s ease-out;
+}
+.card.dragging { cursor: grabbing; box-shadow: 0 14px 30px rgba(29,36,49,.18); z-index: 5; }
+.card.back { transition: transform .3s ease; }
+.card.fly { transition: transform .45s ease-in, opacity .45s ease-in; }
+.card .pic svg { width: 150px; height: 150px; pointer-events: none; }
+.card .word { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 2rem; line-height: 1.5; }
+.card .word .dot { width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.12); }
+.card.only .word { font-size: clamp(2.8rem, 13vw, 3.6rem); }
+.card .say {
+  position: absolute; top: 10px; inset-inline-end: 10px;
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center;
+}
+.card .say svg { width: 22px; height: 22px; }
+.card.shake { animation: shake .45s ease; }
+@keyframes pop { from { transform: scale(.85); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes shake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-10px); } 40% { transform: translateX(9px); } 60% { transform: translateX(-6px); } 80% { transform: translateX(4px); } }
+
+.hint {
+  min-height: 3.4em; max-width: 30ch; text-align: center;
+  font-family: var(--display); font-size: 1.2rem; line-height: 1.55;
+  display: grid; place-items: center;
+}
+.hint.good { color: var(--good); font-weight: 700; font-size: 1.5rem; }
+
+.bins { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: auto; }
+.bin {
+  border-radius: 26px 26px 34px 34px; border: 3px solid; padding: 14px 8px 12px;
+  min-height: 190px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--display); font-size: 1.6rem; font-weight: 700; line-height: 1.4;
+  transition: transform .15s, box-shadow .15s;
+}
+.bin svg { width: 58px; height: 58px; }
+.bin.warm { background: var(--warm-tint); border-color: var(--warm-edge); }
+.bin.cold { background: var(--cold-tint); border-color: var(--cold-edge); }
+.bin.warm b { color: #a8481a; }
+.bin.cold b { color: #1f4f8e; }
+.bin:active { transform: scale(.97); }
+.bin.over { transform: scale(1.04); box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--ink); }
+.bin.glow { animation: glow 1.4s ease-in-out infinite; }
+.bin.got { animation: got .5s ease; }
+@keyframes glow { 0%,100% { box-shadow: 0 0 0 0 rgba(29,36,49,0); } 50% { box-shadow: 0 0 0 7px rgba(29,36,49,.18); } }
+@keyframes got { 50% { transform: scale(1.06); } }
+.pile { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; padding-top: 6px; max-width: 150px; }
+.pile span { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.12); animation: pop .3s ease-out; }
+
+/* ---------- end ---------- */
+.end { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px; padding-block: 16px; text-align: center; }
+.end h1 { font-size: clamp(2rem, 8vw, 2.7rem); }
+.stars { display: flex; gap: 10px; }
+.stars svg { width: 56px; height: 56px; }
+.score { font-size: 1.2rem; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.end .bins { width: 100%; max-width: 520px; margin-top: 0; }
+.end .bin { min-height: 0; cursor: default; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.btn {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  padding: 12px 26px; font-family: var(--display); font-size: 1.25rem; font-weight: 500; line-height: 1.5;
+}
+.btn.main { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+(() => {
+/* ================= content =================
+   say = the word without nikud, in full spelling, for the speech engine
+   (removing nikud from "כָּתֹם" would leave "כתם", a different word). */
+const COLORS = {
+  red:    { name: 'אָדֹם',    say: 'אדום',   hex: '#e0362c', temp: 'warm' },
+  orange: { name: 'כָּתֹם',    say: 'כתום',   hex: '#f2871a', temp: 'warm' },
+  yellow: { name: 'צָהֹב',    say: 'צהוב',   hex: '#f6c516', temp: 'warm' },
+  pink:   { name: 'וָרֹד',     say: 'ורוד',   hex: '#ef75a6', temp: 'warm' },
+  bordo:  { name: 'בּוֹרְדוֹ',  say: 'בורדו',  hex: '#8e1f3c', temp: 'warm' },
+  blue:   { name: 'כָּחֹל',    say: 'כחול',   hex: '#2563c9', temp: 'cold' },
+  sky:    { name: 'תְּכֵלֶת',   say: 'תכלת',   hex: '#67c1ee', temp: 'cold' },
+  green:  { name: 'יָרֹק',     say: 'ירוק',   hex: '#2f9e4f', temp: 'cold' },
+  purple: { name: 'סָגֹל',     say: 'סגול',   hex: '#7b4bb8', temp: 'cold' },
+  turq:   { name: 'טוּרְקִיז',  say: 'טורקיז', hex: '#17b1a6', temp: 'cold' },
+};
+const TEMP = {
+  warm: { name: 'חַם', say: 'חם', like: 'כְּמוֹ הַשֶּׁמֶשׁ וְהָאֵשׁ', sayLike: 'כמו השמש והאש' },
+  cold: { name: 'קַר', say: 'קר', like: 'כְּמוֹ הַמַּיִם וְהַשֶּׁלֶג', sayLike: 'כמו המים והשלג' },
+};
+
+// level 1: color + picture of a thing in that color
+const PICTURES = [
+  { c: 'red',    pic: 'strawberry', obj: 'תּוּת' },
+  { c: 'red',    pic: 'tomato',     obj: 'עַגְבָנִיָּה' },
+  { c: 'orange', pic: 'orange',     obj: 'תַּפּוּז' },
+  { c: 'yellow', pic: 'sun',        obj: 'שֶׁמֶשׁ' },
+  { c: 'yellow', pic: 'banana',     obj: 'בָּנָנָה' },
+  { c: 'pink',   pic: 'flower',     obj: 'פֶּרַח' },
+  { c: 'blue',   pic: 'drop',       obj: 'טִפַּת מַיִם' },
+  { c: 'blue',   pic: 'fish',       obj: 'דָּג' },
+  { c: 'sky',    pic: 'snow',       obj: 'פְּתִית שֶׁלֶג' },
+  { c: 'green',  pic: 'leaf',       obj: 'עָלֶה' },
+  { c: 'purple', pic: 'grapes',     obj: 'עֲנָבִים' },
+  { c: 'purple', pic: 'eggplant',   obj: 'חָצִיל' },
+];
+// level 2: the color word only
+const WORDS = Object.keys(COLORS).map(c => ({ c }));
+
+/* ================= pictures (viewBox 0 0 100 100) ================= */
+const EDGE = 'stroke="rgba(29,36,49,.22)" stroke-width="2"';
+const LEAF = '#3c9a4a';
+function star(cx, cy, ro, ri, n) {
+  const pts = [];
+  for (let i = 0; i < n * 2; i++) {
+    const r = i % 2 ? ri : ro, a = Math.PI * i / n - Math.PI / 2;
+    pts.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1));
+  }
+  return pts.join(' ');
+}
+const PIC = {
+  strawberry: f => `
+    <path d="M50 93C28 81 15 59 19 41C23 28 38 25 50 32C62 25 77 28 81 41C85 59 72 81 50 93Z" fill="${f}" ${EDGE}/>
+    ${[[38,46],[50,44],[62,46],[44,58],[56,58],[38,68],[62,68],[50,72],[50,84]].map(([x,y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="#ffe9a8"/>`).join('')}
+    <polygon points="${star(50, 30, 15, 6, 5)}" fill="${LEAF}"/>
+    <rect x="48" y="10" width="4" height="14" rx="2" fill="${LEAF}"/>`,
+  tomato: f => `
+    <ellipse cx="50" cy="58" rx="38" ry="33" fill="${f}" ${EDGE}/>
+    <ellipse cx="34" cy="48" rx="8" ry="5" fill="#ffffff" fill-opacity=".35"/>
+    <polygon points="${star(50, 29, 17, 6, 6)}" fill="${LEAF}"/>
+    <rect x="48" y="12" width="4" height="12" rx="2" fill="${LEAF}"/>`,
+  orange: f => `
+    <circle cx="50" cy="56" r="36" fill="${f}" ${EDGE}/>
+    ${[[36,46],[60,44],[46,62],[66,64],[34,72],[54,78]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="1.8" fill="#ffffff" fill-opacity=".45"/>`).join('')}
+    <rect x="48" y="14" width="4" height="10" rx="2" fill="#6b4a2b"/>
+    <path d="M52 20C60 8 76 10 80 16C72 24 60 25 52 20Z" fill="${LEAF}"/>`,
+  sun: f => `
+    ${Array.from({ length: 8 }, (_, i) => `<line x1="50" y1="12" x2="50" y2="24" stroke="${f}" stroke-width="7" stroke-linecap="round" transform="rotate(${i * 45} 50 50)"/>`).join('')}
+    <circle cx="50" cy="50" r="22" fill="${f}" ${EDGE}/>`,
+  banana: f => `
+    <path d="M18 30Q22 82 84 72Q90 68 86 62Q38 66 30 28Q24 22 18 30Z" fill="${f}" ${EDGE}/>
+    <path d="M18 30L16 22L24 24Z" fill="#6b4a2b"/>
+    <circle cx="87" cy="66" r="3" fill="#6b4a2b"/>`,
+  flower: f => `
+    <path d="M50 52V94" stroke="${LEAF}" stroke-width="5" stroke-linecap="round"/>
+    <path d="M50 80C38 66 26 70 24 74C30 82 42 84 50 80Z" fill="${LEAF}"/>
+    ${Array.from({ length: 5 }, (_, i) => `<circle cx="50" cy="22" r="14" fill="${f}" ${EDGE} transform="rotate(${i * 72} 50 42)"/>`).join('')}
+    <circle cx="50" cy="42" r="10" fill="#ffd34d"/>`,
+  drop: f => `
+    <path d="M50 8C50 8 20 46 20 64A30 30 0 0 0 80 64C80 46 50 8 50 8Z" fill="${f}" ${EDGE}/>
+    <ellipse cx="37" cy="64" rx="6" ry="11" fill="#ffffff" fill-opacity=".4"/>`,
+  fish: f => `
+    <polygon points="72,50 94,32 94,68" fill="${f}" ${EDGE}/>
+    <ellipse cx="44" cy="50" rx="32" ry="22" fill="${f}" ${EDGE}/>
+    <path d="M40 30Q50 18 60 30Z" fill="${f}" ${EDGE}/>
+    <circle cx="27" cy="45" r="6" fill="#ffffff"/><circle cx="26" cy="45" r="3" fill="#1d2431"/>
+    <path d="M48 42Q54 50 48 58" stroke="rgba(29,36,49,.3)" stroke-width="2.5" fill="none"/>`,
+  snow: f => `
+    <g stroke="${f}" stroke-width="6" stroke-linecap="round" fill="none">
+      ${Array.from({ length: 6 }, (_, i) => `<g transform="rotate(${i * 60} 50 50)"><path d="M50 50V10"/><path d="M50 24L40 15M50 24L60 15"/></g>`).join('')}
+    </g>
+    <circle cx="50" cy="50" r="6" fill="${f}"/>`,
+  leaf: f => `
+    <path d="M16 84C16 42 48 14 86 14C86 52 58 84 16 84Z" fill="${f}" ${EDGE}/>
+    <path d="M16 84L72 28M38 62L36 44M50 50L66 50M58 42L58 30" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-linecap="round"/>`,
+  grapes: f => `
+    <path d="M50 22C50 14 56 8 62 6" stroke="#6b4a2b" stroke-width="4" stroke-linecap="round" fill="none"/>
+    ${[[38,30],[50,30],[62,30],[32,44],[44,44],[56,44],[68,44],[38,58],[50,58],[62,58],[44,72],[56,72],[50,85]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="9" fill="${f}" ${EDGE}/>`).join('')}`,
+  eggplant: f => `
+    <path d="M60 24C42 24 40 42 30 56C18 74 32 96 52 90C72 84 78 64 74 44C72 32 68 24 60 24Z" fill="${f}" ${EDGE}/>
+    <path d="M46 26C52 18 66 16 76 24C70 24 68 30 64 34C60 30 54 32 46 26Z" fill="${LEAF}"/>
+    <path d="M62 22L66 8" stroke="${LEAF}" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="40" cy="62" rx="4" ry="10" fill="#ffffff" fill-opacity=".25" transform="rotate(25 40 62)"/>`,
+};
+const picSVG = (name, color) => `<svg viewBox="0 0 100 100" aria-hidden="true">${PIC[name](color)}</svg>`;
+
+const ICON = {
+  sun: `<svg viewBox="0 0 64 64" aria-hidden="true">${Array.from({ length: 8 }, (_, i) => `<line x1="32" y1="5" x2="32" y2="13" stroke="#f2871a" stroke-width="5" stroke-linecap="round" transform="rotate(${i * 45} 32 32)"/>`).join('')}<circle cx="32" cy="32" r="13" fill="#f6b416"/></svg>`,
+  snow: `<svg viewBox="0 0 64 64" aria-hidden="true"><g stroke="#2f74c9" stroke-width="4" stroke-linecap="round" fill="none">${Array.from({ length: 6 }, (_, i) => `<g transform="rotate(${i * 60} 32 32)"><path d="M32 32V6"/><path d="M32 15L25 9M32 15L39 9"/></g>`).join('')}</g></svg>`,
+  home: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>`,
+  sound: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>`,
+  mute: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M17 9l5 6M22 9l-5 6"/></svg>`,
+  star: on => `<svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="${star(12, 12.5, 11, 4.6, 5)}" fill="${on ? '#f6b416' : '#d8dee7'}"/></svg>`,
+};
+
+/* ================= sound ================= */
+const canSpeak = 'speechSynthesis' in window;
+let heVoice = null;
+function pickVoice() {
+  if (!canSpeak) return;
+  const vs = speechSynthesis.getVoices();
+  heVoice = vs.find(v => /^he|^iw/i.test(v.lang)) || null;
+}
+if (canSpeak) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function speak(text) {
+  if (!state.sound || !canSpeak) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'he-IL';
+    if (heVoice) u.voice = heVoice;
+    u.rate = 0.85;
+    speechSynthesis.speak(u);
+  } catch (e) { /* no speech on this device */ }
+}
+let actx = null;
+function tone(freqs, type, gain) {
+  if (!state.sound) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = actx.currentTime;
+    freqs.forEach((f, i) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type; o.frequency.value = f;
+      const t = t0 + i * 0.12;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(gain, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+      o.connect(g).connect(actx.destination);
+      o.start(t); o.stop(t + 0.4);
+    });
+  } catch (e) { /* no audio */ }
+}
+const chime = () => tone([660, 880], 'sine', 0.18);
+const bump = () => tone([300], 'triangle', 0.12);
+
+/* ================= state ================= */
+const app = document.getElementById('app');
+let saved = {};
+try { saved = JSON.parse(localStorage.getItem('warmCold') || '{}'); } catch (e) {}
+const state = {
+  view: 'home', level: 1, deck: [], i: 0,
+  first: 0, missed: false, results: [], pile: { warm: [], cold: [] },
+  hint: '', hintGood: false, busy: false,
+  sound: saved.sound !== false,
+};
+function save() { try { localStorage.setItem('warmCold', JSON.stringify({ sound: state.sound })); } catch (e) {} }
+
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  // avoid more than 3 of the same kind in a row
+  for (let k = 0; k < 20; k++) {
+    let run = 1, bad = -1;
+    for (let i = 1; i < a.length; i++) {
+      run = COLORS[a[i].c].temp === COLORS[a[i - 1].c].temp ? run + 1 : 1;
+      if (run > 3) { bad = i; break; }
+    }
+    if (bad < 0) break;
+    const j = Math.floor(Math.random() * a.length);
+    [a[bad], a[j]] = [a[j], a[bad]];
+  }
+  return a;
+}
+
+/* ================= views ================= */
+function soundBtn() {
+  if (!canSpeak && !(window.AudioContext || window.webkitAudioContext)) return '';
+  return `<button class="icon-btn" data-act="sound" aria-pressed="${state.sound}" aria-label="הַשְׁמָעָה">${state.sound ? ICON.sound : ICON.mute}</button>`;
+}
+
+function homeView() {
+  const chips = t => Object.values(COLORS).filter(c => c.temp === t).map(c => `<span style="background:${c.hex}"></span>`).join('');
+  return `<div class="bar"><span class="grow"></span>${soundBtn()}</div>
+  <div class="home">
+    <h1>חַם אוֹ קַר?</h1>
+    <div class="teach">
+      <div class="w">${ICON.sun}<strong>צְבָעִים חַמִּים</strong><div class="chips">${chips('warm')}</div>${TEMP.warm.like}</div>
+      <div class="c">${ICON.snow}<strong>צְבָעִים קָרִים</strong><div class="chips">${chips('cold')}</div>${TEMP.cold.like}</div>
+    </div>
+    <div class="levels">
+      <button class="level" data-act="start" data-level="1">
+        <span class="pv">${picSVG('strawberry', COLORS.red.hex)}</span>
+        רָמָה 1
+        <small>צֶבַע וּתְמוּנָה</small>
+      </button>
+      <button class="level" data-act="start" data-level="2">
+        <span class="pv"><b>כָּחֹל</b></span>
+        רָמָה 2
+        <small>רַק מִלָּה</small>
+      </button>
+    </div>
+    <a class="other" href="index.html">לְמַעְבֶּדֶת הַצְּבָעִים</a>
+  </div>`;
+}
+
+function binHTML(t, interactive) {
+  const dots = state.pile[t].map(c => `<span style="background:${COLORS[c].hex}" title="${COLORS[c].name}"></span>`).join('');
+  const tag = interactive ? 'button' : 'div';
+  const act = interactive ? ` data-act="bin" data-temp="${t}" aria-label="צֶבַע ${TEMP[t].name}"` : '';
+  return `<${tag} class="bin ${t}"${act}>${t === 'warm' ? ICON.sun : ICON.snow}<b>${TEMP[t].name}</b><div class="pile">${dots}</div></${tag}>`;
+}
+
+function playView() {
+  const it = state.deck[state.i], col = COLORS[it.c];
+  const prog = state.deck.map((_, k) => `<i class="${k < state.i ? 'ok' : k === state.i ? 'now' : ''}"></i>`).join('');
+  const sayBtn = canSpeak ? `<button class="say" data-act="say" aria-label="לִשְׁמֹעַ שׁוּב">${ICON.sound}</button>` : '';
+  const body = state.level === 1
+    ? `<div class="pic">${picSVG(it.pic, col.hex)}</div>
+       <div class="word"><span class="dot" style="background:${col.hex}"></span>${col.name}</div>`
+    : `<div class="word">${col.name}</div>`;
+  const label = state.level === 1 ? `${col.name}, ${it.obj}` : col.name;
+  return `<div class="bar">
+    <button class="icon-btn" data-act="home" aria-label="הַבַּיְתָה">${ICON.home}</button>
+    <div class="grow progress" aria-label="${state.i + 1} מִתּוֹךְ ${state.deck.length}">${prog}</div>
+    ${soundBtn()}
+  </div>
+  <div class="play">
+    <div class="ask">לְאָן זֶה שַׁיָּךְ?</div>
+    <div class="stage">
+      <div class="card${state.level === 2 ? ' only' : ''}" id="card" role="img" aria-label="${label}">${sayBtn}${body}</div>
+      <div class="hint${state.hintGood ? ' good' : ''}" aria-live="polite">${state.hint}</div>
+    </div>
+    <div class="bins">${binHTML('warm', true)}${binHTML('cold', true)}</div>
+  </div>`;
+}
+
+function endView() {
+  const n = state.deck.length, f = state.first;
+  const stars = f === n ? 3 : f >= n * 0.7 ? 2 : 1;
+  return `<div class="bar"><button class="icon-btn" data-act="home" aria-label="הַבַּיְתָה">${ICON.home}</button><span class="grow"></span>${soundBtn()}</div>
+  <div class="end">
+    <h1>סִיַּמְנוּ! כָּל הַכָּבוֹד!</h1>
+    <div class="stars">${[0, 1, 2].map(k => ICON.star(k < stars)).join('')}</div>
+    <div class="score">${f} מִתּוֹךְ ${n} נְכוֹנִים בַּפַּעַם הָרִאשׁוֹנָה</div>
+    <div class="bins">${binHTML('warm', false)}${binHTML('cold', false)}</div>
+    <div class="actions">
+      ${state.level === 1 ? '<button class="btn main" data-act="start" data-level="2">לְרָמָה 2</button>' : ''}
+      <button class="btn${state.level === 2 ? ' main' : ''}" data-act="start" data-level="${state.level}">עוֹד פַּעַם</button>
+      <button class="btn" data-act="home">הַבַּיְתָה</button>
+    </div>
+  </div>`;
+}
+
+function render() {
+  app.innerHTML = ({ home: homeView, play: playView, end: endView })[state.view]();
+  if (state.view === 'play') bindDrag();
+}
+
+/* ================= game ================= */
+function start(level) {
+  state.level = level;
+  state.deck = shuffle(level === 1 ? PICTURES : WORDS);
+  state.i = 0; state.first = 0; state.missed = false; state.busy = false;
+  state.pile = { warm: [], cold: [] };
+  state.hint = ''; state.hintGood = false;
+  state.view = 'play';
+  render(); window.scrollTo(0, 0);
+  sayCard();
+}
+function sayCard() {
+  const it = state.deck[state.i];
+  speak(COLORS[it.c].say);
+}
+
+function choose(t, fromX, fromY) {
+  if (state.busy) return;
+  const it = state.deck[state.i], col = COLORS[it.c];
+  const card = document.getElementById('card');
+  const bin = app.querySelector(`.bin.${t}`);
+  if (col.temp === t) {
+    state.busy = true;
+    if (!state.missed) state.first++;
+    chime();
+    speak(`נכון! ${col.say}, צבע ${TEMP[t].say}`);
+    const hint = app.querySelector('.hint');
+    hint.textContent = 'נָכוֹן!'; hint.classList.add('good');
+    flyInto(card, bin, fromX || 0, fromY || 0);
+    setTimeout(() => {
+      state.pile[t].push(it.c);
+      state.i++; state.missed = false; state.hint = ''; state.hintGood = false; state.busy = false;
+      if (state.i >= state.deck.length) { state.view = 'end'; render(); window.scrollTo(0, 0); speak('סיימנו! כל הכבוד!'); }
+      else { render(); setTimeout(sayCard, 700); }
+    }, 1500);
+  } else {
+    state.missed = true;
+    bump();
+    state.hint = `${col.name} הוּא צֶבַע ${TEMP[col.temp].name}, ${TEMP[col.temp].like}`;
+    speak(`${col.say} הוא צבע ${TEMP[col.temp].say}, ${TEMP[col.temp].sayLike}`);
+    const hint = app.querySelector('.hint');
+    hint.textContent = state.hint; hint.classList.remove('good');
+    card.style.transform = '';
+    card.classList.remove('shake'); void card.offsetWidth; card.classList.add('shake');
+    app.querySelectorAll('.bin').forEach(b => b.classList.remove('glow'));
+    app.querySelector(`.bin.${col.temp}`).classList.add('glow');
+  }
+}
+
+function flyInto(card, bin, dx, dy) {
+  const c = card.getBoundingClientRect(), b = bin.getBoundingClientRect();
+  const tx = dx + (b.left + b.width / 2) - (c.left + c.width / 2);
+  const ty = dy + (b.top + b.height / 2) - (c.top + c.height / 2);
+  card.classList.remove('dragging', 'back', 'shake');
+  card.classList.add('fly');
+  card.style.transform = `translate(${dx}px, ${dy}px)`;
+  void card.offsetWidth;
+  card.style.transform = `translate(${tx}px, ${ty}px) scale(.15)`;
+  card.style.opacity = '0';
+  setTimeout(() => {
+    bin.classList.add('got');
+    const dot = document.createElement('span');
+    dot.style.background = COLORS[state.deck[state.i].c].hex;
+    bin.querySelector('.pile').appendChild(dot);
+  }, 430);
+}
+
+/* drag the card onto a bin (tapping a bin works too) */
+function bindDrag() {
+  const card = document.getElementById('card');
+  let sx = 0, sy = 0, dx = 0, dy = 0, id = null, dragging = false;
+  const binAt = (x, y) => [...app.querySelectorAll('.bin')].find(b => {
+    const r = b.getBoundingClientRect();
+    return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+  });
+  card.addEventListener('pointerdown', e => {
+    if (state.busy || e.target.closest('.say')) return;
+    id = e.pointerId; sx = e.clientX; sy = e.clientY; dx = dy = 0; dragging = false;
+    card.setPointerCapture(id);
+    card.classList.remove('back', 'shake');
+  });
+  card.addEventListener('pointermove', e => {
+    if (e.pointerId !== id) return;
+    dx = e.clientX - sx; dy = e.clientY - sy;
+    if (!dragging && Math.hypot(dx, dy) > 8) { dragging = true; card.classList.add('dragging'); }
+    if (!dragging) return;
+    card.style.transform = `translate(${dx}px, ${dy}px) rotate(${Math.max(-8, Math.min(8, dx / 20))}deg)`;
+    const over = binAt(e.clientX, e.clientY);
+    app.querySelectorAll('.bin').forEach(b => b.classList.toggle('over', b === over));
+  });
+  const end = e => {
+    if (e.pointerId !== id) return;
+    id = null;
+    app.querySelectorAll('.bin').forEach(b => b.classList.remove('over'));
+    if (!dragging) return;
+    card.classList.remove('dragging');
+    const over = e.type === 'pointerup' ? binAt(e.clientX, e.clientY) : null;
+    const t = over && over.dataset.temp;
+    if (t && COLORS[state.deck[state.i].c].temp === t) { choose(t, dx, dy); return; }
+    card.classList.add('back');
+    card.style.transform = '';
+    if (t) setTimeout(() => choose(t), 300);
+  };
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b) return;
+  switch (b.dataset.act) {
+    case 'start': start(+b.dataset.level); break;
+    case 'home': if (canSpeak) speechSynthesis.cancel(); state.view = 'home'; render(); break;
+    case 'bin': choose(b.dataset.temp); break;
+    case 'say': sayCard(); break;
+    case 'sound':
+      state.sound = !state.sound; save();
+      if (!state.sound && canSpeak) speechSynthesis.cancel();
+      b.setAttribute('aria-pressed', state.sound);
+      b.innerHTML = state.sound ? ICON.sound : ICON.mute;
+      break;
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>
