@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ירקות ופירות שהופיעו / לא הופיעו בסיפור חגיגה של צבעים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: card bank in the middle, one drop zone on each side (stacked below the bank and pinned to the bottom on narrow screens); the fruit is the only saturated color, the rainbow appears only under the story name and at the end. */
+:root {
+  --paper: #eef3f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d4dce7;
+  --yes: #2f8a55;
+  --yes-bg: #e3f3e9;
+  --yes-line: #8fc9a5;
+  --no: #b03f5b;
+  --no-bg: #fae8ed;
+  --no-line: #e3a5b5;
+  --warn: #b7791f;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 20px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+svg { display: block; overflow: visible; }
+
+/* ---------- header ---------- */
+.top { display: flex; align-items: flex-start; gap: 12px; }
+.top h1 {
+  flex: 1; min-width: 0; margin: 0;
+  font-family: var(--display); font-weight: 700;
+  font-size: clamp(1.35rem, 3.6vw, 2.1rem); line-height: 1.55;
+  text-wrap: balance;
+}
+.story { position: relative; white-space: nowrap; display: inline-block; padding-bottom: 6px; }
+.story::after {
+  content: ""; position: absolute; inset-inline: 0; bottom: 0; height: 9px; border-radius: 3px;
+  background: linear-gradient(to bottom,
+    #e8453c 0 16.6%, #f39221 16.6% 33.3%, #f2c832 33.3% 50%,
+    #4caf50 50% 66.6%, #3b82c4 66.6% 83.3%, #6a4c9c 83.3% 100%);
+}
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%; flex: none;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center;
+}
+.icon-btn:hover { border-color: var(--ink-soft); }
+.icon-btn svg { width: 26px; height: 26px; }
+
+.status { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 16px; }
+.hint { margin: 0; font-size: 1.1rem; color: var(--ink-soft); }
+.progress {
+  font-family: var(--display); font-weight: 500; font-size: 1rem;
+  background: var(--surface); border: 2px solid var(--line); border-radius: 999px;
+  padding: 2px 14px; font-variant-numeric: tabular-nums;
+}
+.msg {
+  margin: 0; min-height: 1.6em;
+  font-family: var(--display); font-weight: 700; font-size: 1.25rem;
+}
+.msg.good { color: var(--yes); }
+.msg.bad { color: var(--warn); }
+
+/* ---------- board ---------- */
+.board {
+  display: grid; gap: 14px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "bank bank" "yes no";
+  align-items: start;
+}
+.bank, .done { grid-area: bank; }
+#zone-yes { grid-area: yes; }
+#zone-no { grid-area: no; }
+
+.bank {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+}
+.card {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 10px 6px 8px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--display); font-weight: 500; font-size: 1.1rem; line-height: 1.4;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  transition: border-color .15s, box-shadow .15s, opacity .15s;
+}
+.card svg { width: 68px; height: 68px; pointer-events: none; }
+.card:hover { border-color: var(--ink-soft); }
+.card[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink); }
+.card.lifted { opacity: .25; }
+.card.shake { animation: shake .4s; }
+.ghost {
+  position: fixed; z-index: 50; margin: 0; pointer-events: none;
+  border-color: var(--ink-soft);
+  box-shadow: 0 14px 30px rgba(29, 36, 49, .22);
+  transform: rotate(-3deg) scale(1.06);
+}
+
+.zone {
+  border: 3px dashed var(--line); border-radius: var(--radius);
+  padding: 12px; display: flex; flex-direction: column; gap: 10px;
+  min-height: 150px; cursor: pointer;
+  transition: transform .15s, background-color .15s;
+}
+.zone.yes { background: var(--yes-bg); border-color: var(--yes-line); }
+.zone.no { background: var(--no-bg); border-color: var(--no-line); }
+.zone.over { border-style: solid; transform: scale(1.02); }
+.zone.yes.over { border-color: var(--yes); }
+.zone.no.over { border-color: var(--no); }
+.zone.flash-good { animation: glow-good .6s; }
+.zone.flash-bad { animation: nudge .4s; }
+.zone-head { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 1.25rem; line-height: 1.35; }
+.yes .zone-head { color: var(--yes); }
+.no .zone-head { color: var(--no); }
+.badge { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; flex: none; color: #fff; }
+.yes .badge { background: var(--yes); }
+.no .badge { background: var(--no); }
+.badge svg { width: 22px; height: 22px; }
+.slots { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  background: var(--surface); border-radius: 14px; padding: 6px 6px 4px; width: 84px;
+  font-family: var(--display); font-size: .85rem; font-weight: 500; line-height: 1.35; text-align: center;
+  animation: pop .35s;
+}
+.chip svg { width: 40px; height: 40px; }
+
+/* ---------- end ---------- */
+.done {
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 28px 16px 32px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+}
+.done svg.rainbow { width: min(320px, 100%); height: auto; }
+.rainbow path { fill: none; stroke-width: 11; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .7s ease-out forwards; }
+.done h2 { margin: 0; font-family: var(--display); font-size: 2rem; font-weight: 700; }
+.done p { margin: 0; font-size: 1.15rem; color: var(--ink-soft); }
+.again {
+  margin-top: 6px; border: 0; border-radius: 999px; background: var(--ink); color: #fff;
+  padding: 12px 32px; font-family: var(--display); font-weight: 500; font-size: 1.25rem;
+}
+
+@keyframes shake { 0%,100% { transform: none; } 25% { transform: translateX(-7px); } 50% { transform: translateX(6px); } 75% { transform: translateX(-3px); } }
+@keyframes nudge { 0%,100% { transform: none; } 30% { transform: translateX(-5px); } 70% { transform: translateX(4px); } }
+@keyframes glow-good { 0% { box-shadow: 0 0 0 0 rgba(47,138,85,.5); } 100% { box-shadow: 0 0 0 18px rgba(47,138,85,0); } }
+@keyframes pop { 0% { transform: scale(.4); opacity: 0; } 70% { transform: scale(1.08); opacity: 1; } 100% { transform: none; } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* wide screens (classroom board): zones on both sides of the bank */
+@media (min-width: 900px) {
+  .board { grid-template-columns: 250px 1fr 250px; grid-template-areas: "yes bank no"; align-items: stretch; }
+  .zone { min-height: 420px; }
+}
+/* narrow screens: keep both zones in view while dragging */
+@media (max-width: 899px) {
+  .zone { position: sticky; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); box-shadow: 0 -6px 18px rgba(29,36,49,.08); }
+}
+@media (max-width: 520px) {
+  body { font-size: 17px; }
+  .bank { grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: 8px; }
+  .card { font-size: .98rem; padding: 8px 4px 6px; }
+  .card svg { width: 52px; height: 52px; }
+  .zone { padding: 10px 8px; min-height: 120px; gap: 6px; }
+  .zone-head { font-size: 1.02rem; gap: 6px; }
+  .badge { width: 30px; height: 30px; }
+  .badge svg { width: 18px; height: 18px; }
+  .slots { gap: 4px; }
+  .chip { width: auto; padding: 3px; }
+  .chip span { display: none; }
+  .chip svg { width: 34px; height: 34px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .rainbow path { stroke-dashoffset: 0; }
+}
+</style>
+</head>
+<body>
+<div id="app" lang="he" dir="rtl">
+  <header class="top">
+    <h1>יְרָקוֹת וּפֵרוֹת שֶׁהוֹפִיעוּ / לֹא הוֹפִיעוּ בַּסִּפּוּר <span class="story">חֲגִיגָה שֶׁל צְבָעִים</span></h1>
+    <button class="icon-btn" id="restart" type="button" aria-label="מֵהַהַתְחָלָה" title="מֵהַהַתְחָלָה">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4.5h4.5"/></svg>
+    </button>
+  </header>
+
+  <div class="status">
+    <p class="hint" id="hint">גִּרְרוּ כׇּל כַּרְטִיס לַמָּקוֹם הַנָּכוֹן. אֶפְשָׁר גַּם לִלְחֹץ עַל כַּרְטִיס וְאַחַר כָּךְ עַל הַמָּקוֹם.</p>
+    <span class="progress" id="progress"></span>
+  </div>
+  <p class="msg" id="msg" role="status" aria-live="polite"></p>
+
+  <main class="board">
+    <div class="zone yes" id="zone-yes" data-zone="yes" role="button" tabindex="0">
+      <div class="zone-head">
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+        <span>הוֹפִיעוּ בַּסִּפּוּר</span>
+      </div>
+      <div class="slots"></div>
+    </div>
+
+    <section class="bank" id="bank" aria-label="כַּרְטִיסִים לְמִיּוּן"></section>
+
+    <section class="done" id="done" hidden>
+      <svg class="rainbow" viewBox="0 0 200 104" aria-hidden="true"></svg>
+      <h2>כׇּל הַכָּבוֹד!</h2>
+      <p id="done-text"></p>
+      <button class="again" id="again" type="button">לְשַׂחֵק שׁוּב</button>
+    </section>
+
+    <div class="zone no" id="zone-no" data-zone="no" role="button" tabindex="0">
+      <div class="zone-head">
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M7 7l10 10M17 7L7 17"/></svg></span>
+        <span>לֹא הוֹפִיעוּ בַּסִּפּוּר</span>
+      </div>
+      <div class="slots"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+(() => {
+/* ================= pictures ================= */
+const star = (cx, cy, R, r, n, rot = -90) => {
+  const p = [];
+  for (let i = 0; i < n * 2; i++) {
+    const a = (rot + i * 180 / n) * Math.PI / 180, d = i % 2 ? r : R;
+    p.push((cx + d * Math.cos(a)).toFixed(1) + ',' + (cy + d * Math.sin(a)).toFixed(1));
+  }
+  return p.join(' ');
+};
+const hi = (cx, cy, rx, ry, rot = 0) =>
+  `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" transform="rotate(${rot} ${cx} ${cy})" fill="#fff" opacity=".35"/>`;
+const stem = d => `<path d="${d}" stroke="#6b4a2b" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+const leaf = d => `<path d="${d}" fill="#3e8e3a"/>`;
+const dots = (pts, fill, rx, ry = rx) => pts.map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="${fill}"/>`).join('');
+
+const ART = {
+  grapefruit: () => {
+    let s = '<circle cx="50" cy="50" r="40" fill="#f2b23e"/><circle cx="50" cy="50" r="34" fill="#fde8d2"/><circle cx="50" cy="50" r="31" fill="#ec6a5c"/>';
+    for (let i = 0; i < 8; i++) {
+      const a = i * Math.PI / 4;
+      s += `<line x1="50" y1="50" x2="${(50 + 31 * Math.cos(a)).toFixed(1)}" y2="${(50 + 31 * Math.sin(a)).toFixed(1)}" stroke="#fde8d2" stroke-width="2.5"/>`;
+    }
+    return s + '<circle cx="50" cy="50" r="3.5" fill="#fde8d2"/>';
+  },
+  lemon: () => `<g transform="rotate(-22 50 50)"><path d="M8 50 Q14 44 20 40 C30 22 70 22 80 40 Q86 44 92 50 Q86 56 80 60 C70 78 30 78 20 60 Q14 56 8 50 Z" fill="#f6d33c"/>${hi(40, 40, 14, 5)}</g>`,
+  tomatoes: () => `<circle cx="35" cy="58" r="25" fill="#c9352a"/><polygon points="${star(35, 37, 9, 3.5, 5)}" fill="#3c8f3e"/>
+    <circle cx="63" cy="60" r="28" fill="#e5483a"/><polygon points="${star(63, 36, 11, 4, 5)}" fill="#3c9a3f"/>${hi(52, 54, 5, 9, 20)}`,
+  watermelon: () => `<path d="M8 30 A42 42 0 0 0 92 30 Z" fill="#3f9b4a"/><path d="M13 30 A37 37 0 0 0 87 30 Z" fill="#d7eeb4"/>
+    <path d="M17 30 A33 33 0 0 0 83 30 Z" fill="#ee4a5a"/>${dots([[33, 39], [50, 41], [67, 39], [41, 51], [59, 51], [50, 60]], '#2a2a2a', 2, 3.2)}`,
+  cucumbers: () => {
+    const one = (y, fill) => `<rect x="12" y="${y}" width="74" height="22" rx="11" fill="${fill}"/>` +
+      dots([24, 34, 44, 54, 64, 74].map((x, i) => [x, y + (i % 2 ? 7 : 15)]), '#a4d77f', 1.7);
+    return `<g transform="rotate(-28 50 50)">${one(25, '#2f7d32')}${one(53, '#4e9e3c')}</g>`;
+  },
+  plum: () => leaf('M56 16 Q70 4 84 12 Q72 24 56 16 Z') + stem('M50 26 Q50 16 56 10') +
+    `<ellipse cx="50" cy="58" rx="32" ry="33" fill="#6e3b83"/><path d="M50 27 Q38 56 48 90" stroke="#552869" stroke-width="3" fill="none" stroke-linecap="round"/>${hi(36, 48, 6, 10, 20)}`,
+  orange: () => `<circle cx="50" cy="56" r="34" fill="#f39221"/>${dots([[34, 62], [46, 74], [60, 66], [68, 48], [52, 50], [40, 82], [72, 72], [58, 82], [30, 48]], '#dc7a10', 1.3)}` +
+    stem('M50 23 V15') + leaf('M52 18 Q66 5 80 13 Q68 25 52 18 Z') + hi(38, 44, 7, 11, 25),
+  apple: () => `<path d="M50 32 C40 22 16 24 16 50 C16 74 32 90 44 88 C47 87.5 53 87.5 56 88 C68 90 84 74 84 50 C84 24 60 22 50 32 Z" fill="#8cc63f"/>` +
+    stem('M50 32 Q49 20 53 12') + leaf('M53 22 Q66 10 78 16 Q66 28 53 22 Z') + hi(32, 50, 6, 11, 15),
+  banana: () => `<path d="M20 26 C18 62 48 88 86 72 C89 70 88 66 84 66 C54 72 34 54 30 26 Z" fill="#f7d44c"/>
+    <path d="M27 36 C32 58 52 70 78 68" stroke="#e2b92b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M19 28 L22 16 L29 18 L30 28 Z" fill="#8a7a3a"/><circle cx="86" cy="69" r="2.6" fill="#5a4a25"/>`,
+  carrot: () => `<g fill="#3e9a3a"><ellipse cx="41" cy="19" rx="5" ry="14" transform="rotate(-30 41 19)"/><ellipse cx="50" cy="15" rx="5" ry="15"/><ellipse cx="59" cy="19" rx="5" ry="14" transform="rotate(30 59 19)"/></g>
+    <path d="M30 30 Q50 24 70 30 Q66 50 53 90 Q50 95 47 90 Q34 50 30 30 Z" fill="#f07f23"/>
+    <path d="M37 44 L45 45 M57 56 L64 55 M43 68 L50 69" stroke="#d2661a" stroke-width="2.5" stroke-linecap="round"/>`,
+  grapes: () => {
+    let s = stem('M51 32 Q52 22 56 14') + leaf('M54 24 Q70 12 84 22 Q70 32 54 24 Z');
+    [[[30, 44, 58, 72], 40], [[37, 51, 65], 53], [[44, 58], 66], [[51], 79]].forEach(([xs, y]) =>
+      xs.forEach(x => { s += `<circle cx="${x}" cy="${y}" r="8" fill="#a3cf5a" stroke="#7da93a" stroke-width="1.5"/>`; }));
+    return s;
+  },
+  strawberry: () => `<path d="M50 90 C30 80 16 60 18 44 C20 32 34 30 50 34 C66 30 80 32 82 44 C84 60 70 80 50 90 Z" fill="#e2333f"/>` +
+    dots([[33, 47], [50, 47], [67, 47], [41, 58], [59, 58], [30, 60], [70, 60], [50, 70], [42, 78], [58, 78]], '#fce38a', 1.6, 2.6) +
+    `<path d="M50 26 V14" stroke="#3e7a2e" stroke-width="3.5" stroke-linecap="round"/><polygon points="${star(50, 33, 17, 6, 6)}" fill="#3e9a3a"/>`,
+  eggplant: () => `<path d="M28 30 C16 44 20 78 44 86 C62 92 86 82 86 64 C86 50 70 48 58 40 C50 34 40 22 28 30 Z" fill="#4b2a5e"/>
+    <path d="M30 27 L20 12" stroke="#3e7a2e" stroke-width="5" stroke-linecap="round"/><polygon points="${star(32, 31, 13, 5, 5, -60)}" fill="#4e9a3a"/>${hi(58, 70, 6, 14, -50)}`,
+  pear: () => leaf('M54 14 Q66 4 76 10 Q66 20 54 14 Z') + stem('M50 21 Q50 12 55 8') +
+    `<path d="M50 20 C42 20 40 30 40 40 C40 48 24 56 24 72 C24 86 36 92 50 92 C64 92 76 86 76 72 C76 56 60 48 60 40 C60 30 58 20 50 20 Z" fill="#c3cf45"/>${hi(36, 70, 6, 11, 10)}`,
+};
+const picture = id => `<svg viewBox="0 0 100 100" aria-hidden="true">${ART[id]()}</svg>`;
+
+/* ================= content ================= */
+// g: m / f / p (plural), for "הוֹפִיעַ / הוֹפִיעָה / הוֹפִיעוּ"
+const ITEMS = [
+  { id: 'grapefruit', name: 'אֶשְׁכּוֹלִית', the: 'הָאֶשְׁכּוֹלִית', g: 'f', inStory: true },
+  { id: 'lemon', name: 'לִימוֹן', the: 'הַלִּימוֹן', g: 'm', inStory: true },
+  { id: 'tomatoes', name: 'עַגְבָנִיּוֹת', the: 'הָעַגְבָנִיּוֹת', g: 'p', inStory: true },
+  { id: 'watermelon', name: 'אֲבַטִּיחַ', the: 'הָאֲבַטִּיחַ', g: 'm', inStory: true },
+  { id: 'cucumbers', name: 'מְלָפְפוֹנִים', the: 'הַמְּלָפְפוֹנִים', g: 'p', inStory: true },
+  { id: 'plum', name: 'שָׁזִיף', the: 'הַשָּׁזִיף', g: 'm', inStory: true },
+  { id: 'orange', name: 'תַּפּוּז', the: 'הַתַּפּוּז', g: 'm', inStory: true },
+  { id: 'apple', name: 'תַּפּוּחַ', the: 'הַתַּפּוּחַ', g: 'm', inStory: false },
+  { id: 'banana', name: 'בָּנָנָה', the: 'הַבָּנָנָה', g: 'f', inStory: false },
+  { id: 'carrot', name: 'גֶּזֶר', the: 'הַגֶּזֶר', g: 'm', inStory: false },
+  { id: 'grapes', name: 'עֲנָבִים', the: 'הָעֲנָבִים', g: 'p', inStory: false },
+  { id: 'strawberry', name: 'תּוּת', the: 'הַתּוּת', g: 'm', inStory: false },
+  { id: 'eggplant', name: 'חָצִיל', the: 'הֶחָצִיל', g: 'm', inStory: false },
+  { id: 'pear', name: 'אַגָּס', the: 'הָאַגָּס', g: 'm', inStory: false },
+];
+const VERB = { m: 'הוֹפִיעַ', f: 'הוֹפִיעָה', p: 'הוֹפִיעוּ' };
+const byId = Object.fromEntries(ITEMS.map(it => [it.id, it]));
+
+/* ================= state & DOM ================= */
+const $ = s => document.querySelector(s);
+const app = $('#app'), bank = $('#bank'), done = $('#done'), msg = $('#msg'), progress = $('#progress'), hint = $('#hint');
+const zones = { yes: $('#zone-yes'), no: $('#zone-no') };
+let placed, selected, drag = null, suppressClick = false, msgTimer;
+
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+function say(text, kind) {
+  clearTimeout(msgTimer);
+  msg.textContent = text;
+  msg.className = 'msg' + (kind ? ' ' + kind : '');
+  if (kind === 'bad') msgTimer = setTimeout(() => { msg.textContent = ''; }, 3000);
+}
+function updateProgress() { progress.textContent = `מִיַּנְתֶּם ${placed.size} מִתּוֹךְ ${ITEMS.length}`; }
+
+function start() {
+  placed = new Set(); selected = null;
+  bank.innerHTML = '';
+  Object.values(zones).forEach(z => { z.querySelector('.slots').innerHTML = ''; });
+  shuffle(ITEMS.slice()).forEach(it => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'card'; b.dataset.id = it.id;
+    b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = picture(it.id) + `<span>${it.name}</span>`;
+    b.addEventListener('pointerdown', onDown);
+    b.addEventListener('pointermove', onMove);
+    b.addEventListener('pointerup', onUp);
+    b.addEventListener('pointercancel', onCancel);
+    b.addEventListener('click', () => { if (!suppressClick) select(it.id); });
+    bank.appendChild(b);
+  });
+  bank.hidden = false; done.hidden = true; hint.hidden = false;
+  say('');
+  updateProgress();
+}
+
+const cardEl = id => bank.querySelector(`[data-id="${id}"]`);
+function select(id) {
+  selected = selected === id ? null : id;
+  bank.querySelectorAll('.card').forEach(c => c.setAttribute('aria-pressed', String(c.dataset.id === selected)));
+}
+
+function flash(el, cls) {
+  el.classList.remove('flash-good', 'flash-bad');
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
+function shake(el) {
+  el.classList.remove('shake');
+  void el.offsetWidth;
+  el.classList.add('shake');
+}
+
+function place(id, key, d) {
+  const it = byId[id], zone = zones[key];
+  const ok = it.inStory === (key === 'yes');
+  const card = cardEl(id);
+  if (selected === id) select(id);
+  if (ok) {
+    if (d && d.ghost) d.ghost.remove();
+    card.remove();
+    placed.add(id);
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    chip.title = it.name;
+    chip.innerHTML = picture(id) + `<span>${it.name}</span>`;
+    zone.querySelector('.slots').appendChild(chip);
+    flash(zone, 'flash-good');
+    say(`נָכוֹן! ${it.the} ${key === 'yes' ? '' : 'לֹא '}${VERB[it.g]} בַּסִּפּוּר.`, 'good');
+    updateProgress();
+    if (placed.size === ITEMS.length) finish();
+  } else {
+    flash(zone, 'flash-bad');
+    say('לֹא נָכוֹן. נַסּוּ שׁוּב.', 'bad');
+    if (d && d.ghost) flyBack(d, true); else shake(card);
+  }
+}
+
+function finish() {
+  bank.hidden = true; hint.hidden = true; done.hidden = false;
+  $('#done-text').textContent = `מִיַּנְתֶּם אֶת כׇּל ${ITEMS.length} הַכַּרְטִיסִים.`;
+  const colors = ['#e8453c', '#f39221', '#f2c832', '#4caf50', '#3b82c4', '#6a4c9c'];
+  $('#done svg.rainbow').innerHTML = colors.map((c, i) => {
+    const r = 92 - i * 11;
+    return `<path pathLength="1" d="M${100 - r} 100 A${r} ${r} 0 0 1 ${100 + r} 100" stroke="${c}" style="animation-delay:${i * 0.12}s"/>`;
+  }).join('');
+  $('#again').focus();
+}
+
+/* ================= dragging ================= */
+function zoneAt(x, y) {
+  for (const z of Object.values(zones)) {
+    const r = z.getBoundingClientRect();
+    if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return z;
+  }
+  return null;
+}
+function hover(z) { Object.values(zones).forEach(el => el.classList.toggle('over', el === z)); }
+
+function onDown(e) {
+  if (e.button > 0 || drag) return;
+  const card = e.currentTarget;
+  drag = { card, id: card.dataset.id, sx: e.clientX, sy: e.clientY, pid: e.pointerId, ghost: null };
+  try { card.setPointerCapture(e.pointerId); } catch (_) {}
+}
+function onMove(e) {
+  if (!drag || e.pointerId !== drag.pid) return;
+  if (!drag.ghost) {
+    if (Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 6) return;
+    const r = drag.card.getBoundingClientRect();
+    const g = drag.card.cloneNode(true);
+    g.classList.add('ghost');
+    g.removeAttribute('aria-pressed');
+    g.setAttribute('aria-hidden', 'true');
+    g.style.width = r.width + 'px'; g.style.height = r.height + 'px';
+    drag.offX = drag.sx - r.left; drag.offY = drag.sy - r.top;
+    app.appendChild(g);
+    drag.ghost = g;
+    drag.card.classList.add('lifted');
+    if (selected) select(selected);
+  }
+  drag.ghost.style.left = (e.clientX - drag.offX) + 'px';
+  drag.ghost.style.top = (e.clientY - drag.offY) + 'px';
+  hover(zoneAt(e.clientX, e.clientY));
+}
+function onUp(e) {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const d = drag; drag = null;
+  if (!d.ghost) return;
+  suppressClick = true; setTimeout(() => { suppressClick = false; }, 0);
+  hover(null);
+  const z = zoneAt(e.clientX, e.clientY);
+  if (z) place(d.id, z.dataset.zone, d); else flyBack(d, false);
+}
+function onCancel(e) {
+  if (!drag || e.pointerId !== drag.pid) return;
+  const d = drag; drag = null;
+  hover(null);
+  if (d.ghost) flyBack(d, false);
+}
+function flyBack(d, wrong) {
+  const r = d.card.getBoundingClientRect(), g = d.ghost;
+  g.style.transition = 'left .28s ease, top .28s ease';
+  g.style.left = r.left + 'px'; g.style.top = r.top + 'px';
+  setTimeout(() => {
+    g.remove();
+    d.card.classList.remove('lifted');
+    if (wrong) shake(d.card);
+  }, 300);
+}
+
+/* ================= tap / keyboard ================= */
+Object.entries(zones).forEach(([key, z]) => {
+  const act = () => {
+    if (selected) place(selected, key, null);
+    else if (placed.size < ITEMS.length) say('בַּחֲרוּ קֹדֶם כַּרְטִיס.', 'bad');
+  };
+  z.addEventListener('click', act);
+  z.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); act(); } });
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && selected) select(selected); });
+$('#restart').addEventListener('click', start);
+$('#again').addEventListener('click', start);
+
+start();
+})();
+</script>
+</body>
+</html>
