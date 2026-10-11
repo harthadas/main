@@ -1,0 +1,730 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>צבעים חמים וצבעים קרים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: one calm column; level picker, then three steps (read, sort, answer). The six colors from the text are the only saturated paint on screen. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --track: #e8ecf2;
+  --glass: #97a3b6;
+  --good: #2f8a55;
+  --good-soft: #e6f3eb;
+  --near: #b7791f;
+  --near-soft: #fbf1e1;
+  --red: #e0362c;
+  --orange: #f2871b;
+  --yellow: #f5cc19;
+  --green: #3a9a47;
+  --blue: #2447c0;
+  --violet: #7b39a6;
+  --cyan: #35b0e6;
+  --warm-soft: #fff3e3;
+  --warm-line: #f2b36b;
+  --cool-soft: #e8f1fb;
+  --cool-line: #8fb3e3;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+p { margin: 0; }
+svg { display: block; }
+[hidden] { display: none !important; }
+.card { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+
+/* ---------- header ---------- */
+.head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; }
+.head h1 { font-size: clamp(1.6rem, 5.4vw, 2.2rem); display: flex; align-items: center; gap: 12px; }
+.head h1 svg { width: 48px; height: 32px; flex: none; }
+
+.levels { display: flex; gap: 8px; }
+.level {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 16px;
+  padding: 6px 12px 4px; min-width: 76px;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+  font-family: var(--display); font-weight: 500; font-size: 1rem; line-height: 1.6;
+}
+.level .stars { display: flex; gap: 2px; height: 18px; align-items: center; }
+.level .stars svg { width: 16px; height: 16px; fill: var(--line); }
+.level .stars svg.on { fill: var(--near); }
+.level[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--surface); }
+.level[aria-pressed="true"] .stars svg.on { fill: var(--yellow); }
+.level[aria-pressed="true"] .stars svg:not(.on) { fill: rgba(255,255,255,.22); }
+
+/* ---------- step tabs ---------- */
+.tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tab {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  padding: 8px 6px; display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--display); font-weight: 500; font-size: 1.1rem; line-height: 1.5;
+}
+.tab .n {
+  width: 28px; height: 28px; border-radius: 50%; flex: none;
+  display: grid; place-items: center; font-size: .95rem;
+  background: var(--track); color: var(--ink-soft);
+}
+.tab[aria-selected="true"] { border-color: var(--ink); }
+.tab[aria-selected="true"] .n { background: var(--ink); color: var(--surface); }
+
+/* ---------- shared buttons ---------- */
+.row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  min-height: 54px; padding: 8px 24px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--display); font-weight: 500; font-size: 1.2rem; line-height: 1.5;
+}
+.act svg { width: 24px; height: 24px; flex: none; }
+.act:hover { border-color: var(--glass); }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act:active { transform: scale(.98); }
+
+.panel { display: flex; flex-direction: column; gap: 18px; }
+.lead { font-family: var(--display); font-size: 1.3rem; font-weight: 500; text-align: center; line-height: 1.7; text-wrap: balance; }
+
+/* ---------- read ---------- */
+.reading { padding: 22px 22px 18px; display: flex; flex-direction: column; gap: 14px; }
+.reading h2 { font-size: 1.5rem; }
+.story { font-size: 1.35rem; line-height: 2.2; max-width: 34em; }
+.story.lvl1 { display: flex; flex-direction: column; gap: 10px; font-size: 1.45rem; }
+.story.lvl1 .sent { display: block; }
+.cw { white-space: nowrap; }
+.cw::before {
+  content: ""; display: inline-block; vertical-align: .05em;
+  width: .62em; height: .62em; border-radius: 50%;
+  background: var(--c); margin-inline-end: .22em;
+  box-shadow: inset 0 0 0 1.5px rgba(29,36,49,.15);
+}
+.story.lvl3 .cw::before { display: none; }
+.listen { align-self: flex-start; min-height: 46px; padding: 6px 18px; font-size: 1.05rem; }
+
+.demo { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 0; }
+.frame {
+  width: 100%; max-width: 440px; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 0 0 6px #e2d6c3, 0 0 0 8px #c9b89d;
+  margin: 8px 0 4px;
+}
+.frame svg { width: 100%; height: auto; }
+.demo .cap { font-family: var(--display); font-size: 1.15rem; font-weight: 500; text-align: center; min-height: 3.4em; line-height: 1.7; text-wrap: balance; }
+.act .trio { display: flex; gap: 3px; }
+.act .trio i { width: 14px; height: 14px; border-radius: 50%; background: var(--c); display: block; box-shadow: inset 0 0 0 1.5px rgba(29,36,49,.12); }
+.act[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+
+/* painting palettes */
+.painting * { transition: fill .7s ease; }
+.painting .p-sky   { fill: #eef1f5; }
+.painting .p-sun   { fill: #d8dee7; }
+.painting .p-back  { fill: #c9d0db; }
+.painting .p-front { fill: #b7c0cd; }
+.painting .p-crown { fill: #aab4c3; }
+.painting .p-trunk { fill: #97a3b6; }
+.painting .p-bird  { fill: none; stroke: #97a3b6; stroke-width: 2.5; stroke-linecap: round; transition: stroke .7s ease; }
+.painting.warm .p-sky   { fill: #ffeeb8; }
+.painting.warm .p-sun   { fill: var(--yellow); }
+.painting.warm .p-back  { fill: var(--orange); }
+.painting.warm .p-front { fill: var(--red); }
+.painting.warm .p-crown { fill: #f7a823; }
+.painting.warm .p-trunk { fill: #9c2f1c; }
+.painting.warm .p-bird  { stroke: #c2410c; }
+.painting.cool .p-sky   { fill: #d4e9f7; }
+.painting.cool .p-sun   { fill: #f4f8fc; }
+.painting.cool .p-back  { fill: var(--violet); }
+.painting.cool .p-front { fill: var(--green); }
+.painting.cool .p-crown { fill: #1f6b3a; }
+.painting.cool .p-trunk { fill: #34307a; }
+.painting.cool .p-bird  { stroke: var(--blue); }
+
+/* ---------- sort ---------- */
+.itemcard { padding: 18px 16px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; min-height: 196px; justify-content: center; }
+.count { font-family: var(--display); color: var(--ink-soft); font-size: 1rem; font-variant-numeric: tabular-nums; }
+.item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-family: var(--display); font-weight: 700; font-size: 1.8rem; line-height: 1.5; }
+.item .big { width: 96px; height: 96px; display: grid; place-items: center; }
+.item .big.paint { border-radius: 50%; background: var(--c); box-shadow: inset 0 -8px 0 rgba(0,0,0,.08), inset 0 0 0 2px rgba(29,36,49,.14); position: relative; }
+.item .big.paint::after { content: ""; position: absolute; top: 17px; inset-inline-end: 21px; width: 20px; height: 12px; border-radius: 50%; background: rgba(255,255,255,.45); }
+.item .big svg { width: 88px; height: 88px; }
+.item.plain { font-size: 2.2rem; padding-block: 24px; }
+.item.pop { animation: pop .35s ease-out; }
+@keyframes pop { 0% { transform: scale(.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+.msg { font-family: var(--display); font-size: 1.25rem; font-weight: 500; text-align: center; min-height: 2.2em; line-height: 1.7; text-wrap: balance; }
+.msg.good { color: var(--good); }
+.msg.near { color: var(--near); }
+
+.bins { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+.bin { border-radius: var(--radius); border: 2px solid var(--line); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; }
+.bin.warm { border-color: var(--warm-line); }
+.bin.cool { border-color: var(--cool-line); }
+.binbtn {
+  border: 0; width: 100%; min-height: 84px; padding: 10px 8px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.4;
+}
+.bin.warm .binbtn { background: var(--warm-soft); }
+.bin.cool .binbtn { background: var(--cool-soft); }
+.binbtn svg { width: 40px; height: 40px; flex: none; }
+.binbtn:not(:disabled):active { filter: brightness(.96); }
+.binbtn:disabled { cursor: default; }
+.bins.plain .binbtn svg { display: none; }
+.bin.shake { animation: shake .4s; }
+.bin.hint { box-shadow: 0 0 0 4px var(--paper), 0 0 0 7px var(--near); animation: nudge 1.4s ease-in-out infinite; }
+@keyframes nudge { 0%, 60%, 100% { transform: translateY(0); } 75% { transform: translateY(-6px); } 90% { transform: translateY(0); } }
+@keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.got { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; padding: 10px 8px 12px; min-height: 56px; }
+.got span {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px 2px 8px;
+  border-radius: 999px; background: var(--paper); font-family: var(--display); font-weight: 500; font-size: 1rem; line-height: 1.8;
+  animation: pop .3s ease-out;
+}
+.got span i { width: 16px; height: 16px; border-radius: 50%; background: var(--c); display: block; flex: none; box-shadow: inset 0 0 0 1.5px rgba(29,36,49,.14); }
+.got span svg { width: 20px; height: 20px; flex: none; }
+.bins.plain .got span i, .bins.plain .got span svg { display: none; }
+
+/* ---------- quiz ---------- */
+.qhead { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.dots { display: flex; gap: 6px; }
+.dots i { width: 14px; height: 14px; border-radius: 50%; background: var(--track); display: block; }
+.dots i.done { background: var(--good); }
+.dots i.now { background: var(--ink); }
+.question { padding: 22px; display: flex; flex-direction: column; gap: 18px; }
+.question h2 { font-size: 1.45rem; line-height: 1.8; }
+.opts { display: grid; gap: 12px; }
+.opts.two { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.opts.two.four { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.opt {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  min-height: 64px; padding: 10px 18px;
+  display: flex; align-items: center; gap: 14px; text-align: start;
+  font-family: var(--display); font-size: 1.2rem; font-weight: 500; line-height: 1.7;
+  transition: border-color .15s, background-color .15s;
+}
+.opt:hover:not(:disabled) { border-color: var(--glass); }
+.opt .sw { width: 36px; height: 36px; border-radius: 50%; flex: none; background: var(--c); box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); }
+.opt.num { justify-content: center; font-size: 1.8rem; font-variant-numeric: tabular-nums; }
+.opt .strip { display: flex; gap: 8px; flex: 1; }
+.opt .strip span { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 1.05rem; }
+.opt .strip span i { width: 100%; max-width: 64px; height: 30px; border-radius: 10px; background: var(--c); display: block; box-shadow: inset 0 0 0 2px rgba(29,36,49,.1); }
+.opt .mark { margin-inline-start: auto; width: 28px; height: 28px; flex: none; }
+.opt.right { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { border-color: var(--line); opacity: .45; }
+.opt:disabled { cursor: default; }
+.feedback { display: flex; flex-direction: column; gap: 8px; }
+.quote {
+  border-inline-start: 4px solid var(--glass); padding-inline-start: 14px;
+  color: var(--ink-soft); font-size: 1.15rem; line-height: 2;
+}
+.quote b { color: var(--ink); font-weight: 600; }
+
+.finish { padding: 24px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.finish .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; width: 100%; max-width: 420px; }
+.finish .pair .frame { margin: 6px 0; box-shadow: 0 0 0 4px #e2d6c3, 0 0 0 6px #c9b89d; border-radius: 10px; }
+.finish h2 { font-size: 1.8rem; }
+.finish p { font-size: 1.2rem; line-height: 1.8; }
+
+@media (max-width: 460px) {
+  .tab { font-size: 1rem; gap: 6px; padding-inline: 4px; }
+  .tab .n { width: 24px; height: 24px; }
+  .level { min-width: 0; flex: 1; padding-inline: 6px; }
+  .levels { width: 100%; }
+  .story { font-size: 1.25rem; }
+  .story.lvl1 { font-size: 1.3rem; }
+  .question { padding: 18px 14px; }
+  .question h2 { font-size: 1.3rem; }
+  .opt { font-size: 1.1rem; padding-inline: 12px; }
+  .opt .strip { gap: 4px; }
+  .opt .strip span { font-size: .95rem; }
+  .binbtn { font-size: 1.35rem; min-height: 74px; gap: 6px; }
+  .binbtn svg { width: 32px; height: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="head">
+    <h1>
+      <svg viewBox="0 0 48 32" aria-hidden="true">
+        <circle cx="12" cy="10" r="7" fill="var(--red)"/>
+        <circle cx="24" cy="10" r="7" fill="var(--orange)"/>
+        <circle cx="36" cy="10" r="7" fill="var(--yellow)"/>
+        <circle cx="12" cy="24" r="7" fill="var(--blue)"/>
+        <circle cx="24" cy="24" r="7" fill="var(--green)"/>
+        <circle cx="36" cy="24" r="7" fill="var(--violet)"/>
+      </svg>
+      חַמִּים וְקָרִים
+    </h1>
+    <div class="levels" role="group" aria-label="רָמָה">
+      <button class="level" data-level="1" aria-pressed="true"><span class="stars" data-n="1"></span>קַל</button>
+      <button class="level" data-level="2" aria-pressed="false"><span class="stars" data-n="2"></span>בֵּינוֹנִי</button>
+      <button class="level" data-level="3" aria-pressed="false"><span class="stars" data-n="3"></span>מִתְקַדֵּם</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" id="tab-read" role="tab" data-go="read" aria-selected="true"><span class="n">1</span>קוֹרְאִים</button>
+    <button class="tab" id="tab-sort" role="tab" data-go="sort" aria-selected="false"><span class="n">2</span>מְמַיְּנִים</button>
+    <button class="tab" id="tab-quiz" role="tab" data-go="quiz" aria-selected="false"><span class="n">3</span>עוֹנִים</button>
+  </nav>
+
+  <!-- ===== step 1: read ===== -->
+  <section class="panel" id="read" role="tabpanel">
+    <div class="card reading">
+      <h2>צְבָעִים חַמִּים וּצְבָעִים קָרִים</h2>
+      <p class="story" id="story"></p>
+      <button class="act listen" id="listen" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+        הַקְשִׁיבוּ
+      </button>
+    </div>
+
+    <figure class="card demo">
+      <div class="frame" id="demoFrame"></div>
+      <figcaption class="cap" id="demoCap">בְּאֵילוּ צְבָעִים נִצְבַּע אֶת הַצִּיּוּר?</figcaption>
+      <div class="row">
+        <button class="act" id="paintWarm" aria-pressed="false">
+          <span class="trio" aria-hidden="true"><i style="--c:var(--red)"></i><i style="--c:var(--orange)"></i><i style="--c:var(--yellow)"></i></span>
+          צְבָעִים חַמִּים
+        </button>
+        <button class="act" id="paintCool" aria-pressed="false">
+          <span class="trio" aria-hidden="true"><i style="--c:var(--blue)"></i><i style="--c:var(--green)"></i><i style="--c:var(--violet)"></i></span>
+          צְבָעִים קָרִים
+        </button>
+      </div>
+    </figure>
+
+    <div class="row"><button class="act primary" data-go="sort">לְמַיֵּן ←</button></div>
+  </section>
+
+  <!-- ===== step 2: sort ===== -->
+  <section class="panel" id="sort" role="tabpanel" hidden>
+    <p class="lead" id="sortLead"></p>
+    <div class="card itemcard">
+      <span class="count" id="sortCount"></span>
+      <div class="item" id="item" aria-live="polite"></div>
+      <div class="row" id="sortDone" hidden>
+        <button class="act" id="sortAgain">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg>
+          עוֹד פַּעַם
+        </button>
+        <button class="act primary" data-go="quiz">לַשְּׁאֵלוֹת ←</button>
+      </div>
+    </div>
+    <div class="feedback">
+      <p class="msg" id="sortMsg" aria-live="polite"></p>
+      <p class="quote" id="sortQuote" hidden></p>
+    </div>
+    <div class="bins" id="bins">
+      <div class="bin warm" id="bin-warm">
+        <button class="binbtn" data-bin="warm">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="10" fill="var(--yellow)"/><g stroke="var(--orange)" stroke-width="3.5" stroke-linecap="round"><line x1="24" y1="4" x2="24" y2="9"/><line x1="24" y1="39" x2="24" y2="44"/><line x1="4" y1="24" x2="9" y2="24"/><line x1="39" y1="24" x2="44" y2="24"/><line x1="10" y1="10" x2="13.5" y2="13.5"/><line x1="34.5" y1="34.5" x2="38" y2="38"/><line x1="10" y1="38" x2="13.5" y2="34.5"/><line x1="34.5" y1="13.5" x2="38" y2="10"/></g></svg>
+          חַם
+        </button>
+        <div class="got" id="got-warm"></div>
+      </div>
+      <div class="bin cool" id="bin-cool">
+        <button class="binbtn" data-bin="cool">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5C18 15 11 22 11 30a13 13 0 0 0 26 0c0-8-7-15-13-25z" fill="var(--cyan)"/><ellipse cx="18.5" cy="30" rx="3" ry="5" fill="rgba(255,255,255,.6)"/></svg>
+          קַר
+        </button>
+        <div class="got" id="got-cool"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== step 3: quiz ===== -->
+  <section class="panel" id="quiz" role="tabpanel" hidden>
+    <div id="quizBody"></div>
+  </section>
+
+</div>
+
+<script>
+const COLORS = {
+  red:    { name: 'אָדֹם',  bin: 'warm' },
+  orange: { name: 'כָּתֹם', bin: 'warm' },
+  yellow: { name: 'צָהֹב',  bin: 'warm' },
+  blue:   { name: 'כָּחֹל', bin: 'cool' },
+  green:  { name: 'יָרֹק',  bin: 'cool' },
+  violet: { name: 'סָגֹל',  bin: 'cool' },
+};
+const cvar = id => `var(--${id})`;
+
+/* things the text says each group reminds us of */
+const THINGS = {
+  fire:  { name: 'אֵשׁ',  bin: 'warm',
+    icon: '<path d="M25 4c1 8 12 13 12 26a13 13 0 0 1-26 0c0-7 3-11 6-14 0 5 2 8 5 9-1-7 0-14 3-21z" fill="var(--red)"/><path d="M24 25c3 4 7 7 7 12a7 7 0 0 1-14 0c0-4 3-8 7-12z" fill="var(--yellow)"/>' },
+  sun:   { name: 'שֶׁמֶשׁ', bin: 'warm',
+    icon: '<circle cx="24" cy="24" r="10" fill="var(--yellow)"/><g stroke="var(--orange)" stroke-width="3.5" stroke-linecap="round"><line x1="24" y1="4" x2="24" y2="9"/><line x1="24" y1="39" x2="24" y2="44"/><line x1="4" y1="24" x2="9" y2="24"/><line x1="39" y1="24" x2="44" y2="24"/><line x1="10" y1="10" x2="13.5" y2="13.5"/><line x1="34.5" y1="34.5" x2="38" y2="38"/><line x1="10" y1="38" x2="13.5" y2="34.5"/><line x1="34.5" y1="13.5" x2="38" y2="10"/></g>' },
+  water: { name: 'מַיִם', bin: 'cool',
+    icon: '<g fill="none" stroke="var(--blue)" stroke-width="3.5" stroke-linecap="round"><path d="M5 16c4-4 8-4 12 0s8 4 12 0 8-4 12 0"/><path d="M5 26c4-4 8-4 12 0s8 4 12 0 8-4 12 0"/><path d="M5 36c4-4 8-4 12 0s8 4 12 0 8-4 12 0"/></g>' },
+  shade: { name: 'צֵל',   bin: 'cool',
+    icon: '<ellipse cx="27" cy="41" rx="17" ry="4.5" fill="#8e9aac"/><rect x="21.5" y="22" width="5" height="19" rx="1.5" fill="#6b5a4a"/><circle cx="24" cy="17" r="13" fill="var(--green)"/>' },
+  wind:  { name: 'רוּחַ קְרִירָה', bin: 'cool',
+    icon: '<g fill="none" stroke="var(--cyan)" stroke-width="3.5" stroke-linecap="round"><path d="M5 17h23a6 6 0 1 0-6-6"/><path d="M5 26h31a6 6 0 1 1-6 6"/><path d="M5 35h15"/></g>' },
+};
+const ITEM = { ...COLORS, ...THINGS };
+const iconSVG = (id, cls = '') => `<svg class="${cls}" viewBox="0 0 48 48" aria-hidden="true">${THINGS[id].icon}</svg>`;
+
+const SENTENCES = [
+  'צְבָעִים חַמִּים וּצְבָעִים קָרִים מְעוֹרְרִים בָּנוּ תְּחוּשׁוֹת שׁוֹנוֹת.',
+  '{red}, {orange} וְ{yellow} מַזְכִּירִים אֵשׁ וְשֶׁמֶשׁ, וְלָכֵן נִקְרָאִים צְבָעִים חַמִּים.',
+  '{blue}, {green} וְ{violet} מַזְכִּירִים מַיִם, צֵל וְרוּחַ קְרִירָה. אֵלֶּה צְבָעִים קָרִים.',
+  'צַיָּרִים בּוֹחֲרִים צְבָעִים כְּדֵי לִיצוֹר אֲוִירָה שְׂמֵחָה, רְגוּעָה אוֹ מְיֻחֶדֶת בַּצִּיּוּר.',
+];
+const plain = s => s.replace(/\{(\w+)\}/g, (m, id) => COLORS[id].name);
+const WARM_QUOTE = plain(SENTENCES[1]);
+const COOL_QUOTE = plain(SENTENCES[2]);
+
+/* Each level changes all three steps:
+   read  - 1: one sentence per line + color dots; 2: paragraph + dots; 3: plain paragraph
+   sort  - 1: the six colors, with paint
+           2: six colors + five things from the text, with paint and pictures
+           3: the same eleven, written names only; the right basket glows only after 2 misses
+   quiz  - 1: 5 questions, 2 answers; 2: 7 questions, 3 answers; 3: 7 harder questions, 4 answers */
+const ALL = ['red', 'orange', 'yellow', 'blue', 'green', 'violet', 'fire', 'sun', 'water', 'shade', 'wind'];
+const LEVELS = {
+  1: { items: ALL.slice(0, 6), plain: false, pulseAfter: 1, quoteAfter: 1 },
+  2: { items: ALL,             plain: false, pulseAfter: 1, quoteAfter: 1 },
+  3: { items: ALL,             plain: true,  pulseAfter: 2, quoteAfter: 2 },
+};
+
+/* kind: text (default) | num | color (options are color ids) | group (options are color-id arrays) */
+const QUESTIONS = {
+  1: [
+    { q: 'אֵיזֶה צֶבַע הוּא צֶבַע חַם?', kind: 'color', o: ['blue', 'red'], a: 1, quote: '<b>אָדֹם</b>, כָּתֹם וְצָהֹב ... נִקְרָאִים <b>צְבָעִים חַמִּים</b>.' },
+    { q: 'אֵיזֶה צֶבַע הוּא צֶבַע קַר?', kind: 'color', o: ['green', 'orange'], a: 0, quote: 'כָּחֹל, <b>יָרֹק</b> וְסָגֹל ... אֵלֶּה <b>צְבָעִים קָרִים</b>.' },
+    { q: 'מָה מַזְכִּירִים הַצְּבָעִים הַחַמִּים?', o: ['מַיִם וְצֵל', 'אֵשׁ וְשֶׁמֶשׁ'], a: 1, quote: 'אָדֹם, כָּתֹם וְצָהֹב מַזְכִּירִים <b>אֵשׁ וְשֶׁמֶשׁ</b>.' },
+    { q: 'מָה מַזְכִּירִים הַצְּבָעִים הַקָּרִים?', o: ['מַיִם, צֵל וְרוּחַ קְרִירָה', 'אֵשׁ וְשֶׁמֶשׁ'], a: 0, quote: 'כָּחֹל, יָרֹק וְסָגֹל מַזְכִּירִים <b>מַיִם, צֵל וְרוּחַ קְרִירָה</b>.' },
+    { q: 'צָהֹב הוּא צֶבַע...', o: ['חַם', 'קַר'], a: 0, quote: 'אָדֹם, כָּתֹם וְ<b>צָהֹב</b> ... נִקְרָאִים <b>צְבָעִים חַמִּים</b>.' },
+  ],
+  2: [
+    { q: 'אֵיזֶה צֶבַע הוּא צֶבַע חַם?', kind: 'color', o: ['green', 'violet', 'orange'], a: 2, quote: 'אָדֹם, <b>כָּתֹם</b> וְצָהֹב ... נִקְרָאִים <b>צְבָעִים חַמִּים</b>.' },
+    { q: 'אֵיזֶה צֶבַע הוּא צֶבַע קַר?', kind: 'color', o: ['red', 'violet', 'yellow'], a: 1, quote: 'כָּחֹל, יָרֹק וְ<b>סָגֹל</b> ... אֵלֶּה <b>צְבָעִים קָרִים</b>.' },
+    { q: 'לָמָּה אָדֹם, כָּתֹם וְצָהֹב נִקְרָאִים צְבָעִים חַמִּים?', o: ['כִּי הֵם מַזְכִּירִים מַיִם', 'כִּי הֵם מַזְכִּירִים אֵשׁ וְשֶׁמֶשׁ', 'כִּי הֵם צְבָעִים כֵּהִים'], a: 1, quote: 'מַזְכִּירִים <b>אֵשׁ וְשֶׁמֶשׁ</b>, וְלָכֵן נִקְרָאִים צְבָעִים חַמִּים.' },
+    { q: 'מָה מַזְכִּירִים הַצְּבָעִים הַקָּרִים?', o: ['אֵשׁ וְשֶׁמֶשׁ', 'חוֹל וַאֲדָמָה', 'מַיִם, צֵל וְרוּחַ קְרִירָה'], a: 2, quote: 'כָּחֹל, יָרֹק וְסָגֹל מַזְכִּירִים <b>מַיִם, צֵל וְרוּחַ קְרִירָה</b>.' },
+    { q: 'כַּמָּה צְבָעִים קָרִים מוֹפִיעִים בַּטֶּקְסְט?', kind: 'num', o: ['2', '3', '6'], a: 1, quote: '<b>כָּחֹל, יָרֹק וְסָגֹל</b> ... אֵלֶּה צְבָעִים קָרִים.' },
+    { q: 'אֵיזוֹ קְבוּצָה הִיא כֻּלָּהּ צְבָעִים חַמִּים?', kind: 'group', o: [['red', 'blue', 'yellow'], ['red', 'orange', 'yellow'], ['green', 'orange', 'violet']], a: 1, quote: WARM_QUOTE },
+    { q: 'מִי בּוֹחֵר צְבָעִים כְּדֵי לִיצוֹר אֲוִירָה בַּצִּיּוּר?', o: ['צַיָּרִים', 'רוֹפְאִים', 'נַהָגִים'], a: 0, quote: '<b>צַיָּרִים</b> בּוֹחֲרִים צְבָעִים כְּדֵי לִיצוֹר אֲוִירָה.' },
+  ],
+  3: [
+    { q: 'הַשְׁלִימוּ: צְבָעִים חַמִּים וּצְבָעִים קָרִים מְעוֹרְרִים בָּנוּ ______ שׁוֹנוֹת.', o: ['מִלִּים', 'תְּחוּשׁוֹת', 'שְׁאֵלוֹת', 'צִיּוּרִים'], a: 1, quote: 'מְעוֹרְרִים בָּנוּ <b>תְּחוּשׁוֹת</b> שׁוֹנוֹת.' },
+    { q: 'אֵיזוֹ קְבוּצָה הִיא כֻּלָּהּ צְבָעִים קָרִים?', kind: 'group', o: [['blue', 'orange', 'violet'], ['yellow', 'green', 'blue'], ['blue', 'green', 'violet'], ['red', 'violet', 'green']], a: 2, quote: COOL_QUOTE },
+    { q: 'אָדֹם, צָהֹב, כָּחֹל, כָּתֹם. אֵיזֶה צֶבַע לֹא שַׁיָּךְ לַקְּבוּצָה?', kind: 'color', o: ['red', 'yellow', 'blue', 'orange'], a: 2, quote: '<b>כָּחֹל</b>, יָרֹק וְסָגֹל ... אֵלֶּה <b>צְבָעִים קָרִים</b>.' },
+    { q: 'דָּנָה רוֹצָה לְצַיֵּר יוֹם קַיִץ חַם וְשִׁמְשִׁי. אֵילוּ צְבָעִים כְּדַאי לָהּ לִבְחֹר?', o: ['כָּחֹל, יָרֹק וְסָגֹל', 'אָדֹם, כָּתֹם וְצָהֹב', 'כָּחֹל וְסָגֹל', 'יָרֹק וְכָחֹל'], a: 1, quote: 'אָדֹם, כָּתֹם וְצָהֹב מַזְכִּירִים <b>אֵשׁ וְשֶׁמֶשׁ</b>.' },
+    { q: 'מָה פֵּרוּשׁ הַמִּלָּה "קְרִירָה"?', o: ['חַמָּה מְאוֹד', 'קְצָת קָרָה', 'רְטֻבָּה', 'חֲזָקָה'], a: 1, quote: 'מַיִם, צֵל וְרוּחַ <b>קְרִירָה</b>. אֵלֶּה צְבָעִים <b>קָרִים</b>.' },
+    { q: 'מָה פֵּרוּשׁ "אֲוִירָה" בַּצִּיּוּר?', o: ['הָאֲוִיר שֶׁנּוֹשְׁמִים', 'גֹּדֶל הַצִּיּוּר', 'הַהַרְגָּשָׁה שֶׁהַצִּיּוּר נוֹתֵן', 'הַמִּסְגֶּרֶת שֶׁל הַצִּיּוּר'], a: 2, quote: 'כְּדֵי לִיצוֹר <b>אֲוִירָה</b> שְׂמֵחָה, רְגוּעָה אוֹ מְיֻחֶדֶת.' },
+    { q: 'לָמָּה צַיָּרִים בּוֹחֲרִים צְבָעִים?', o: ['כִּי יֵשׁ מְעַט צְבָעִים', 'כְּדֵי שֶׁהַצִּיּוּר יִתְיַבֵּשׁ מַהֵר', 'כְּדֵי לִיצוֹר אֲוִירָה בַּצִּיּוּר', 'כִּי כָּל הַצְּבָעִים דּוֹמִים'], a: 2, quote: 'צַיָּרִים בּוֹחֲרִים צְבָעִים <b>כְּדֵי לִיצוֹר אֲוִירָה</b> שְׂמֵחָה, רְגוּעָה אוֹ מְיֻחֶדֶת בַּצִּיּוּר.' },
+  ],
+};
+
+const $ = id => document.getElementById(id);
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const CHECK = '<svg class="mark" viewBox="0 0 24 24" fill="none" stroke="var(--good)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const STAR = 'M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7L12 17.3 5.8 20.9l1.6-7L2 9.2l7.1-.6z';
+
+function paintingSVG(mode, label) {
+  return `<svg class="painting ${mode}" viewBox="0 0 320 180" role="img" aria-label="${label}">
+    <rect class="p-sky" width="320" height="180"/>
+    <circle class="p-sun" cx="248" cy="50" r="24"/>
+    <path class="p-bird" d="M150 46q6-6 12 0q6-6 12 0"/>
+    <path class="p-bird" d="M184 30q5-5 10 0q5-5 10 0"/>
+    <path class="p-back" d="M0 118C55 82 115 82 165 106C215 80 275 76 320 96V180H0Z"/>
+    <path class="p-front" d="M0 150C80 122 185 124 320 144V180H0Z"/>
+    <rect class="p-trunk" x="68" y="110" width="9" height="34" rx="2"/>
+    <circle class="p-crown" cx="72" cy="100" r="22"/>
+  </svg>`;
+}
+
+const state = { level: 1, step: 'read' };
+try { const s = Number(localStorage.getItem('warmcool-level')); if (LEVELS[s]) state.level = s; } catch (e) {}
+
+/* ---------- header: levels + tabs ---------- */
+document.querySelectorAll('.level .stars').forEach(box => {
+  const n = Number(box.dataset.n);
+  box.innerHTML = [1, 2, 3].map(i => `<svg viewBox="0 0 24 24" class="${i <= n ? 'on' : ''}" aria-hidden="true"><path d="${STAR}"/></svg>`).join('');
+});
+document.querySelectorAll('.level').forEach(b => b.addEventListener('click', () => setLevel(Number(b.dataset.level))));
+
+function setLevel(n) {
+  state.level = n;
+  try { localStorage.setItem('warmcool-level', String(n)); } catch (e) {}
+  document.querySelectorAll('.level').forEach(b => b.setAttribute('aria-pressed', String(Number(b.dataset.level) === n)));
+  renderStory();
+  resetSort();
+  resetQuiz();
+}
+
+function go(step) {
+  state.step = step;
+  ['read', 'sort', 'quiz'].forEach(s => {
+    $(s).hidden = s !== step;
+    $('tab-' + s).setAttribute('aria-selected', String(s === step));
+  });
+  window.scrollTo({ top: 0 });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go]');
+  if (b) go(b.dataset.go);
+});
+
+/* ---------- step 1: read ---------- */
+function renderStory() {
+  const story = $('story');
+  story.className = 'story lvl' + state.level;
+  story.innerHTML = SENTENCES.map(s =>
+    '<span class="sent">' + s.replace(/\{(\w+)\}/g, (m, id) => `<span class="cw" style="--c:${cvar(id)}">${COLORS[id].name}</span>`) + '</span>'
+  ).join(' ');
+}
+
+$('demoFrame').innerHTML = paintingSVG('', 'צִיּוּר שֶׁל נוֹף: שָׁמַיִם, שֶׁמֶשׁ, גְּבָעוֹת וְעֵץ');
+const DEMO = {
+  warm: 'צְבָעִים חַמִּים: הַצִּיּוּר נִרְאֶה חַם וְשָׂמֵחַ, כְּמוֹ אֵשׁ וְשֶׁמֶשׁ.',
+  cool: 'צְבָעִים קָרִים: הַצִּיּוּר נִרְאֶה רָגוּעַ וְקָרִיר, כְּמוֹ מַיִם, צֵל וְרוּחַ.',
+};
+function paintDemo(mode) {
+  $('demoFrame').querySelector('svg').setAttribute('class', 'painting ' + mode);
+  $('paintWarm').setAttribute('aria-pressed', String(mode === 'warm'));
+  $('paintCool').setAttribute('aria-pressed', String(mode === 'cool'));
+  $('demoCap').textContent = DEMO[mode];
+}
+$('paintWarm').addEventListener('click', () => paintDemo('warm'));
+$('paintCool').addEventListener('click', () => paintDemo('cool'));
+
+/* read-aloud, only where the device has a Hebrew voice */
+function hebrewVoice() {
+  if (!('speechSynthesis' in window)) return null;
+  return speechSynthesis.getVoices().find(v => /^(he|iw)\b/i.test(v.lang)) || null;
+}
+function checkVoice() { $('listen').hidden = !hebrewVoice(); }
+if ('speechSynthesis' in window) {
+  checkVoice();
+  speechSynthesis.addEventListener?.('voiceschanged', checkVoice);
+}
+$('listen').addEventListener('click', () => {
+  const v = hebrewVoice();
+  if (!v) return;
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance('צְבָעִים חַמִּים וּצְבָעִים קָרִים. ' + SENTENCES.map(plain).join(' '));
+  u.voice = v; u.lang = v.lang; u.rate = .85;
+  speechSynthesis.speak(u);
+});
+
+/* ---------- step 2: sort ---------- */
+const S = { order: [], i: 0, misses: 0, firstTry: 0 };
+
+function resetSort() {
+  const L = LEVELS[state.level];
+  S.order = shuffle([...L.items]); S.i = 0; S.misses = 0; S.firstTry = 0;
+  $('sortLead').textContent = L.plain
+    ? 'קִרְאוּ אֶת הַמִּלָּה. לְאָן הִיא שַׁיֶּכֶת: חַם אוֹ קַר?'
+    : state.level === 1 ? 'לְאָן שַׁיָּךְ הַצֶּבַע: חַם אוֹ קַר?' : 'לְאָן זֶה שַׁיָּךְ: חַם אוֹ קַר?';
+  $('bins').className = 'bins' + (L.plain ? ' plain' : '');
+  $('got-warm').innerHTML = '';
+  $('got-cool').innerHTML = '';
+  setSortMsg('', '');
+  renderItem();
+}
+
+function setSortMsg(text, tone, quote) {
+  const m = $('sortMsg');
+  m.textContent = text;
+  m.className = 'msg' + (tone ? ' ' + tone : '');
+  $('sortQuote').hidden = !quote;
+  $('sortQuote').innerHTML = quote ? 'בַּטֶּקְסְט: ' + quote : '';
+}
+
+function itemQuote(id) {
+  const it = ITEM[id];
+  return (it.bin === 'warm' ? WARM_QUOTE : COOL_QUOTE)
+    .replace(it.name, `<b>${it.name}</b>`)
+    .replace(/(צְבָעִים (חַמִּים|קָרִים)\.)$/, '<b>$1</b>');
+}
+
+function renderItem() {
+  const L = LEVELS[state.level], total = S.order.length;
+  const done = S.i >= total;
+  $('sortCount').textContent = done ? `${total} / ${total}` : `${S.i + 1} / ${total}`;
+  $('sortDone').hidden = !done;
+  document.querySelectorAll('.binbtn').forEach(b => { b.disabled = done; });
+  document.querySelectorAll('.bin').forEach(b => b.classList.remove('hint'));
+  const box = $('item');
+  box.className = 'item';
+  if (done) {
+    box.innerHTML = '';
+    $('sortCount').textContent = `מִיַּנְתֶּם נָכוֹן בַּנִּסָּיוֹן הָרִאשׁוֹן ${S.firstTry} מִתּוֹךְ ${total}`;
+    return;
+  }
+  const id = S.order[S.i], it = ITEM[id];
+  if (L.plain) {
+    box.classList.add('plain');
+    box.innerHTML = `<span>${it.name}</span>`;
+  } else if (COLORS[id]) {
+    box.innerHTML = `<span class="big paint" style="--c:${cvar(id)}"></span><span>${it.name}</span>`;
+  } else {
+    box.innerHTML = `<span class="big">${iconSVG(id)}</span><span>${it.name}</span>`;
+  }
+  void box.offsetWidth;
+  box.classList.add('pop');
+}
+
+function chipHTML(id) {
+  const mark = COLORS[id] ? `<i style="--c:${cvar(id)}"></i>` : iconSVG(id);
+  return `<span>${mark}${ITEM[id].name}</span>`;
+}
+
+function sortInto(bin) {
+  const id = S.order[S.i];
+  if (!id) return;
+  const L = LEVELS[state.level];
+  if (ITEM[id].bin === bin) {
+    if (S.misses === 0) S.firstTry++;
+    $('got-' + bin).insertAdjacentHTML('beforeend', chipHTML(id));
+    S.i++; S.misses = 0;
+    if (S.i >= S.order.length) setSortMsg('כָּל הַכָּבוֹד! מִיַּנְתֶּם הַכֹּל.', 'good');
+    else setSortMsg('נָכוֹן!', 'good');
+    renderItem();
+  } else {
+    S.misses++;
+    const b = $('bin-' + bin);
+    b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+    setSortMsg('לֹא בְּדִיּוּק. נַסּוּ שׁוּב.', 'near', S.misses >= L.quoteAfter ? itemQuote(id) : '');
+    if (S.misses >= L.pulseAfter) $('bin-' + ITEM[id].bin).classList.add('hint');
+  }
+}
+document.querySelectorAll('.binbtn').forEach(b => b.addEventListener('click', () => sortInto(b.dataset.bin)));
+$('sortAgain').addEventListener('click', resetSort);
+
+/* ---------- step 3: quiz ---------- */
+const Z = { i: 0, firstTry: 0, misses: 0, solved: false };
+
+function resetQuiz() {
+  Z.i = 0; Z.firstTry = 0; Z.misses = 0; Z.solved = false;
+  renderQuiz();
+}
+
+function optionHTML(q, o) {
+  if (q.kind === 'color') return `<span class="sw" style="--c:${cvar(o)}"></span><span>${COLORS[o].name}</span>`;
+  if (q.kind === 'group') return `<span class="strip">${o.map(id => `<span><i style="--c:${cvar(id)}"></i>${COLORS[id].name}</span>`).join('')}</span>`;
+  return `<span>${o}</span>`;
+}
+
+function renderQuiz() {
+  const list = QUESTIONS[state.level];
+  const body = $('quizBody');
+  if (Z.i >= list.length) return renderFinish(list.length);
+  const q = list[Z.i];
+  const L = LEVELS[state.level];
+  const dots = list.map((_, k) => `<i class="${k < Z.i ? 'done' : k === Z.i ? 'now' : ''}"></i>`).join('');
+  const two = q.kind !== 'group' && q.o.every(o => o.length < 24);
+  body.innerHTML = `
+    <div class="panel">
+      <div class="qhead">
+        <span class="count">שְׁאֵלָה ${Z.i + 1} מִתּוֹךְ ${list.length}</span>
+        <div class="dots" aria-hidden="true">${dots}</div>
+      </div>
+      <div class="card question">
+        <h2>${q.q}</h2>
+        <div class="opts${two ? ' two' : ''}${q.o.length === 4 ? ' four' : ''}" id="opts"></div>
+        <div class="feedback" id="fb" aria-live="polite"></div>
+      </div>
+      <div class="row" id="qNext" hidden>
+        <button class="act primary" id="nextQ">${Z.i + 1 < list.length ? 'לַשְּׁאֵלָה הַבָּאָה ←' : 'לְסִיּוּם ←'}</button>
+      </div>
+    </div>`;
+  const opts = $('opts');
+  q.o.forEach((o, k) => {
+    const b = document.createElement('button');
+    b.className = 'opt' + (q.kind === 'num' ? ' num' : '');
+    b.innerHTML = optionHTML(q, o);
+    if (q.kind === 'group') b.setAttribute('aria-label', o.map(id => COLORS[id].name).join(', '));
+    b.addEventListener('click', () => answer(k, b));
+    opts.append(b);
+  });
+  $('nextQ').addEventListener('click', () => { Z.i++; Z.misses = 0; Z.solved = false; renderQuiz(); window.scrollTo({ top: 0 }); });
+
+  function answer(k, b) {
+    if (Z.solved) return;
+    const fb = $('fb');
+    if (k === q.a) {
+      Z.solved = true;
+      if (Z.misses === 0) Z.firstTry++;
+      b.classList.add('right');
+      b.insertAdjacentHTML('beforeend', CHECK);
+      opts.querySelectorAll('.opt').forEach(x => { x.disabled = true; });
+      fb.innerHTML = `<p class="msg good" style="text-align:start">נָכוֹן!</p><p class="quote">בַּטֶּקְסְט: ${q.quote}</p>`;
+      $('qNext').hidden = false;
+      $('nextQ').focus();
+    } else {
+      Z.misses++;
+      b.classList.add('wrong');
+      b.disabled = true;
+      let html = '<p class="msg near" style="text-align:start">לֹא בְּדִיּוּק. נַסּוּ שׁוּב.</p>';
+      if (Z.misses >= L.quoteAfter) html += `<p class="quote">רֶמֶז מֵהַטֶּקְסְט: ${q.quote}</p>`;
+      fb.innerHTML = html;
+    }
+  }
+}
+
+function renderFinish(total) {
+  const body = $('quizBody');
+  const next = state.level < 3 ? `<button class="act primary" id="levelUp">לָרָמָה הַבָּאָה ←</button>` : '';
+  body.innerHTML = `
+    <div class="card finish">
+      <div class="pair">
+        <div class="frame">${paintingSVG('warm', 'צִיּוּר בִּצְבָעִים חַמִּים')}</div>
+        <div class="frame">${paintingSVG('cool', 'צִיּוּר בִּצְבָעִים קָרִים')}</div>
+      </div>
+      <h2>סִיַּמְתֶּם!</h2>
+      <p>עֲנִיתֶם נָכוֹן בַּנִּסָּיוֹן הָרִאשׁוֹן עַל ${Z.firstTry} מִתּוֹךְ ${total} שְׁאֵלוֹת.</p>
+      <div class="row">
+        <button class="act" id="quizAgain">עוֹד פַּעַם</button>
+        ${next}
+      </div>
+    </div>`;
+  $('quizAgain').addEventListener('click', resetQuiz);
+  if (next) $('levelUp').addEventListener('click', () => { setLevel(state.level + 1); go('read'); });
+}
+
+setLevel(state.level);
+</script>
+</body>
+</html>
