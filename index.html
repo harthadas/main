@@ -18,6 +18,7 @@
   --glass: #97a3b6;
   --good: #2f8a55;
   --near: #b7791f;
+  --mark: #fff1b0;
   --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
   --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
   --radius: 22px;
@@ -48,16 +49,8 @@ button:disabled { cursor: default; }
 :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
 svg { display: block; }
+[hidden] { display: none !important; }
 
-/* ---------- top bar ---------- */
-.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
-.icon-btn {
-  width: 52px; height: 52px; border-radius: 50%;
-  border: 2px solid var(--line); background: var(--surface);
-  display: grid; place-items: center; flex: none;
-}
-.icon-btn svg { width: 26px; height: 26px; }
-.bar h2 { font-size: 1.35rem; }
 
 /* ---------- home ---------- */
 .home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding-block: 24px; }
@@ -69,7 +62,6 @@ svg { display: block; }
   padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;
   font-family: var(--display); font-size: 1.45rem; font-weight: 500;
   transition: border-color .15s, transform .15s;
-  color: var(--ink); text-decoration: none;
 }
 .mode:hover { border-color: var(--glass); }
 .mode:active { transform: scale(.98); }
@@ -207,15 +199,6 @@ svg { display: block; }
 .formula .blob { width: 58px; height: 58px; border-radius: 50%; box-shadow: inset 0 -5px 0 rgba(0,0,0,.08), inset 0 0 0 2px rgba(29,36,49,.12); }
 .formula .count { font-size: 1.15rem; }
 
-.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
-.act {
-  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
-  font-family: var(--display); font-weight: 500; font-size: 1.2rem;
-  padding: 10px 24px; min-height: 56px;
-  display: inline-flex; align-items: center; gap: 10px;
-}
-.act svg { width: 24px; height: 24px; }
-.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
 
 @media (max-width: 420px) {
   body { font-size: 17px; }
@@ -235,10 +218,189 @@ svg { display: block; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .bowl .final { opacity: 1; }
 }
+
+/* ================= story lab ================= */
+#story-app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+svg { display: block; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none; padding: 0;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn.off { color: var(--glass); }
+.bar h2 { font-size: 1.35rem; flex: 1; }
+.steps { flex: 1; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.stepdot {
+  width: 36px; height: 36px; border-radius: 50%; padding: 0;
+  border: 2px solid var(--line); background: var(--surface);
+  font-family: var(--display); font-weight: 700; font-size: 1rem; line-height: 1;
+  display: grid; place-items: center;
+}
+.stepdot.done { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.stepdot.cur { box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--ink); }
+.stepdot:disabled { opacity: .4; }
+
+/* ---------- start ---------- */
+.start { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; text-align: center; }
+.start h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.start p { margin: -14px 0 0; color: var(--ink-soft); font-family: var(--display); font-size: 1.25rem; }
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
+.kind { display: flex; flex-direction: column; gap: 10px; }
+.kind-card {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 22px 18px 20px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: border-color .15s, transform .15s;
+}
+.kind-card:hover { border-color: var(--glass); }
+.kind-card:active { transform: scale(.98); }
+.kind-card svg { width: min(220px, 100%); height: auto; margin-bottom: 6px; }
+.kind-card strong { font-family: var(--display); font-size: 1.4rem; font-weight: 700; line-height: 1.5; }
+.kind-card small { color: var(--ink-soft); font-size: 1rem; line-height: 1.5; }
+.kind-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ---------- work area ---------- */
+.work { display: grid; gap: 18px; padding-top: 14px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "ask" "story"; }
+.work.final { grid-template-areas: "stage" "story" "more"; }
+@media (min-width: 860px) {
+  .work { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "ask stage" "ask story"; align-items: start; }
+  .work.final { grid-template-areas: "stage story" "more story"; grid-template-rows: auto 1fr; }
+}
+.panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+.stage { grid-area: stage; overflow: hidden; }
+.stage svg { width: 100%; height: auto; }
+
+.ask { grid-area: ask; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.ask h2 { font-size: 1.5rem; }
+.choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.choices.small { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.card {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 10px 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--display); font-size: 1.15rem; font-weight: 500; line-height: 1.5; text-align: center;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.card:hover { border-color: var(--glass); }
+.card:active { transform: scale(.97); }
+.card.on, .card.flash { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+.card.on { background: #f7f9fc; }
+.card svg { width: 100%; height: auto; }
+.choices.small .card svg { max-width: 70px; }
+.card .thumb { width: 100%; border-radius: 10px; overflow: hidden; }
+
+.grp + .grp { margin-top: 6px; }
+.grp h3 { display: flex; align-items: center; gap: 6px; font-size: 1.05rem; font-weight: 500; color: var(--ink-soft); margin-bottom: 8px; }
+.grp h3 svg { width: 26px; height: 26px; flex: none; }
+.own {
+  width: 100%; font-size: 1.15rem; line-height: 1.6;
+  padding: 12px 16px; border: 2px dashed var(--glass); border-radius: 16px; background: var(--paper);
+}
+.own::placeholder { color: var(--ink-soft); opacity: 1; }
+.own.filled { border-style: solid; border-color: var(--ink); background: var(--surface); }
+.own:focus-visible { outline-offset: 2px; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+
+/* ---------- story ---------- */
+.story { grid-area: story; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.story-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.story-head h2 { font-size: 1.3rem; }
+.part h3 { font-size: 1rem; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; }
+.sent { display: flex; align-items: flex-start; gap: 8px; font-size: 1.22rem; line-height: 1.9; }
+.sent + .sent { margin-top: 4px; }
+.sent .txt { flex: 1; min-width: 0; border-radius: 6px; padding-inline: 2px; transition: background .2s; overflow-wrap: anywhere; }
+.sent.reading .txt { background: var(--mark); }
+.sent.blank .txt { color: var(--glass); letter-spacing: .12em; }
+.sent.fresh .txt { animation: rise .45s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+.spk {
+  flex: none; width: 40px; height: 40px; margin-top: 3px; border-radius: 50%; padding: 0;
+  border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center;
+}
+.spk svg { width: 20px; height: 20px; }
+.spk.del { color: var(--ink-soft); }
+.spk.del svg { width: 14px; height: 14px; }
+
+/* ---------- final screen ---------- */
+.title-in {
+  width: 100%; border: 0; border-bottom: 2px dashed var(--glass); background: none;
+  font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.5; padding: 4px 2px;
+}
+.title-in::placeholder { color: var(--ink); opacity: .45; }
+.title-in:focus { border-bottom-style: solid; border-bottom-color: var(--ink); outline: none; }
+.label { font-family: var(--display); font-size: 1rem; color: var(--ink-soft); }
+.more { grid-area: more; padding: 16px; display: flex; flex-direction: column; gap: 10px; align-self: start; }
+.add-row { display: flex; gap: 10px; align-items: stretch; }
+.add-row .own { flex: 1; min-width: 0; }
+
+/* ---------- buttons ---------- */
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.15rem; line-height: 1.4;
+  padding: 10px 22px; min-height: 54px; text-decoration: none; color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+}
+.act svg { width: 24px; height: 24px; flex: none; }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act.big { font-size: 1.4rem; font-weight: 700; min-height: 64px; padding-inline: 34px; min-width: min(300px, 100%); }
+.act:disabled { opacity: .3; }
+.act:not(:disabled):active { transform: scale(.97); }
+
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .stepdot { width: 29px; height: 29px; font-size: .9rem; border-width: 1.5px; }
+  .stepdot.cur { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+  .steps { gap: 5px; flex-wrap: nowrap; }
+  .bar { gap: 8px; }
+  .icon-btn { width: 46px; height: 46px; }
+  .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .choices.small { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sent { font-size: 1.15rem; }
+  .act { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- book ---------- */
+.book { display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 14px; }
+.book-status { margin: 0; min-height: 1.6em; color: var(--ink-soft); font-family: var(--display); text-align: center; }
+.pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 18px; width: 100%; }
+.page { margin: 0; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(29,36,49,.08); }
+.page img { display: block; width: 100%; height: auto; }
+
+@media print {
+  @page { size: A4; margin: 0; }
+  body { background: #fff; }
+  #story-app { padding: 0; max-width: none; }
+  .bar, .book-actions, .book-status { display: none !important; }
+  .book { display: block; padding: 0; }
+  .pages { display: block; }
+  .page { border: 0; box-shadow: none; break-after: page; }
+  .page img { width: 210mm; height: 297mm; }
+}
 </style>
 </head>
 <body>
 <div id="app" lang="he" dir="rtl"></div>
+<div id="story-app" lang="he" dir="rtl" hidden></div>
 
 <script>
 (() => {
@@ -439,7 +601,7 @@ function homeView() {
         </svg>
         מְשִׂימוֹת
       </button>
-      <a class="mode" href="story.html">
+      <button class="mode" data-act="stories" data-key="stories">
         <svg viewBox="0 0 64 64" aria-hidden="true">
           <path d="M8 14h20a4 4 0 0 1 4 4v34a4 4 0 0 0-4-4H8z" fill="#ffffff" stroke="#1d2431" stroke-width="3.5" stroke-linejoin="round"/>
           <path d="M56 14H36a4 4 0 0 0-4 4v34a4 4 0 0 1 4-4h20z" fill="#ffffff" stroke="#1d2431" stroke-width="3.5" stroke-linejoin="round"/>
@@ -447,7 +609,7 @@ function homeView() {
           <circle cx="44" cy="30" r="7" fill="${css(PAINT.blue.rgb)}"/>
         </svg>
         סִפּוּרִים
-      </a>
+      </button>
     </div>
   </div>`;
 }
@@ -618,6 +780,7 @@ app.addEventListener('click', e => {
     case 'home': go('home'); break;
     case 'free': state.mode = 'free'; state.mission = null; state.tubes = []; go('lab'); break;
     case 'missions': state.mode = 'mission'; go('missions'); break;
+    case 'stories': window.openApp('stories'); break;
     case 'pick': state.mode = 'mission'; state.mission = i; state.tubes = []; go('lab'); break;
     case 'nextMission': state.mission = Math.min(MISSIONS.length - 1, state.mission + 1); state.tubes = []; go('lab'); break;
     case 'toggle': {
@@ -660,5 +823,1453 @@ window.addEventListener('resize', () => { if (small() !== lastSmall) { lastSmall
 render();
 })();
 </script>
+
+<script>
+(() => {
+/* ================= shared =================
+   Three kinds of story share one engine:
+   - colors: the colors are the heroes (a hero color and a friend color).
+   - helpers: a child or an animal is the hero, and colors come to help.
+   - temp: a warm color and a cool color meet.
+   Each kind is a "mode" object below with its own steps, sentences and picture. */
+const COLORS = [
+  { id: 'red',    hex: '#ef3b44', name: 'אָדֹם',  def: 'הָאָדֹם',  to: 'לָאָדֹם',  gift: 'כֹּחַ וְאֹמֶץ' },
+  { id: 'orange', hex: '#fb7a2c', name: 'כָּתֹם', def: 'הַכָּתֹם', to: 'לַכָּתֹם', gift: 'מֶרֶץ וְשִׂמְחָה' },
+  { id: 'yellow', hex: '#fad21e', name: 'צָהֹב',  def: 'הַצָּהֹב',  to: 'לַצָּהֹב',  gift: 'אוֹר' },
+  { id: 'green',  hex: '#2f9e55', name: 'יָרֹק',  def: 'הַיָּרֹק',  to: 'לַיָּרֹק',  gift: 'עֵץ גָּבוֹהַּ' },
+  { id: 'blue',   hex: '#1f6fd6', name: 'כָּחֹל', def: 'הַכָּחֹל', to: 'לַכָּחֹל', gift: 'רֹגַע' },
+  { id: 'purple', hex: '#8a4cc2', name: 'סָגֹל',  def: 'הַסָּגֹל',  to: 'לַסָּגֹל',  gift: 'קְסָמִים' },
+  { id: 'pink',   hex: '#f58cb2', name: 'וָרֹד',  def: 'הַוָּרֹד',  to: 'לַוָּרֹד',  gift: 'חִבּוּק' },
+];
+const C = Object.fromEntries(COLORS.map(c => [c.id, c]));
+
+// The color born when two colors hug or work together.
+const MIX = {};
+[
+  ['red', 'orange', 'צֶבַע שְׁקִיעָה', '#f4582f'], ['red', 'yellow', 'כָּתֹם', '#fb8f22'],
+  ['red', 'green', 'חוּם', '#7a5236'],             ['red', 'blue', 'סָגֹל', '#7b3fa8'],
+  ['red', 'purple', 'צֶבַע דֻּבְדְּבָן', '#b0306e'], ['red', 'pink', 'צֶבַע תּוּת', '#e8475f'],
+  ['orange', 'yellow', 'צֶבַע זָהָב', '#f5b22a'],  ['orange', 'green', 'צֶבַע זַיִת', '#8a8a32'],
+  ['orange', 'blue', 'צֶבַע עָנָן', '#8f949b'],    ['orange', 'purple', 'צֶבַע שׁוֹקוֹלָד', '#6b3f2a'],
+  ['orange', 'pink', 'צֶבַע אֲפַרְסֵק', '#ffb38a'], ['yellow', 'green', 'צֶבַע פִּיסְטוּק', '#a5cf4a'],
+  ['yellow', 'blue', 'יָרֹק', '#2fa35a'],          ['yellow', 'purple', 'צֶבַע חוֹל', '#cbb58a'],
+  ['yellow', 'pink', 'צֶבַע מֶלוֹן', '#ffad7a'],    ['green', 'blue', 'טוּרְקִיז', '#1ea7a0'],
+  ['green', 'purple', 'צֶבַע אֶבֶן', '#6b6e6a'],   ['green', 'pink', 'צֶבַע עֵץ', '#a8825e'],
+  ['blue', 'purple', 'צֶבַע לַיְלָה', '#3b2f86'],  ['blue', 'pink', 'לִילָךְ', '#b39ddb'],
+  ['purple', 'pink', 'צֶבַע סִגָּלִית', '#c06ad0'],
+].forEach(([a, b, name, hex]) => { MIX[[a, b].sort().join('+')] = { name, hex }; });
+const mixOf = (a, b) => MIX[[a, b].sort().join('+')];
+
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+const pick = (list, id) => list.find(o => o.id === id);
+
+/* ================= drawings ================= */
+const INK = '#1d2431';
+const PLAIN = '#eef1f5';   // "not colored yet"
+const SKIN = '#f0c4a0', HAIR = '#4a3426';
+const DROP = 'M50 3 C44 19 12 42 12 62 A38 36 0 0 0 88 62 C88 42 56 19 50 3 Z';
+
+// A paint-drop character. mood: happy | shy | brave | curious | sad | angry | sleep
+function drop(hex, mood, cx, bottom, size, extra = '') {
+  const s = size / 100;
+  let px = 0, py = 0, face = '';
+  const line = d => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>`;
+  switch (mood) {
+    case 'shy':
+      py = 2.5; px = 1.5;
+      face = line('M44 77 Q50 81 56 77') + '<ellipse cx="27" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/><ellipse cx="73" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/>';
+      break;
+    case 'brave':
+      face = line('M35 72 Q50 87 65 72') + line('M28 45 L45 50') + line('M72 45 L55 50');
+      break;
+    case 'curious':
+      px = -2; py = -2.5;
+      face = `<circle cx="50" cy="77" r="4.6" fill="${INK}"/>` + line('M54 45 Q63 39 72 45');
+      break;
+    case 'sad':
+      py = 1.5;
+      face = line('M40 81 Q50 72 60 81') + line('M29 49 L44 45') + line('M71 49 L56 45');
+      break;
+    case 'angry':
+      face = line('M41 79 Q50 75 59 79') + line('M29 45 L45 51') + line('M71 45 L55 51');
+      break;
+    case 'sleep':
+      face = line('M38 74 Q50 84 62 74');
+      break;
+    default:
+      face = line('M37 72 Q50 86 63 72');
+  }
+  const eyes = mood === 'sleep'
+    ? line('M31 59 Q38 64 45 59') + line('M55 59 Q62 64 69 59')
+    : [38, 62].map(x => `<circle cx="${x}" cy="59" r="8.5" fill="#fff" stroke="${INK}" stroke-width="2.6"/><circle cx="${x + px}" cy="${59 + py}" r="4.3" fill="${INK}"/>`).join('');
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${s})" ${extra}>
+    <path d="${DROP}" fill="${hex}" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+    <ellipse cx="28" cy="46" rx="5" ry="9" fill="#fff" opacity=".45" transform="rotate(28 28 46)"/>
+    ${eyes}${face}</g>`;
+}
+function ghost(cx, bottom, size) {
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">
+    <path d="${DROP}" fill="#ffffff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="8 7"/>
+    <text x="50" y="76" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="34" fill="#97a3b6">?</text></g>`;
+}
+const heart = (x, y, r, fill = '#ef3b44') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 9 C-12 0 -10 -10 -4.5 -10 C-1.5 -10 0 -7.5 0 -6 C0 -7.5 1.5 -10 4.5 -10 C10 -10 12 0 0 9 Z" fill="${fill}" stroke="${INK}" stroke-width="${16 / r}"/>`;
+const sparkle = (x, y, r, fill = '#ffd84d') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 -10 L2.4 -2.4 L10 0 L2.4 2.4 L0 10 L-2.4 2.4 L-10 0 L-2.4 -2.4 Z" fill="${fill}"/>`;
+const moon = (x, y, r) =>
+  `<path d="M${x} ${y - r} a${r} ${r} 0 1 0 ${r * 0.75} ${r * 1.66} a${r * 0.8} ${r * 0.8} 0 1 1 ${-r * 0.75} ${-r * 1.66} Z" fill="#fff2a8" stroke="${INK}" stroke-width="2"/>`;
+const note = (x, y, s) =>
+  `<g transform="translate(${x} ${y}) scale(${s})" fill="${INK}"><ellipse cx="0" cy="12" rx="5" ry="4" transform="rotate(-20 0 12)"/><rect x="3.5" y="-8" width="2.4" height="20"/><path d="M5.9 -8 q8 3 6 11 q-1 -6 -6 -6 Z"/></g>`;
+function rainbowArcs(cx, cy, r0, step, width) {
+  return COLORS.map((c, i) => {
+    const r = r0 - i * step;
+    return `<path d="M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}" fill="none" stroke="${c.hex}" stroke-width="${width}"/>`;
+  }).join('');
+}
+function flower(x, y, color, wilted) {
+  if (wilted) return `<path d="M${x} ${y + 24} V${y + 6} q0 -8 -9 -6" fill="none" stroke="#8c7a52" stroke-width="3" stroke-linecap="round"/><circle cx="${x - 11}" cy="${y + 2}" r="6" fill="#a89a78"/>`;
+  return `<path d="M${x} ${y + 24} V${y}" stroke="#3e8f4f" stroke-width="3"/><circle cx="${x}" cy="${y}" r="9" fill="${color}"/><circle cx="${x}" cy="${y}" r="3.5" fill="#fff6c2"/>`;
+}
+
+// Backgrounds, 400 x 230. night: leave the sun out.
+function scene(place, night) {
+  const sun = (x, y) => night ? '' : `<circle cx="${x}" cy="${y}" r="24" fill="#ffd84d"/>`;
+  switch (place) {
+    case 'garden': {
+      const flowers = [[24, '#ef3b44'], [62, '#fad21e'], [104, '#8a4cc2'], [298, '#f58cb2'], [340, '#1f6fd6'], [378, '#fb7a2c']]
+        .map(([x, c]) => `<path d="M${x} 206 V182" stroke="#3e8f4f" stroke-width="3"/><circle cx="${x}" cy="178" r="9" fill="${c}"/><circle cx="${x}" cy="178" r="3.5" fill="#fff6c2"/>`).join('');
+      return `<rect width="400" height="230" fill="#e3f2ff"/>${sun(58, 48)}
+        <path d="M0 176 Q100 152 200 172 T400 166 V230 H0Z" fill="#a3dc93"/>${flowers}`;
+    }
+    case 'forest': {
+      const trees = [[30, '#3f9a58'], [88, '#57b36b'], [318, '#57b36b'], [374, '#3f9a58']]
+        .map(([x, c]) => `<rect x="${x - 6}" y="150" width="12" height="44" fill="#9a6b4a"/><path d="M${x} 62 L${x - 32} 154 H${x + 32} Z" fill="${c}"/><path d="M${x} 44 L${x - 24} 110 H${x + 24} Z" fill="${c}"/>`).join('');
+      return `<rect width="400" height="230" fill="#e8f5e3"/><path d="M0 184 Q200 164 400 184 V230 H0Z" fill="#7cc47f"/>${trees}`;
+    }
+    case 'city': {
+      const b = [[0, 58, 118, '#ffb4b4'], [62, 50, 158, '#a9d6ff'], [116, 54, 96, '#ffe08a'], [234, 52, 140, '#cdb9ff'], [290, 56, 104, '#b6e6b0'], [350, 50, 150, '#ffc79a']]
+        .map(([x, w, h, c]) => {
+          let win = '';
+          for (let y = 200 - h + 14; y < 184; y += 26) for (let wx = x + 10; wx < x + w - 14; wx += 18) win += `<rect x="${wx}" y="${y}" width="10" height="12" rx="2" fill="#fff" opacity=".85"/>`;
+          return `<rect x="${x}" y="${200 - h}" width="${w}" height="${h}" fill="${c}"/>${win}`;
+        }).join('');
+      return `<rect width="400" height="230" fill="#fff3dc"/>${b}<rect y="198" width="400" height="32" fill="#d4d8e2"/>
+        <path d="M10 215 H390" stroke="#fff" stroke-width="4" stroke-dasharray="22 16"/>`;
+    }
+    case 'rainbow':
+      return `<rect width="400" height="230" fill="#e6f1ff"/>${rainbowArcs(200, 238, 196, 15, 14)}
+        <g fill="#fff"><ellipse cx="200" cy="226" rx="230" ry="26"/><circle cx="30" cy="206" r="26"/><circle cx="68" cy="214" r="22"/><circle cx="370" cy="206" r="26"/><circle cx="332" cy="214" r="22"/></g>`;
+    case 'village': {
+      const house = (x, w, roof, wall) => `<rect x="${x}" y="150" width="${w}" height="46" fill="${wall}" stroke="${INK}" stroke-width="2"/>
+        <path d="M${x - 6} 152 L${x + w / 2} 118 L${x + w + 6} 152 Z" fill="${roof}" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>
+        <rect x="${x + w / 2 - 7}" y="172" width="14" height="24" fill="#9a6b4a"/><rect x="${x + 6}" y="160" width="12" height="11" fill="#bfe3ff"/>`;
+      return `<rect width="400" height="230" fill="#e3f2ff"/>${sun(60, 46)}
+        <path d="M0 160 Q120 120 240 156 T400 150 V230 H0Z" fill="#b9e3a6"/><path d="M0 196 H400 V230 H0Z" fill="#9fd98f"/>
+        ${house(14, 58, '#ef3b44', '#fff3d6')}${house(326, 60, '#1f6fd6', '#ffe9c7')}`;
+    }
+    case 'sea':
+      return `<rect width="400" height="230" fill="#dff1ff"/>${sun(340, 46)}
+        <rect y="128" width="400" height="56" fill="#4aa3e0"/>
+        <path d="M20 146 q12 -8 24 0 t24 0 M300 160 q12 -8 24 0 t24 0 M150 140 q12 -8 24 0" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+        <path d="M40 120 h50 l-8 12 h-34 Z" fill="#ef3b44" stroke="${INK}" stroke-width="2"/><path d="M64 120 V88 L86 116 Z" fill="#fff" stroke="${INK}" stroke-width="2"/>
+        <path d="M0 184 Q200 170 400 184 V230 H0Z" fill="#f3d98b"/>`;
+    default:
+      return `<rect width="400" height="230" fill="#fbfcfd"/><path d="M24 214 H376" stroke="#d8dee7" stroke-width="3" stroke-dasharray="10 9" stroke-linecap="round"/>`;
+  }
+}
+const FADE = sat => `<defs><filter id="fade"><feColorMatrix type="saturate" values="${sat}"/></filter></defs>`;
+const colorCard = (key, c, label) => card(key, c.id, label, `<svg viewBox="0 0 100 100" aria-hidden="true">${drop(c.hex, 'happy', 50, 98, 94)}</svg>`);
+const placeCards = list => `<div class="choices">${list.map(p => card('place', p.id, p.at, `<span class="thumb"><svg viewBox="0 0 400 230" aria-hidden="true">${scene(p.id)}</svg></span>`)).join('')}</div>`;
+const listCards = s => `<div class="choices">${s.list.map(o => card(s.key, o.id, typeof o.label === 'function' ? o.label() : o.label, s.icon(o.id))).join('')}</div>`;
+
+/* ================= mode 1: the colors are the heroes =================
+   "צֶבַע" is masculine, so every verb about the heroes is masculine; what
+   changes is the article (הָאָדֹם / הַכָּחֹל), "to" (לָאָדֹם / לַכָּחֹל),
+   the joining vav (וְשָׂמֵחַ / וּבַיְשָׁן) and the color born from a hug. */
+const colorsMode = (() => {
+  const TRAITS = [
+    { id: 'happy',   name: 'שָׂמֵחַ', and: 'וְשָׂמֵחַ', line: 'הוּא אָהַב לְחַיֵּךְ וְלָשִׁיר.' },
+    { id: 'shy',     name: 'בַּיְשָׁן', and: 'וּבַיְשָׁן', line: 'הוּא דִּבֵּר בְּשֶׁקֶט, וְלִפְעָמִים הִתְבַּיֵּשׁ.' },
+    { id: 'brave',   name: 'אַמִּיץ', and: 'וְאַמִּיץ', line: 'הוּא לֹא פָּחַד מִשּׁוּם דָּבָר.' },
+    { id: 'curious', name: 'סַקְרָן', and: 'וְסַקְרָן', line: 'הוּא אָהַב לִשְׁאֹל שְׁאֵלוֹת וְלִגְלוֹת דְּבָרִים חֲדָשִׁים.' },
+  ];
+  const PLACES = [
+    { id: 'garden',  at: 'בַּגַּן' },
+    { id: 'forest',  at: 'בַּיַּעַר' },
+    { id: 'city',    at: 'בְּעִיר הַצְּבָעִים' },
+    { id: 'rainbow', at: 'עַל הַקֶּשֶׁת' },
+  ];
+  const H = () => C[st.hero];
+  const BLANK = { id: '', name: '___', def: '___', to: '___' };
+  const F = () => st.friend ? C[st.friend] : BLANK;
+  const helpers = () => COLORS.filter(c => c.id !== st.hero && c.id !== st.friend).slice(0, 3);
+
+  const PROBLEMS = [
+    { id: 'fight', label: 'רִיב: מִי יָפֶה יוֹתֵר?',
+      text: (h, f) => `יוֹם אֶחָד, ${h.def} וְ${f.def} רָבוּ מִי יָפֶה יוֹתֵר. ״אֲנִי!״ צָעַק ${h.def}. ״לֹא, אֲנִי!״ צָעַק ${f.def}.` },
+    { id: 'other', label: 'רוֹצֶה צֶבַע אַחֵר',
+      text: (h, f) => `יוֹם אֶחָד, ${h.def} אָמַר ${f.to}: ״אֲנִי לֹא רוֹצֶה לִהְיוֹת ${h.name}. אֲנִי רוֹצֶה לִהְיוֹת ${f.name} כָּמוֹךָ!״` },
+    { id: 'lonely', label: 'לְבַד',
+      text: (h, f) => `יוֹם אֶחָד, ${f.def} נָסַע רָחוֹק, וְ${h.def} נִשְׁאַר לְבַד. הוּא הִרְגִּישׁ בּוֹדֵד וְעָצוּב.` },
+    { id: 'vanish', label: 'הַצְּבָעִים נֶעֱלָמִים',
+      text: h => `יוֹם אֶחָד, כָּל הַצְּבָעִים בָּעוֹלָם הִתְחִילוּ לְהֵעָלֵם. הַשָּׁמַיִם נִהְיוּ אֲפֹרִים, וְגַם ${h.def} הִתְחִיל לְהַחְוִיר.` },
+  ];
+  const FEEL = { fight: 'עָצוּב כְּשֶׁאֲנַחְנוּ רָבִים', other: 'שֶׁאֲנִי לֹא מַסְפִּיק יָפֶה', lonely: 'בּוֹדֵד', vanish: 'מְפַחֵד' };
+  const SOLUTIONS = [
+    { id: 'hug', label: 'חִבּוּק וְצֶבַע חָדָשׁ',
+      text: (h, f) => `${h.def} וְ${f.def} הִתְחַבְּקוּ חִבּוּק גָּדוֹל, וּמֵהַחִבּוּק נוֹלַד צֶבַע חָדָשׁ: ${f.id ? mixOf(h.id, f.id).name : '___'}!` },
+    { id: 'help', label: 'צְבָעִים בָּאִים לַעֲזֹר',
+      text: () => { const o = helpers(); return `פִּתְאוֹם הִגִּיעוּ ${o[0].def}, ${o[1].def} וְ${o[2].def}, וְאָמְרוּ: ״בָּאנוּ לַעֲזֹר!״ יַחַד הֵם מָצְאוּ פִּתְרוֹן.`; } },
+    { id: 'self', label: 'לֶאֱהֹב אֶת עַצְמִי',
+      text: h => `${h.def} הִסְתַּכֵּל בַּמַּרְאָה וְאָמַר: ״אֲנִי ${h.name}, וְזֶה מְצֻיָּן! טוֹב לִהְיוֹת מִי שֶׁאֲנִי.״` },
+    { id: 'tell', label: 'לְסַפֵּר מָה מַרְגִּישִׁים',
+      text: h => `${h.def} אָמַר בְּקוֹל: ״אֲנִי מַרְגִּישׁ ${FEEL[st.problem] || 'עָצוּב'}.״ כֻּלָּם הִקְשִׁיבוּ לוֹ, וְהוּא הִרְגִּישׁ טוֹב יוֹתֵר.` },
+  ];
+  const ENDINGS = [
+    { id: 'friends', label: 'חֲבֵרִים לָנֶצַח',
+      text: (h, f) => `מֵאָז, ${h.def} וְ${f.def} הֵם הַחֲבֵרִים הֲכִי טוֹבִים בָּעוֹלָם.` },
+    { id: 'all', label: 'כָּל הַצְּבָעִים יָפִים',
+      text: h => `בַּסּוֹף, ${h.def} הֵבִין שֶׁכָּל הַצְּבָעִים יָפִים, כָּל אֶחָד בְּדֶרֶךְ מִשֶּׁלּוֹ.` },
+    { id: 'paint', label: 'קֶשֶׁת שֶׁל כֻּלָּם',
+      text: () => 'בַּסּוֹף, כֻּלָּם צִיְּרוּ יַחַד קֶשֶׁת עֲנָקִית, וְהָעוֹלָם הָיָה צִבְעוֹנִי וְשָׂמֵחַ.' },
+    { id: 'sleep', label: 'חִיּוּךְ לִפְנֵי הַשֵּׁנָה',
+      text: h => `בָּעֶרֶב, ${h.def} הָלַךְ לִישֹׁן עִם חִיּוּךְ גָּדוֹל. זֶה הָיָה יוֹם נִפְלָא!` },
+  ];
+
+  const TROUBLE = ['fight', 'other', 'lonely', 'vanish'];
+  function heroMood() {
+    if (st.ending === 'sleep') return 'sleep';
+    if (TROUBLE.includes(st.problem) && !st.solution) return st.problem === 'fight' ? 'angry' : 'sad';
+    return st.trait || 'happy';
+  }
+  function stage() {
+    const h = st.hero && H(), f = st.friend && F();
+    const trouble = TROUBLE.includes(st.problem) && !st.solution;
+    const hug = st.solution === 'hug' && f;
+    const hx = hug ? 250 : 272, fx = hug ? 150 : 128;
+    let back = '', front = '';
+    if (st.ending === 'paint' && st.place !== 'rainbow') back += `<g opacity=".9">${rainbowArcs(200, 150, 120, 9, 8)}</g>`;
+    if (st.ending === 'sleep') back += `<path d="M352 30 a24 24 0 1 0 18 40 a19 19 0 1 1 -18 -40 Z" fill="#fff2a8" stroke="${INK}" stroke-width="2"/>${sparkle(300, 40, 7, '#ffe27a')}${sparkle(330, 92, 5, '#ffe27a')}`;
+    if (st.ending === 'all') back += COLORS.map((c, i) => drop(c.hex, 'happy', 80 + i * 40, 74, 34)).join('');
+    if (st.solution === 'help') back += helpers().map((c, i) => drop(c.hex, 'happy', [44, 356, 200][i], [212, 212, 118][i], 54)).join('');
+    if (st.ending === 'friends' && f) front += heart(200, 64, 16);
+    if (st.solution === 'self' && h) front += heart(hx + 46, 70, 11, '#ff6f91');
+    if (st.solution === 'tell' && h) front += `<path d="M${hx - 92} 46 h70 a10 10 0 0 1 10 10 v24 a10 10 0 0 1 -10 10 h-46 l-12 12 v-12 h-12 a10 10 0 0 1 -10 -10 v-24 a10 10 0 0 1 10 -10 Z" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+      <g fill="${INK}"><circle cx="${hx - 72}" cy="68" r="4"/><circle cx="${hx - 57}" cy="68" r="4"/><circle cx="${hx - 42}" cy="68" r="4"/></g>`;
+    const friend = f ? drop(f.hex, st.problem === 'fight' && trouble ? 'angry' : 'happy', fx, 214, 104, st.problem === 'lonely' && trouble ? 'opacity=".22"' : '') : ghost(fx, 214, 104);
+    const hero = h ? drop(h.hex, heroMood(), hx, 214, 118) : ghost(hx, 214, 118);
+    if (hug) front += drop(mixOf(st.hero, st.friend).hex, 'happy', 200, 226, 58) + sparkle(168, 150, 8) + sparkle(236, 138, 6) + sparkle(200, 118, 7);
+    const grey = st.problem === 'vanish' && trouble;
+    return `<svg viewBox="0 0 400 230" role="img" aria-label="${esc(titleText() || 'הַגִּבּוֹרִים')}">${FADE(0.08)}
+      <g ${grey ? 'filter="url(#fade)"' : ''}>${scene(st.place, st.ending === 'sleep')}${back}${friend}${hero}${front}</g></svg>`;
+  }
+  function icon(kind, id) {
+    const h = st.hero ? H() : C.red, f = st.friend ? F() : C.blue;
+    let g = '';
+    if (kind === 'problem') g = {
+      fight: drop(h.hex, 'angry', 86, 82, 62) + drop(f.hex, 'angry', 34, 82, 56) + `<path d="M60 8 l-7 12 h9 l-7 13" fill="none" stroke="#e09a00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+      other: drop(h.hex, 'sad', 90, 82, 58) + drop(f.hex, 'happy', 30, 82, 54) + `<path d="M70 44 H50 M57 37 L50 44 L57 51" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+      lonely: drop(h.hex, 'sad', 60, 82, 64) + `<path d="M76 54 q-3 6 0 8 q3 -2 0 -8 Z" fill="#7cc4ff"/>`,
+      vanish: `<g filter="url(#fade)">${drop(h.hex, 'sad', 60, 82, 62)}</g>` + drop('#e3e7ee', 'sad', 20, 82, 30) + drop('#cfd5de', 'sad', 100, 82, 30),
+    }[id];
+    if (kind === 'solution') g = {
+      hug: drop(h.hex, 'happy', 84, 80, 56) + drop(f.hex, 'happy', 36, 80, 52) + drop(st.hero && st.friend ? mixOf(st.hero, st.friend).hex : '#7b3fa8', 'happy', 60, 84, 32) + sparkle(60, 16, 7),
+      help: drop(h.hex, 'happy', 60, 82, 58) + helpers().map((c, i) => drop(c.hex, 'happy', [16, 104, 60][i], [82, 82, 30][i], 28)).join(''),
+      self: drop(h.hex, 'happy', 60, 82, 62) + heart(92, 22, 9, '#ff6f91'),
+      tell: drop(h.hex, 'happy', 78, 82, 58) + `<path d="M8 10 h50 a8 8 0 0 1 8 8 v16 a8 8 0 0 1 -8 8 h-30 l-9 9 v-9 h-11 a8 8 0 0 1 -8 -8 v-16 a8 8 0 0 1 8 -8 Z" fill="#fff" stroke="${INK}" stroke-width="2.5"/><g fill="${INK}"><circle cx="21" cy="26" r="3.2"/><circle cx="33" cy="26" r="3.2"/><circle cx="45" cy="26" r="3.2"/></g>`,
+    }[id];
+    if (kind === 'ending') g = {
+      friends: drop(h.hex, 'happy', 88, 82, 54) + drop(f.hex, 'happy', 32, 82, 50) + heart(60, 26, 11),
+      all: COLORS.map((c, i) => drop(c.hex, 'happy', 12 + i * 16, 62 + (i % 2) * 18, 26)).join(''),
+      paint: rainbowArcs(60, 84, 56, 7, 6.5),
+      sleep: drop(h.hex, 'sleep', 64, 82, 62) + `<path d="M22 8 a14 14 0 1 0 10 24 a11 11 0 1 1 -10 -24 Z" fill="#fff2a8" stroke="${INK}" stroke-width="2"/>`,
+    }[id];
+    return `<svg viewBox="0 0 120 84" aria-hidden="true">${FADE(0.08)}${g}</svg>`;
+  }
+
+  const steps = [
+    { key: 'hero',     part: 0, q: () => 'אֵיזֶה צֶבַע יִהְיֶה הַגִּבּוֹר?' },
+    { key: 'trait',    part: 0, q: () => `אֵיזֶה אֹפִי יֵשׁ ${H().to}?` },
+    { key: 'friend',   part: 0, q: () => `מִי הֶחָבֵר שֶׁל ${H().def}?` },
+    { key: 'place',    part: 0, q: () => 'אֵיפֹה הֵם גָּרִים?' },
+    { key: 'problem',  part: 1, q: () => 'מָה הַבְּעָיָה?', own: true, list: PROBLEMS, icon: id => icon('problem', id) },
+    { key: 'solution', part: 2, q: () => 'אֵיךְ פּוֹתְרִים אֶת הַבְּעָיָה?', own: true, list: SOLUTIONS, icon: id => icon('solution', id) },
+    { key: 'ending',   part: 3, q: () => 'אֵיךְ הַסִּפּוּר נִגְמָר?', own: true, list: ENDINGS, icon: id => icon('ending', id) },
+  ];
+
+  return {
+    id: 'colors',
+    label: 'הַצְּבָעִים הֵם הַגִּבּוֹרִים',
+    hint: 'צֶבַע גִּבּוֹר וְצֶבַע חָבֵר',
+    parts: ['הַתְחָלָה', 'הַבְּעָיָה', 'הַפִּתְרוֹן', 'הַסּוֹף'],
+    steps,
+    // what each book page must not show yet (page 1 = beginning, 2 = problem, 3 = solution, 4 = ending)
+    later: [['problem', 'solution', 'ending'], ['solution', 'ending'], ['ending'], []],
+    fresh: () => ({ hero: null, trait: null, friend: null, place: null, problem: null, solution: null, ending: null,
+      own: { problem: '', solution: '', ending: '' } }),
+    story() {
+      const parts = [[], [], [], []];
+      if (!st.hero) return parts;
+      const h = H(), f = F(), trait = pick(TRAITS, st.trait), place = pick(PLACES, st.place);
+      parts[0].push({ id: 'open', text: `פַּעַם${place ? `, ${place.at},` : ''} גָּר צֶבַע ${h.name}${trait ? ' ' + trait.and : ''}.` });
+      if (trait) parts[0].push({ id: 'trait', text: trait.line });
+      if (st.friend) parts[0].push({ id: 'friend', text: `הוּא וְהַצֶּבַע ${f.def} הָיוּ חֲבֵרִים טוֹבִים.` });
+      steps.slice(4).forEach(s => {
+        const val = st[s.key];
+        if (val === 'own') { const t = st.own[s.key].trim(); if (t) parts[s.part].push({ id: s.key, text: t }); }
+        else if (val) parts[s.part].push({ id: s.key, text: pick(s.list, val).text(h, f) });
+      });
+      return parts;
+    },
+    title: () => st.hero ? (st.friend ? `${H().def} וְ${F().def}` : `הַצֶּבַע ${H().def}`) : '',
+    stage,
+    choices(s) {
+      switch (s.key) {
+        case 'hero':   return `<div class="choices small">${COLORS.map(c => colorCard('hero', c, c.name)).join('')}</div>`;
+        case 'friend': return `<div class="choices small">${COLORS.filter(c => c.id !== st.hero).map(c => colorCard('friend', c, c.name)).join('')}</div>`;
+        case 'trait':
+          return `<div class="choices small">${TRAITS.map(t => card('trait', t.id, t.name, `<svg viewBox="0 0 100 100" aria-hidden="true">${drop(H().hex, t.id, 50, 98, 94)}</svg>`)).join('')}</div>`;
+        case 'place':  return placeCards(PLACES);
+        default:       return listCards(s);
+      }
+    },
+    options(s) {
+      if (s.key === 'hero') return COLORS.map(c => c.id);
+      if (s.key === 'friend') return COLORS.filter(c => c.id !== st.hero).map(c => c.id);
+      if (s.key === 'trait') return TRAITS.map(t => t.id);
+      if (s.key === 'place') return PLACES.map(p => p.id);
+      return s.list.map(o => o.id);
+    },
+    chose(key, id) { if (key === 'hero' && st.friend === id) st.friend = null; },
+    art: () => `<svg viewBox="0 0 220 120" aria-hidden="true">${drop(C.blue.hex, 'happy', 70, 116, 84)}${drop(C.red.hex, 'shy', 150, 116, 96)}${heart(110, 22, 9)}</svg>`,
+  };
+})();
+
+/* ================= mode 2: colors come to help =================
+   The hero is a child or an animal who starts out uncolored, like a page in
+   a coloring book. The first helper paints the body or the clothes, the
+   second the scarf or the bow, and together they bring the color back.
+   Grammar follows the hero: masculine for יֶלֶד / חָתוּל, feminine for
+   יַלְדָּה / אַרְנֶבֶת. */
+const helpersMode = (() => {
+  const HEROES = [
+    { id: 'boy',   g: 'm', noun: 'יֶלֶד',    def: 'הַיֶּלֶד',    to: 'לַיֶּלֶד',    small: 'קָטָן' },
+    { id: 'girl',  g: 'f', noun: 'יַלְדָּה',   def: 'הַיַּלְדָּה',   to: 'לַיַּלְדָּה',   small: 'קְטַנָּה' },
+    { id: 'cat',   g: 'm', noun: 'חָתוּל',   def: 'הֶחָתוּל',   to: 'לֶחָתוּל',   small: 'קָטָן' },
+    { id: 'bunny', g: 'f', noun: 'אַרְנֶבֶת', def: 'הָאַרְנֶבֶת', to: 'לָאַרְנֶבֶת', small: 'קְטַנָּה' },
+  ];
+  const HR = Object.fromEntries(HEROES.map(h => [h.id, h]));
+  const PLACES = [
+    { id: 'village', at: 'בַּכְּפָר' },
+    { id: 'forest',  at: 'בַּיַּעַר' },
+    { id: 'sea',     at: 'לְיַד הַיָּם' },
+    { id: 'city',    at: 'בָּעִיר' },
+  ];
+  const H = () => HR[st.hero];
+  const v = (m, f) => (st && st.hero && H().g === 'f') ? f : m;
+
+  // What each color does when it arrives.
+  const POWER = {
+    red:    h => `הוּא נָתַן ${h.to} כֹּחַ וְאֹמֶץ.`,
+    orange: h => `הוּא הֵבִיא ${h.to} מֶרֶץ וְשִׂמְחָה.`,
+    yellow: () => 'הוּא הֵאִיר אֶת הַכֹּל, כְּמוֹ שֶׁמֶשׁ.',
+    green:  () => 'הוּא הִצְמִיחַ עֵץ גָּבוֹהַּ, וּמִמֶּנּוּ אֶפְשָׁר הָיָה לִרְאוֹת רָחוֹק.',
+    blue:   () => `הוּא לָחַשׁ: ״${v('נְשֹׁם', 'נִשְׁמִי')} עָמֹק, הַכֹּל יִהְיֶה בְּסֵדֶר.״`,
+    purple: () => 'הוּא פִּזֵּר אֲבָקַת קְסָמִים, וְהַכֹּל נִהְיָה קַל יוֹתֵר.',
+    pink:   h => `הוּא חִבֵּק אֶת ${h.def} וְאָמַר: ״${v('אַתָּה', 'אַתְּ')} לֹא לְבַד.״`,
+  };
+  const PROBLEMS = [
+    { id: 'dark', label: 'חֹשֶׁךְ בַּדֶּרֶךְ',
+      text: h => `יוֹם אֶחָד, ${h.def} ${v('יָצָא', 'יָצְאָה')} לְטַיֵּל, וּפִתְאוֹם יָרַד חֹשֶׁךְ. ${v('הוּא לֹא מָצָא', 'הִיא לֹא מָצְאָה')} אֶת הַדֶּרֶךְ הַבַּיְתָה.`,
+      fixed: () => `בְּעֶזְרַת הַצְּבָעִים, ${v('הוּא מָצָא', 'הִיא מָצְאָה')} אֶת הַדֶּרֶךְ הַבַּיְתָה.` },
+    { id: 'grey', label: 'הַכֹּל אָפֹר',
+      text: h => `יוֹם אֶחָד, כָּל הַצְּבָעִים נֶעֶלְמוּ, וְהַכֹּל נִהְיָה אָפֹר. ${h.def} ${v('הִרְגִּישׁ עָצוּב', 'הִרְגִּישָׁה עֲצוּבָה')}.`,
+      fixed: h => `בְּעֶזְרַת הַצְּבָעִים, הָעוֹלָם חָזַר לִהְיוֹת צִבְעוֹנִי, וְ${h.def} ${v('חִיֵּךְ', 'חִיְּכָה')}.` },
+    { id: 'new', label: 'מָקוֹם חָדָשׁ',
+      text: h => `יוֹם אֶחָד, ${h.def} ${v('הָיָה צָרִיךְ', 'הָיְתָה צְרִיכָה')} לָלֶכֶת לְמָקוֹם חָדָשׁ, ${v('וְהוּא פָּחַד', 'וְהִיא פָּחֲדָה')} מְאוֹד.`,
+      fixed: () => `בְּעֶזְרַת הַצְּבָעִים, ${v('הוּא נִכְנַס', 'הִיא נִכְנְסָה')} בְּאֹמֶץ, ${v('וּמָצָא', 'וּמָצְאָה')} שָׁם חֲבֵרִים חֲדָשִׁים.` },
+    { id: 'flowers', label: 'הַפְּרָחִים נָבְלוּ',
+      text: h => `יוֹם אֶחָד, הַפְּרָחִים שֶׁל ${h.def} נָבְלוּ, ${v('וְהוּא לֹא יָדַע', 'וְהִיא לֹא יָדְעָה')} מָה לַעֲשׂוֹת.`,
+      fixed: () => 'בְּעֶזְרַת הַצְּבָעִים, הַפְּרָחִים פָּרְחוּ מֵחָדָשׁ.' },
+  ];
+  const THANKS = [
+    { id: 'draw', label: 'צִיּוּר תּוֹדָה',
+      text: h => `${h.def} ${v('צִיֵּר', 'צִיְּרָה')} לַצְּבָעִים צִיּוּר גָּדוֹל, כְּדֵי לוֹמַר תּוֹדָה.` },
+    { id: 'hug', label: 'חִבּוּק וְתוֹדָה',
+      text: h => `${h.def} ${v('חִבֵּק', 'חִבְּקָה')} אֶת הַצְּבָעִים ${v('וְאָמַר', 'וְאָמְרָה')}: ״תּוֹדָה רַבָּה!״` },
+    { id: 'song', label: 'שִׁיר תּוֹדָה',
+      text: h => `${h.def} ${v('שָׁר', 'שָׁרָה')} לַצְּבָעִים שִׁיר תּוֹדָה.` },
+    { id: 'back', label: 'לַעֲזֹר בַּחֲזָרָה',
+      text: h => `${h.def} ${v('אָמַר', 'אָמְרָה')}: ״גַּם אֲנִי אֶעֱזֹר לָכֶם, כְּשֶׁתִּצְטָרְכוּ.״` },
+  ];
+  const ENDINGS = [
+    { id: 'friends', label: 'חֲבֵרִים טוֹבִים',
+      text: h => `מֵאָז, ${h.def} וְהַצְּבָעִים הֵם חֲבֵרִים טוֹבִים.` },
+    { id: 'paint', label: 'מְצַיְּרִים כָּל יוֹם',
+      text: h => `מֵאָז, ${h.def} ${v('מְצַיֵּר', 'מְצַיֶּרֶת')} כָּל יוֹם בְּכָל הַצְּבָעִים.` },
+    { id: 'others', label: 'עוֹזְרִים לַאֲחֵרִים',
+      text: h => `עַכְשָׁו גַּם ${h.def} ${v('עוֹזֵר', 'עוֹזֶרֶת')} לְמִי שֶׁצָּרִיךְ, בְּדִיּוּק כְּמוֹ הַצְּבָעִים.` },
+    { id: 'sleep', label: 'חֲלוֹם צִבְעוֹנִי',
+      text: h => `בָּעֶרֶב, ${h.def} ${v('הָלַךְ', 'הָלְכָה')} לִישֹׁן עִם חִיּוּךְ, ${v('וְחָלַם', 'וְחָלְמָה')} חֲלוֹם צִבְעוֹנִי.` },
+  ];
+
+  // The hero, drawn in a 100 x 100 box. main = body or clothes, acc = scarf or bow.
+  // mood: happy | sad | scared | sleep
+  function face(cx, ey, mood, catMouth) {
+    const s = `fill="none" stroke="${INK}" stroke-width="2.8" stroke-linecap="round"`;
+    let eyes = mood === 'sleep'
+      ? `<path d="M${cx - 10} ${ey} q4 4 8 0 M${cx + 2} ${ey} q4 4 8 0" ${s}/>`
+      : `<circle cx="${cx - 7}" cy="${ey}" r="${mood === 'scared' ? 3.6 : 2.9}" fill="${INK}"/><circle cx="${cx + 7}" cy="${ey}" r="${mood === 'scared' ? 3.6 : 2.9}" fill="${INK}"/>`;
+    if (mood === 'sad' || mood === 'scared') eyes += `<path d="M${cx - 12} ${ey - 7} l6 -2 M${cx + 12} ${ey - 7} l-6 -2" ${s}/>`;
+    const mouth = mood === 'sad' ? `<path d="M${cx - 6} ${ey + 13} q6 -6 12 0" ${s}/>`
+      : mood === 'scared' ? `<ellipse cx="${cx}" cy="${ey + 11}" rx="3.5" ry="4.5" fill="${INK}"/>`
+      : catMouth ? `<path d="M${cx - 6} ${ey + 12} q3 4 6 0 q3 4 6 0" ${s}/>`
+      : `<path d="M${cx - 7} ${ey + 8} q7 7 14 0" ${s}/>`;
+    const cheeks = mood === 'happy' || mood === 'sleep'
+      ? `<circle cx="${cx - 12}" cy="${ey + 7}" r="3.5" fill="#ff7a96" opacity=".45"/><circle cx="${cx + 12}" cy="${ey + 7}" r="3.5" fill="#ff7a96" opacity=".45"/>` : '';
+    return eyes + mouth + cheeks;
+  }
+  function person(kind, main, acc, mood, cx, bottom, size) {
+    const o = `stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
+    let g = '';
+    if (kind === 'boy' || kind === 'girl') {
+      const girl = kind === 'girl';
+      g += `<rect x="39" y="78" width="9" height="20" rx="4" fill="#5b6577" ${o}/><rect x="52" y="78" width="9" height="20" rx="4" fill="#5b6577" ${o}/>`;
+      g += `<path d="M38 60 Q27 66 27 76" fill="none" ${o} stroke-linecap="round"/><path d="M62 60 Q73 66 73 76" fill="none" ${o} stroke-linecap="round"/>`;
+      g += `<circle cx="27" cy="78" r="4" fill="${SKIN}" ${o}/><circle cx="73" cy="78" r="4" fill="${SKIN}" ${o}/>`;
+      if (girl) g += `<path d="M31 36 Q28 60 37 63 H63 Q72 60 69 36 Q69 15 50 15 Q31 15 31 36 Z" fill="${HAIR}" ${o}/>`;
+      g += girl ? `<path d="M31 88 Q33 60 41 55 H59 Q67 60 69 88 Z" fill="${main}" ${o}/>`
+                : `<path d="M33 84 Q31 60 41 55 H59 Q69 60 67 84 Z" fill="${main}" ${o}/>`;
+      g += `<circle cx="50" cy="37" r="18" fill="${SKIN}" ${o}/>`;
+      g += girl ? `<path d="M32 34 Q35 19 50 19 Q65 19 68 34 Q59 26 50 28 Q41 26 32 34 Z" fill="${HAIR}" ${o}/>`
+                : `<path d="M32 35 Q31 17 50 17 Q69 17 68 35 Q62 25 50 26 Q38 25 32 35 Z" fill="${HAIR}" ${o}/>`;
+      g += girl ? `<path d="M62 22 L72 15 L73 28 Z M62 22 L53 13 L51 26 Z" fill="${acc}" ${o}/><circle cx="62" cy="21" r="3" fill="${acc}" ${o}/>`
+                : `<path d="M38 56 Q50 64 62 56 L62 61 Q50 69 38 61 Z" fill="${acc}" ${o}/><path d="M56 63 L61 76 L52 73 Z" fill="${acc}" ${o}/>`;
+      g += face(50, 39, mood);
+    } else if (kind === 'cat') {
+      g += `<path d="M66 88 Q88 86 84 64" fill="none" stroke="${INK}" stroke-width="9" stroke-linecap="round"/><path d="M66 88 Q88 86 84 64" fill="none" stroke="${main}" stroke-width="4" stroke-linecap="round"/>`;
+      g += `<ellipse cx="50" cy="80" rx="21" ry="18" fill="${main}" ${o}/>`;
+      g += `<path d="M32 38 L30 14 L46 27 Z M68 38 L70 14 L54 27 Z" fill="${main}" ${o}/>`;
+      g += `<circle cx="50" cy="44" r="20" fill="${main}" ${o}/>`;
+      g += `<path d="M34 62 Q50 70 66 62 L66 67 Q50 75 34 67 Z" fill="${acc}" ${o}/>`;
+      g += `<path d="M47 50 h6 l-3 3 Z" fill="#ff7a96"/><path d="M28 50 h10 M28 55 h10 M62 50 h10 M62 55 h10" stroke="${INK}" stroke-width="1.8" stroke-linecap="round"/>`;
+      g += face(50, 43, mood, true);
+    } else {
+      g += `<ellipse cx="41" cy="16" rx="6.5" ry="17" fill="${main}" ${o}/><ellipse cx="59" cy="16" rx="6.5" ry="17" fill="${main}" ${o}/>`;
+      g += `<ellipse cx="41" cy="17" rx="2.6" ry="11" fill="#ffc2d4"/><ellipse cx="59" cy="17" rx="2.6" ry="11" fill="#ffc2d4"/>`;
+      g += `<ellipse cx="50" cy="81" rx="20" ry="17" fill="${main}" ${o}/>`;
+      g += `<circle cx="50" cy="47" r="18" fill="${main}" ${o}/>`;
+      g += `<path d="M50 66 L39 60 L39 72 Z M50 66 L61 60 L61 72 Z" fill="${acc}" ${o}/><circle cx="50" cy="66" r="3.5" fill="${acc}" ${o}/>`;
+      g += `<circle cx="50" cy="53" r="2.3" fill="#ff7a96"/>`;
+      g += face(50, 46, mood);
+    }
+    return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">${g}</g>`;
+  }
+  function heroGhost(cx, bottom, size) {
+    return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">
+      <circle cx="50" cy="36" r="18" fill="#fff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="7 6"/>
+      <path d="M33 92 Q31 62 41 56 H59 Q69 62 67 92 Z" fill="#fff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="7 6"/>
+      <text x="50" y="47" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="#97a3b6">?</text></g>`;
+  }
+
+  const TROUBLE = ['dark', 'grey', 'new', 'flowers'];
+  const helpCount = () => (st.help1 ? 1 : 0) + (st.help2 ? 1 : 0);
+  function heroMood() {
+    if (st.ending === 'sleep') return 'sleep';
+    if (TROUBLE.includes(st.problem) && helpCount() === 0) return st.problem === 'new' || st.problem === 'dark' ? 'scared' : 'sad';
+    return 'happy';
+  }
+  function stage() {
+    const n = helpCount(), trouble = TROUBLE.includes(st.problem) && n < 2;
+    // the world loses its color while the trouble lasts, and gets it back with each helper
+    const sat = st.problem === 'grey' && trouble ? (n ? 0.45 : 0.04) : 1;
+    const night = st.problem === 'dark' && trouble ? (n ? 0.3 : 0.62) : 0;
+    let back = '', front = '';
+    if (st.problem === 'flowers') back += [[22, '#ef3b44'], [46, '#fad21e'], [226, '#8a4cc2']].map(([x, c]) => flower(x, 190, c, trouble)).join('');
+    if (st.problem === 'new') back += `<rect x="186" y="96" width="62" height="104" rx="6" fill="#c9b6ff" stroke="${INK}" stroke-width="2.5"/><rect x="196" y="108" width="42" height="92" rx="4" fill="#9a6b4a" stroke="${INK}" stroke-width="2"/><circle cx="230" cy="156" r="3.5" fill="#ffd84d"/>`;
+    if (st.ending === 'sleep') back += moon(60, 50, 22) + sparkle(110, 40, 6, '#ffe27a') + sparkle(150, 70, 4, '#ffe27a');
+    if (st.ending === 'paint') back += `<path d="M226 206 L238 130 M262 206 L250 130 M244 206 V140" stroke="#9a6b4a" stroke-width="4" stroke-linecap="round"/><rect x="220" y="120" width="48" height="40" rx="3" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+      <path d="M226 150 a18 18 0 0 1 36 0" fill="none" stroke="#ef3b44" stroke-width="4"/><path d="M231 150 a13 13 0 0 1 26 0" fill="none" stroke="#fad21e" stroke-width="4"/><path d="M236 150 a8 8 0 0 1 16 0" fill="none" stroke="#1f6fd6" stroke-width="4"/>`;
+    const hero = st.hero ? person(st.hero, st.help1 ? C[st.help1].hex : PLAIN, st.help2 ? C[st.help2].hex : PLAIN, heroMood(), 130, 216, 132) : heroGhost(130, 216, 132);
+    const wantHelp = st.step >= 3 || st.help1;
+    const h1 = st.help1 ? drop(C[st.help1].hex, 'happy', 292, 206, 78) : wantHelp ? ghost(292, 206, 78) : '';
+    const h2 = st.help2 ? drop(C[st.help2].hex, 'happy', 362, 206, 72) : (st.step >= 4 || st.help1) && wantHelp ? ghost(362, 206, 72) : '';
+    if (st.help1 && st.help2) front += drop(mixOf(st.help1, st.help2).hex, 'happy', 328, 226, 44) + sparkle(318, 112, 7) + sparkle(360, 100, 5);
+    if (st.ending === 'friends') front += heart(214, 70, 15);
+    if (st.thanks === 'song') front += note(70, 60, 1.2) + note(196, 46, 1);
+    if (st.thanks === 'hug' && !st.ending) front += heart(200, 76, 11, '#ff6f91');
+    if (st.ending === 'others') front += heart(196, 60, 10, '#ff6f91') + sparkle(176, 92, 6);
+    return `<svg viewBox="0 0 400 230" role="img" aria-label="${esc(titleText() || 'הַגִּבּוֹר')}">${FADE(sat)}
+      <g ${sat < 1 ? 'filter="url(#fade)"' : ''}>${scene(st.place, night || st.ending === 'sleep')}${back}</g>
+      ${night ? `<rect width="400" height="230" fill="#141a3a" opacity="${night}"/>${moon(200, 44, 18)}` : ''}
+      ${hero}${h1}${h2}${front}</svg>`;
+  }
+  function icon(kind, id) {
+    const k = st.hero || 'boy';
+    const me = (mood, cx = 60, size = 74) => person(k, PLAIN, PLAIN, mood, cx, 84, size);
+    let g = '';
+    if (kind === 'problem') g = {
+      dark: `<rect x="4" y="4" width="112" height="78" rx="12" fill="#2b3157"/>${moon(94, 22, 11)}${sparkle(24, 20, 5, '#ffe27a')}` + me('scared'),
+      grey: drop('#d6dbe3', 'sad', 18, 80, 30) + drop('#c4cad3', 'sad', 102, 80, 30) + me('sad'),
+      new: `<rect x="74" y="10" width="40" height="72" rx="5" fill="#c9b6ff" stroke="${INK}" stroke-width="2.5"/><rect x="81" y="18" width="26" height="64" rx="3" fill="#9a6b4a" stroke="${INK}" stroke-width="2"/>` + me('scared', 40),
+      flowers: flower(90, 50, '', true) + flower(106, 50, '', true) + me('sad', 44),
+    }[id];
+    if (kind === 'thanks') g = {
+      draw: `<rect x="70" y="12" width="44" height="40" rx="3" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M76 44 a16 16 0 0 1 32 0" fill="none" stroke="#ef3b44" stroke-width="4"/><path d="M81 44 a11 11 0 0 1 22 0" fill="none" stroke="#fad21e" stroke-width="4"/><path d="M86 44 a6 6 0 0 1 12 0" fill="none" stroke="#1f6fd6" stroke-width="4"/>` + me('happy', 40),
+      hug: me('happy', 48) + drop('#f58cb2', 'happy', 92, 84, 36) + heart(76, 16, 9),
+      song: me('happy', 46) + note(88, 14, 1.1) + note(104, 34, .9),
+      back: me('happy', 42) + drop('#1f6fd6', 'happy', 94, 84, 38) + heart(98, 20, 8, '#ff6f91'),
+    }[id];
+    if (kind === 'ending') g = {
+      friends: me('happy', 38) + drop('#ef3b44', 'happy', 84, 84, 34) + drop('#fad21e', 'happy', 108, 84, 28) + heart(92, 18, 9),
+      paint: `<path d="M82 82 L90 30 M106 82 L98 30" stroke="#9a6b4a" stroke-width="3" stroke-linecap="round"/><rect x="76" y="18" width="38" height="32" rx="3" fill="#fff" stroke="${INK}" stroke-width="2.5"/><circle cx="88" cy="32" r="5" fill="#ef3b44"/><circle cx="100" cy="30" r="5" fill="#2f9e55"/><circle cx="96" cy="40" r="5" fill="#fad21e"/>` + me('happy', 40),
+      others: me('happy', 42) + heart(96, 26, 11, '#ff6f91') + sparkle(108, 56, 6),
+      sleep: moon(98, 22, 13) + me('sleep', 50),
+    }[id];
+    return `<svg viewBox="0 0 120 84" aria-hidden="true">${g}</svg>`;
+  }
+
+  const steps = [
+    { key: 'hero',    part: 0, q: () => 'מִי בַּסִּפּוּר?' },
+    { key: 'place',   part: 0, q: () => `אֵיפֹה ${H().def} ${v('גָּר', 'גָּרָה')}?` },
+    { key: 'problem', part: 1, q: () => `מָה קָרָה ${H().to}?`, own: true, list: PROBLEMS, icon: id => icon('problem', id) },
+    { key: 'help1',   part: 2, q: () => 'אֵיזֶה צֶבַע בָּא לַעֲזֹר?' },
+    { key: 'help2',   part: 2, q: () => 'מִי עוֹד בָּא לַעֲזֹר?' },
+    { key: 'thanks',  part: 3, q: () => `אֵיךְ ${H().def} ${v('אָמַר', 'אָמְרָה')} תּוֹדָה?`, own: true, list: THANKS, icon: id => icon('thanks', id) },
+    { key: 'ending',  part: 3, q: () => 'אֵיךְ הַסִּפּוּר נִגְמָר?', own: true, list: ENDINGS, icon: id => icon('ending', id) },
+  ];
+  const helperCards = key => {
+    const other = key === 'help1' ? st.help2 : st.help1;
+    return `<div class="choices small">${COLORS.filter(c => c.id !== other).map(c => colorCard(key, c, `${c.name}<small>${c.gift}</small>`)).join('')}</div>`;
+  };
+
+  return {
+    id: 'helpers',
+    label: 'הַצְּבָעִים בָּאִים לַעֲזֹר',
+    hint: 'גִּבּוֹר אוֹ גִּבּוֹרָה, וּצְבָעִים שֶׁעוֹזְרִים',
+    parts: ['הַתְחָלָה', 'הַבְּעָיָה', 'הָעֶזְרָה', 'הַסּוֹף'],
+    steps,
+    later: [['problem', 'help1', 'help2', 'thanks', 'ending'], ['help1', 'help2', 'thanks', 'ending'], ['thanks', 'ending'], []],
+    fresh: () => ({ hero: null, place: null, problem: null, help1: null, help2: null, thanks: null, ending: null,
+      own: { problem: '', thanks: '', ending: '' } }),
+    story() {
+      const parts = [[], [], [], []];
+      if (!st.hero) return parts;
+      const h = H(), place = pick(PLACES, st.place);
+      parts[0].push({ id: 'open', text: `פַּעַם${place ? `, ${place.at},` : ''} ${v('גָּר', 'גָּרָה')} ${h.noun} ${h.small}.` });
+      const line = (key, list, part) => {
+        const val = st[key];
+        if (val === 'own') { const t = st.own[key].trim(); if (t) parts[part].push({ id: key, text: t }); }
+        else if (val) parts[part].push({ id: key, text: pick(list, val).text(h) });
+      };
+      line('problem', PROBLEMS, 1);
+      if (st.help1) parts[2].push({ id: 'help1', text: `פִּתְאוֹם הִגִּיעַ הַצֶּבַע ${C[st.help1].def}. ${POWER[st.help1](h)}` });
+      if (st.help2) {
+        parts[2].push({ id: 'help2', text: `וְאָז הִגִּיעַ גַּם הַצֶּבַע ${C[st.help2].def}. ${POWER[st.help2](h)}` });
+        const p = pick(PROBLEMS, st.problem);
+        parts[2].push({ id: 'together', text: `שְׁנֵי הַצְּבָעִים עָבְדוּ יַחַד, הִתְעַרְבְּבוּ, וְנוֹלַד צֶבַע חָדָשׁ: ${mixOf(st.help1, st.help2).name}! `
+          + (p ? p.fixed(h) : 'בְּעֶזְרַת הַצְּבָעִים, הַכֹּל הִסְתַּדֵּר.') });
+      }
+      line('thanks', THANKS, 3);
+      line('ending', ENDINGS, 3);
+      return parts;
+    },
+    title: () => st.hero ? `${H().def} וְהַצְּבָעִים` : '',
+    stage,
+    choices(s) {
+      switch (s.key) {
+        case 'hero':
+          return `<div class="choices">${HEROES.map(h => card('hero', h.id, h.noun, `<svg viewBox="0 0 100 100" aria-hidden="true" style="max-width:110px">${person(h.id, PLAIN, PLAIN, 'happy', 50, 100, 100)}</svg>`)).join('')}</div>`;
+        case 'place': return placeCards(PLACES);
+        case 'help1': case 'help2': return helperCards(s.key);
+        default: return listCards(s);
+      }
+    },
+    options(s) {
+      if (s.key === 'hero') return HEROES.map(h => h.id);
+      if (s.key === 'place') return PLACES.map(p => p.id);
+      if (s.key === 'help1') return COLORS.filter(c => c.id !== st.help2).map(c => c.id);
+      if (s.key === 'help2') return COLORS.filter(c => c.id !== st.help1).map(c => c.id);
+      return s.list.map(o => o.id);
+    },
+    chose(key, id) {
+      if (key === 'help1' && st.help2 === id) st.help2 = null;
+      if (key === 'help2' && st.help1 === id) st.help1 = null;
+    },
+    art: () => `<svg viewBox="0 0 220 120" aria-hidden="true">${person('girl', C.yellow.hex, C.blue.hex, 'happy', 84, 120, 112)}${drop(C.yellow.hex, 'happy', 158, 116, 62)}${drop(C.blue.hex, 'happy', 200, 116, 50)}${sparkle(150, 26, 8)}</svg>`,
+  };
+})();
+
+/* ================= mode 3: warm colors and cool colors =================
+   A warm color from the land of the sun meets a cool color from the land of
+   the snow. The hero's land is on the right of the picture, the friend's on
+   the left; once they meet they walk toward the middle. Both are "צֶבַע",
+   so the grammar is masculine, as in the first mode. */
+const tempMode = (() => {
+  const WARM = ['red', 'orange', 'yellow'], COOL = ['blue', 'green', 'purple'];
+  const isWarm = id => WARM.includes(id);
+  const LIKE = { red: 'כְּמוֹ אֵשׁ', orange: 'כְּמוֹ תַּפּוּז', yellow: 'כְּמוֹ הַשֶּׁמֶשׁ', blue: 'כְּמוֹ הַיָּם', green: 'כְּמוֹ עָלִים בַּצֵּל', purple: 'כְּמוֹ שָׁמַיִם בַּלַּיְלָה' };
+  const H = () => C[st.hero];
+  const BLANK = { id: '', name: '___', def: '___', to: '___' };
+  const F = () => st.friend ? C[st.friend] : BLANK;
+  const heroWarm = () => !st.hero || isWarm(st.hero);
+  const W = () => heroWarm() ? H() : F();      // the warm one of the pair
+  const K = () => heroWarm() ? F() : H();      // the cool one
+  const temp = id => isWarm(id) ? 'חַם' : 'קַר';
+  const temps = id => isWarm(id) ? 'חַמִּים' : 'קָרִים';
+  const inLand = warm => warm ? 'בְּאֶרֶץ הַשֶּׁמֶשׁ' : 'בְּאֶרֶץ הַשֶּׁלֶג';
+  const landName = warm => warm ? 'אֶרֶץ הַשֶּׁמֶשׁ' : 'אֶרֶץ הַשֶּׁלֶג';
+
+  /* ---- small pictures ---- */
+  const sunIcon = (x, y, r) => `<g stroke="#f2a20c" stroke-width="${r / 5}" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+      const t = a * Math.PI / 180; return `<path d="M${x + Math.cos(t) * r * 1.35} ${y + Math.sin(t) * r * 1.35} L${x + Math.cos(t) * r * 1.75} ${y + Math.sin(t) * r * 1.75}"/>`; }).join('')}</g>
+    <circle cx="${x}" cy="${y}" r="${r}" fill="#ffd84d"/>`;
+  const flake = (x, y, r, color = '#6fb1e8') => `<g stroke="${color}" stroke-width="${Math.max(2, r / 5)}" stroke-linecap="round">${[0, 60, 120].map(a =>
+      `<path d="M${x - r} ${y} H${x + r}" transform="rotate(${a} ${x} ${y})"/><path d="M${x + r * 0.55} ${y - r * 0.3} L${x + r * 0.75} ${y} L${x + r * 0.55} ${y + r * 0.3}" fill="none" transform="rotate(${a} ${x} ${y})"/>`).join('')}</g>`;
+  const fire = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})"><path d="M-14 14 L14 6 M-14 6 L14 14" stroke="#9a6b4a" stroke-width="5" stroke-linecap="round"/>
+    <path d="M0 -24 C10 -12 14 -4 10 6 H-10 C-14 -4 -8 -10 0 -24 Z" fill="#ef3b44"/><path d="M0 -12 C6 -4 7 0 5 6 H-5 C-7 0 -4 -6 0 -12 Z" fill="#fad21e"/></g>`;
+  const cloud = (x, y, s, fill = '#fff') => `<g transform="translate(${x} ${y}) scale(${s})" fill="${fill}" stroke="${INK}" stroke-width="2"><path d="M-22 8 a10 10 0 0 1 2 -19 a14 14 0 0 1 26 -4 a11 11 0 0 1 16 13 a8 8 0 0 1 -2 10 Z"/></g>`;
+  const house = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round">
+    <rect x="-30" y="-30" width="30" height="34" fill="#fb7a2c"/><rect x="0" y="-30" width="30" height="34" fill="#1f6fd6"/>
+    <path d="M-36 -28 L0 -58 L36 -28 Z" fill="#fff3d6"/><rect x="-8" y="-14" width="16" height="18" fill="#9a6b4a"/></g>`;
+  const gift = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s})" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round">
+    <rect x="-18" y="-10" width="36" height="26" fill="#ef3b44"/><rect x="-21" y="-18" width="42" height="9" fill="#1f6fd6"/>
+    <path d="M0 -18 V16" stroke="#fad21e" stroke-width="5"/><path d="M0 -18 C-10 -30 -18 -22 0 -18 C18 -22 10 -30 0 -18 Z" fill="#fad21e"/></g>`;
+  const bubble = (x, y) => `<path d="M${x - 26} ${y - 18} h52 a8 8 0 0 1 8 8 v16 a8 8 0 0 1 -8 8 h-30 l-9 9 v-9 h-13 a8 8 0 0 1 -8 -8 v-16 a8 8 0 0 1 8 -8 Z" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+    <g fill="${INK}"><circle cx="${x - 12}" cy="${y - 2}" r="3.2"/><circle cx="${x}" cy="${y - 2}" r="3.2"/><circle cx="${x + 12}" cy="${y - 2}" r="3.2"/></g>`;
+
+  const LOVES = [
+    { id: 'sun',    warm: true,  label: 'שֶׁמֶשׁ',        text: 'הוּא אָהַב לִשְׁכַּב בַּשֶּׁמֶשׁ.', pic: () => sunIcon(60, 42, 18) },
+    { id: 'fire',   warm: true,  label: 'מְדוּרָה',       text: 'הוּא אָהַב לָשֶׁבֶת לְיַד מְדוּרָה.', pic: () => fire(60, 52, 1.5) },
+    { id: 'summer', warm: true,  label: 'קַיִץ',          text: 'הוּא אָהַב אֶת הַקַּיִץ.', pic: () => sunIcon(84, 26, 11) + `<path d="M34 72 V36" stroke="${INK}" stroke-width="3"/><path d="M8 40 Q34 8 60 40 Z" fill="#ef3b44" stroke="${INK}" stroke-width="2.5"/><path d="M0 78 H120" stroke="#f3d98b" stroke-width="10"/>` },
+    { id: 'fruit',  warm: true,  label: 'תַּפּוּזִים וְתוּתִים', text: 'הוּא אָהַב לֶאֱכֹל תַּפּוּזִים וְתוּתִים.', pic: () => `<circle cx="46" cy="48" r="20" fill="#fb7a2c" stroke="${INK}" stroke-width="2.5"/><path d="M46 28 q6 -8 12 -4" fill="none" stroke="#2f9e55" stroke-width="3"/><path d="M76 34 C96 34 98 50 86 68 C80 74 76 74 70 68 C58 50 58 34 76 34 Z" fill="#ef3b44" stroke="${INK}" stroke-width="2.5"/><path d="M70 34 L78 26 L86 34" fill="#2f9e55"/>` },
+    { id: 'snow',   warm: false, label: 'שֶׁלֶג',          text: 'הוּא אָהַב לְשַׂחֵק בַּשֶּׁלֶג.', pic: () => flake(60, 42, 26) },
+    { id: 'rain',   warm: false, label: 'גֶּשֶׁם',         text: 'הוּא אָהַב לִקְפֹּץ בִּשְׁלוּלִיּוֹת שֶׁל גֶּשֶׁם.', pic: () => cloud(60, 34, 1.5, '#dce6f2') + `<g stroke="#1f6fd6" stroke-width="3.5" stroke-linecap="round"><path d="M42 58 l-4 10"/><path d="M60 58 l-4 10"/><path d="M78 58 l-4 10"/></g>` },
+    { id: 'sea',    warm: false, label: 'יָם',             text: 'הוּא אָהַב לִשְׂחוֹת בַּיָּם.', pic: () => `<path d="M6 44 q14 -12 27 0 t27 0 t27 0 t27 0 V80 H6 Z" fill="#4aa3e0"/><path d="M6 58 q14 -10 27 0 t27 0 t27 0 t27 0" fill="none" stroke="#fff" stroke-width="3"/>` },
+    { id: 'night',  warm: false, label: 'לַיְלָה',          text: 'הוּא אָהַב לְהִסְתַּכֵּל עַל הַכּוֹכָבִים בַּלַּיְלָה.', pic: () => `<rect x="4" y="4" width="112" height="76" rx="12" fill="#2b3157"/>${moon(46, 40, 18)}${sparkle(84, 26, 7, '#ffe27a')}${sparkle(96, 56, 5, '#ffe27a')}${sparkle(24, 64, 4, '#ffe27a')}` },
+  ];
+  const MEETS = [
+    { id: 'wind', label: 'רוּחַ חֲזָקָה',
+      text: (h, f) => `יוֹם אֶחָד, רוּחַ חֲזָקָה הֵעִיפָה אֶת ${h.def} עַד ${landName(!heroWarm())}, וְשָׁם הוּא פָּגַשׁ אֶת ${f.def}.` },
+    { id: 'letter', label: 'מִכְתָּב',
+      text: (h, f) => `${h.def} כָּתַב מִכְתָּב וְשָׁלַח אוֹתוֹ עִם צִפּוֹר. הַמִּכְתָּב הִגִּיעַ ${f.to}, וְכָךְ הֵם נִהְיוּ חֲבֵרִים.` },
+    { id: 'beach', label: 'עַל חוֹף הַיָּם',
+      text: (h, f) => `בֵּין שְׁתֵּי הָאֲרָצוֹת הָיָה חוֹף יָם, עִם חוֹל חַם וּמַיִם קָרִים. שָׁם ${h.def} וְ${f.def} נִפְגְּשׁוּ וְנִהְיוּ חֲבֵרִים.` },
+    { id: 'bridge', label: 'גֶּשֶׁר',
+      text: (h, f) => `${h.def} וְ${f.def} בָּנוּ גֶּשֶׁר בֵּין שְׁתֵּי הָאֲרָצוֹת, וְנִפְגְּשׁוּ בְּאֶמְצַע הַגֶּשֶׁר.` },
+  ];
+  const PROBLEMS = [
+    { id: 'hotcold', label: 'חַם מִדַּי, קַר מִדַּי',
+      text: () => `אֲבָל יוֹם אֶחָד, ${W().def} רָעַד מִקֹּר בְּאֶרֶץ הַשֶּׁלֶג, וְ${K().def} הִזִּיעַ מֵחֹם בְּאֶרֶץ הַשֶּׁמֶשׁ. אֵיךְ הֵם יְשַׂחֲקוּ יַחַד?` },
+    { id: 'better', label: 'מִי יוֹתֵר טוֹב?',
+      text: (h, f) => `אֲבָל יוֹם אֶחָד, ${h.def} אָמַר: ״צְבָעִים ${temps(st.hero)} הֵם הֲכִי טוֹבִים!״ ${f.def} כָּעַס וְעָנָה: ״לֹא נָכוֹן! צְבָעִים ${st.friend ? temps(st.friend) : '___'} הֲכִי טוֹבִים!״` },
+    { id: 'energy', label: 'מֶרֶץ אוֹ שֶׁקֶט?',
+      text: (h, f) => {
+        const run = 'רָצָה לָרוּץ וְלִקְפֹּץ', calm = 'רָצָה לָשֶׁבֶת בְּשֶׁקֶט';
+        return `אֲבָל יוֹם אֶחָד, ${h.def} ${heroWarm() ? run : calm}, וְ${f.def} ${heroWarm() ? calm : run}. הֵם לֹא הִסְכִּימוּ מָה לַעֲשׂוֹת.`;
+      } },
+    { id: 'weather', label: () => heroWarm() ? 'הַשֶּׁמֶשׁ נֶעֶלְמָה' : 'הַשֶּׁלֶג נָמֵס',
+      text: h => heroWarm()
+        ? `אֲבָל יוֹם אֶחָד, הַשֶּׁמֶשׁ נֶעֶלְמָה, וּבְאֶרֶץ הַשֶּׁמֶשׁ נִהְיָה קַר וְאָפֹר. ${h.def} לֹא יָדַע מָה לַעֲשׂוֹת.`
+        : `אֲבָל יוֹם אֶחָד, הַשֶּׁלֶג הִתְחִיל לְהִמֵּס, וּבְאֶרֶץ הַשֶּׁלֶג נִהְיָה חַם מִדַּי. ${h.def} לֹא יָדַע מָה לַעֲשׂוֹת.` },
+  ];
+  const SOLUTIONS = [
+    { id: 'mix', label: 'מִתְעַרְבְּבִים',
+      text: (h, f) => `${h.def} וְ${f.def} הִתְחַבְּקוּ וְהִתְעַרְבְּבוּ, וְנוֹלַד צֶבַע חָדָשׁ: ${f.id ? mixOf(h.id, f.id).name : '___'}! צֶבַע שֶׁהוּא קְצָת חַם וּקְצָת קַר.` },
+    { id: 'gifts', label: 'מַחְלִיפִים מַתָּנוֹת',
+      text: (h, f) => `${h.def} וְ${f.def} הֶחְלִיפוּ מַתָּנוֹת: ${W().def} קִבֵּל צָעִיף חַם, וְ${K().def} קִבֵּל מְנִיפָה קְרִירָה.` },
+    { id: 'home', label: 'בַּיִת בָּאֶמְצַע',
+      text: (h, f) => `${h.def} וְ${f.def} בָּנוּ יַחַד בַּיִת בָּאֶמְצַע, עִם חֶדֶר חַם וְחֶדֶר קַר, וְכָל אֶחָד יָכוֹל לִבְחֹר.` },
+    { id: 'talk', label: 'מְדַבְּרִים וּמַקְשִׁיבִים',
+      text: (h, f) => `${h.def} וְ${f.def} יָשְׁבוּ וְדִבְּרוּ. כָּל אֶחָד סִפֵּר מָה הוּא צָרִיךְ, וְהַשֵּׁנִי הִקְשִׁיב.` },
+  ];
+  const ENDINGS = [
+    { id: 'rainbow', label: 'קֶשֶׁת שֶׁל כֻּלָּם',
+      text: () => 'בַּסּוֹף, הַצְּבָעִים הַחַמִּים וְהַקָּרִים צִיְּרוּ יַחַד קֶשֶׁת, וְהִיא הָיְתָה הֲכִי יָפָה עִם כֻּלָּם.' },
+    { id: 'seasons', label: 'קַיִץ וְחֹרֶף',
+      text: () => 'מֵאָז, בַּקַּיִץ הֵם מְשַׂחֲקִים בְּאֶרֶץ הַשֶּׁלֶג, וּבַחֹרֶף בְּאֶרֶץ הַשֶּׁמֶשׁ.' },
+    { id: 'friends', label: 'חֲבֵרִים שׁוֹנִים',
+      text: (h, f) => `מֵאָז, ${h.def} וְ${f.def} חֲבֵרִים טוֹבִים, אַף עַל פִּי שֶׁהֵם שׁוֹנִים.` },
+    { id: 'both', label: 'גַּם חַם וְגַם קַר',
+      text: h => `בַּסּוֹף, ${h.def} הֵבִין שֶׁצָּרִיךְ גַּם חַם וְגַם קַר, כְּדֵי שֶׁהָעוֹלָם יִהְיֶה נָעִים.` },
+  ];
+
+  /* ---- the picture ---- */
+  function land(warm, x0, faded) {
+    let g;
+    if (warm) {
+      g = `<rect x="0" width="200" height="230" fill="#ffe3bf"/>${faded ? '' : sunIcon(100, 50, 20)}
+        <path d="M0 176 Q60 150 120 170 T200 166 V230 H0Z" fill="#f6c76b"/><path d="M0 200 Q80 186 200 198 V230 H0Z" fill="#f1b54f"/>
+        <g transform="translate(34 150)"><rect x="-4" y="0" width="8" height="30" fill="#2f9e55"/><rect x="-14" y="8" width="8" height="12" rx="4" fill="#2f9e55"/><rect x="6" y="4" width="8" height="12" rx="4" fill="#2f9e55"/></g>`;
+    } else {
+      g = `<rect x="0" width="200" height="230" fill="#dcefff"/>
+        <path d="M0 172 Q50 140 110 168 T200 160 V230 H0Z" fill="#ffffff" stroke="#b9d7f0" stroke-width="2"/><path d="M0 204 Q90 190 200 202 V230 H0Z" fill="#eef6ff"/>
+        <path d="M166 160 L150 160 L158 120 Z M170 176 L146 176 L158 136 Z" fill="#3f9a58"/><path d="M158 120 L152 136 L164 136 Z" fill="#fff"/>
+        ${flake(40, 40, 7)}${flake(120, 70, 5)}${flake(80, 24, 5)}`;
+    }
+    return `<g transform="translate(${x0} 0)" ${faded ? 'filter="url(#fade)"' : ''}>${g}</g>`;
+  }
+  const TROUBLE = ['hotcold', 'better', 'energy', 'weather'];
+  function mood(isHero) {
+    const id = isHero ? st.hero : st.friend;
+    if (!TROUBLE.includes(st.problem) || st.solution) return 'happy';
+    if (st.problem === 'better') return 'angry';
+    if (st.problem === 'energy') return isWarm(id) ? 'brave' : 'shy';
+    if (st.problem === 'weather') return isHero ? 'sad' : 'happy';
+    return 'sad';
+  }
+  function stage() {
+    const warmRight = heroWarm();
+    const trouble = TROUBLE.includes(st.problem) && !st.solution;
+    const faded = st.problem === 'weather' && trouble;   // the hero's land loses its weather
+    const met = !!st.meet;
+    const hx = met ? 252 : 300, fx = met ? 148 : 100;
+    let back = '', front = '';
+    if (st.meet === 'beach') back += `<path d="M168 230 V196 q8 -6 16 0 t16 0 t16 0 V230 Z" fill="#4aa3e0"/>`;
+    if (st.meet === 'bridge') back += `<rect x="176" y="196" width="48" height="34" fill="#4aa3e0"/><path d="M160 200 Q200 166 240 200" fill="none" stroke="#9a6b4a" stroke-width="8"/><path d="M168 194 V180 M184 184 V172 M200 182 V168 M216 184 V172 M232 194 V180" stroke="#9a6b4a" stroke-width="3"/>`;
+    if (st.ending === 'rainbow') back += `<g opacity=".9">${rainbowArcs(200, 170, 130, 10, 9)}</g>`;
+    if (st.solution === 'home') back += house(200, 196, 1.2);
+    if (st.meet === 'letter' && !st.problem) front += `<g transform="translate(200 64)"><rect x="-16" y="-10" width="32" height="22" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M-16 -10 L0 4 L16 -10" fill="none" stroke="${INK}" stroke-width="2.5"/></g>`;
+    if (st.meet === 'wind' && !st.problem) front += `<g fill="none" stroke="#97a3b6" stroke-width="4" stroke-linecap="round"><path d="M150 60 h60 a12 12 0 1 0 -12 -12"/><path d="M170 84 h50 a10 10 0 1 1 -10 10"/></g>`;
+    if (st.solution === 'gifts') front += gift(200, 70, 1.3);
+    if (st.solution === 'talk') front += bubble(hx + 40, 52) + bubble(fx - 40, 66);
+    if (st.ending === 'seasons') front += sunIcon(176, 40, 13) + flake(226, 40, 15);
+    if (st.ending === 'friends' || st.ending === 'both') front += heart(200, 74, 14, st.ending === 'both' ? '#c06ad0' : '#ef3b44');
+    if (st.problem === 'hotcold' && trouble) {
+      const wx = warmRight ? hx : fx, kx = warmRight ? fx : hx;
+      front += flake(wx - 50, 112, 8) + flake(wx + 50, 128, 6) + `<path d="M${kx + 40} 120 q-4 8 0 11 q4 -3 0 -11 Z" fill="#7cc4ff"/>`;
+    }
+    const friend = st.friend ? drop(F().hex, mood(false), fx, 214, 104) : ghost(fx, 214, 104);
+    const hero = st.hero ? drop(H().hex, mood(true), hx, 214, 118) : ghost(hx, 214, 118);
+    if (st.solution === 'mix' && st.friend) front += drop(mixOf(st.hero, st.friend).hex, 'happy', 200, 228, 56) + sparkle(170, 150, 8) + sparkle(232, 140, 6);
+    const scene = st.hero
+      ? (warmRight ? land(false, 0, faded && !heroWarm()) + land(true, 200, faded && heroWarm()) : land(true, 0, faded && heroWarm()) + land(false, 200, faded && !heroWarm()))
+      : land(false, 0) + land(true, 200);
+    return `<svg viewBox="0 0 400 230" role="img" aria-label="${esc(titleText() || 'חַם וְקַר')}">${FADE(0.12)}
+      ${scene}${back}${friend}${hero}${front}</svg>`;
+  }
+  function icon(kind, id) {
+    const w = st.hero ? W() : C.orange, k = st.hero && st.friend ? K() : C.blue;
+    let g = '';
+    if (kind === 'meet') g = {
+      wind: drop(C[st.hero || 'orange'].hex, 'happy', 84, 74, 48) + `<g fill="none" stroke="#97a3b6" stroke-width="4" stroke-linecap="round"><path d="M8 34 h40 a10 10 0 1 0 -10 -10"/><path d="M14 56 h34 a8 8 0 1 1 -8 8"/></g>`,
+      letter: `<g transform="translate(60 46)"><rect x="-30" y="-20" width="60" height="40" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M-30 -20 L0 6 L30 -20" fill="none" stroke="${INK}" stroke-width="2.5"/></g>${heart(60, 52, 6)}`,
+      beach: `<rect x="0" y="0" width="120" height="84" rx="10" fill="#dff1ff"/><path d="M0 44 H120 V62 H0Z" fill="#4aa3e0"/><path d="M0 60 Q60 52 120 60 V84 H0Z" fill="#f3d98b"/>`,
+      bridge: `<rect x="40" y="56" width="40" height="28" fill="#4aa3e0"/><path d="M20 62 Q60 26 100 62" fill="none" stroke="#9a6b4a" stroke-width="7"/><path d="M30 56 V42 M45 46 V34 M60 44 V30 M75 46 V34 M90 56 V42" stroke="#9a6b4a" stroke-width="3"/>`,
+    }[id];
+    if (kind === 'problem') g = {
+      hotcold: drop(w.hex, 'sad', 86, 80, 52) + drop(k.hex, 'sad', 34, 80, 52) + flake(108, 24, 7) + `<path d="M48 30 q-4 8 0 11 q4 -3 0 -11 Z" fill="#7cc4ff"/>`,
+      better: drop(C[st.hero || 'orange'].hex, 'angry', 86, 82, 56) + drop(st.friend ? F().hex : C.blue.hex, 'angry', 34, 82, 52) + `<path d="M60 8 l-7 12 h9 l-7 13" fill="none" stroke="#e09a00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+      energy: drop(w.hex, 'brave', 86, 70, 50) + `<path d="M58 30 h-12 M60 44 h-16" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>` + drop(k.hex, 'shy', 30, 82, 46),
+      weather: heroWarm()
+        ? `<g filter="url(#fade)">${sunIcon(60, 36, 16)}</g>` + cloud(70, 44, 1.4, '#c4cad3') + `<path d="M0 78 H120" stroke="#c4cad3" stroke-width="10"/>`
+        : `<circle cx="60" cy="62" r="18" fill="#fff" stroke="${INK}" stroke-width="2.5"/><circle cx="60" cy="32" r="12" fill="#fff" stroke="${INK}" stroke-width="2.5"/><path d="M30 80 Q60 70 90 80" fill="#9fd0f5"/><path d="M78 40 q-4 8 0 11 q4 -3 0 -11 Z" fill="#7cc4ff"/>${sunIcon(100, 20, 9)}`,
+    }[id];
+    if (kind === 'solution') g = {
+      mix: drop(w.hex, 'happy', 86, 78, 50) + drop(k.hex, 'happy', 34, 78, 50) + drop(st.hero && st.friend ? mixOf(st.hero, st.friend).hex : '#7b3fa8', 'happy', 60, 84, 30) + sparkle(60, 14, 7),
+      gifts: gift(60, 48, 1.5),
+      home: house(60, 74, 1.1),
+      talk: bubble(78, 30) + bubble(42, 56),
+    }[id];
+    if (kind === 'ending') g = {
+      rainbow: rainbowArcs(60, 84, 56, 7, 6.5),
+      seasons: sunIcon(38, 42, 14) + flake(86, 42, 20),
+      friends: drop(w.hex, 'happy', 86, 82, 52) + drop(k.hex, 'happy', 34, 82, 52) + heart(60, 24, 10),
+      both: heart(44, 44, 16, '#fb7a2c') + heart(78, 44, 16, '#1f6fd6'),
+    }[id];
+    return `<svg viewBox="0 0 120 84" aria-hidden="true">${FADE(0.12)}${g}</svg>`;
+  }
+
+  const steps = [
+    { key: 'hero',     part: 0, q: () => 'אֵיזֶה צֶבַע יִהְיֶה הַגִּבּוֹר?' },
+    { key: 'love',     part: 0, q: () => `מָה ${H().def} אוֹהֵב?` },
+    { key: 'friend',   part: 0, q: () => `מִי גָּר ${inLand(!heroWarm())}?` },
+    { key: 'meet',     part: 0, q: () => 'אֵיךְ הֵם נִפְגְּשׁוּ?', list: MEETS, icon: id => icon('meet', id) },
+    { key: 'problem',  part: 1, q: () => 'מָה הַבְּעָיָה?', own: true, list: PROBLEMS, icon: id => icon('problem', id) },
+    { key: 'solution', part: 2, q: () => 'אֵיךְ פּוֹתְרִים אֶת הַבְּעָיָה?', own: true, list: SOLUTIONS, icon: id => icon('solution', id) },
+    { key: 'ending',   part: 3, q: () => 'אֵיךְ הַסִּפּוּר נִגְמָר?', own: true, list: ENDINGS, icon: id => icon('ending', id) },
+  ];
+  const group = (warm, ids, key) => `<div class="grp">
+      <h3><svg viewBox="0 0 40 40" aria-hidden="true">${warm ? sunIcon(20, 20, 9) : flake(20, 20, 14)}</svg>${warm ? 'צְבָעִים חַמִּים' : 'צְבָעִים קָרִים'}</h3>
+      <div class="choices small">${ids.map(id => colorCard(key, C[id], C[id].name)).join('')}</div></div>`;
+
+  return {
+    id: 'temp',
+    label: 'הַצְּבָעִים הַחַמִּים וְהַקָּרִים',
+    hint: 'צֶבַע מֵאֶרֶץ הַשֶּׁמֶשׁ פּוֹגֵשׁ צֶבַע מֵאֶרֶץ הַשֶּׁלֶג',
+    parts: ['הַתְחָלָה', 'הַבְּעָיָה', 'הַפִּתְרוֹן', 'הַסּוֹף'],
+    steps,
+    later: [['problem', 'solution', 'ending'], ['solution', 'ending'], ['ending'], []],
+    fresh: () => ({ hero: null, love: null, friend: null, meet: null, problem: null, solution: null, ending: null,
+      own: { problem: '', solution: '', ending: '' } }),
+    story() {
+      const parts = [[], [], [], []];
+      if (!st.hero) return parts;
+      const h = H(), f = F(), love = pick(LOVES, st.love);
+      parts[0].push({ id: 'open', text: `פַּעַם, ${inLand(heroWarm())}, גָּר צֶבַע ${h.name}. הוּא הָיָה צֶבַע ${temp(st.hero)}, ${LIKE[st.hero]}.` });
+      if (love) parts[0].push({ id: 'love', text: love.text });
+      if (st.friend) parts[0].push({ id: 'friend', text: `רָחוֹק מִשָּׁם, ${inLand(!heroWarm())}, גָּר צֶבַע ${f.name}. הוּא הָיָה צֶבַע ${temp(st.friend)}, ${LIKE[st.friend]}.` });
+      steps.slice(3).forEach(s => {
+        const val = st[s.key];
+        if (val === 'own') { const t = st.own[s.key].trim(); if (t) parts[s.part].push({ id: s.key, text: t }); }
+        else if (val) parts[s.part].push({ id: s.key, text: pick(s.list, val).text(h, f) });
+      });
+      return parts;
+    },
+    title: () => {
+      const the = id => isWarm(id) ? 'הֶחָם' : 'הַקַּר';
+      if (!st.hero) return '';
+      return st.friend ? `${H().def} ${the(st.hero)} וְ${F().def} ${the(st.friend)}` : `${H().def} ${the(st.hero)}`;
+    },
+    stage,
+    choices(s) {
+      switch (s.key) {
+        case 'hero': return group(true, WARM, 'hero') + group(false, COOL, 'hero');
+        case 'friend': return group(!heroWarm(), heroWarm() ? COOL : WARM, 'friend');
+        case 'love': return `<div class="choices">${LOVES.filter(l => l.warm === heroWarm()).map(l => card('love', l.id, l.label, `<svg viewBox="0 0 120 84" aria-hidden="true">${l.pic()}</svg>`)).join('')}</div>`;
+        default: return listCards(s);
+      }
+    },
+    options(s) {
+      if (s.key === 'hero') return [...WARM, ...COOL];
+      if (s.key === 'friend') return heroWarm() ? COOL : WARM;
+      if (s.key === 'love') return LOVES.filter(l => l.warm === heroWarm()).map(l => l.id);
+      return s.list.map(o => o.id);
+    },
+    chose(key, id) {
+      if (key !== 'hero') return;
+      if (st.friend && isWarm(st.friend) === isWarm(id)) st.friend = null;
+      const love = pick(LOVES, st.love);
+      if (love && love.warm !== isWarm(id)) st.love = null;
+    },
+    art: () => `<svg viewBox="0 0 220 120" aria-hidden="true">${sunIcon(150, 22, 10)}${flake(66, 22, 12)}${drop(C.blue.hex, 'happy', 70, 116, 84)}${drop(C.orange.hex, 'happy', 150, 116, 92)}</svg>`,
+  };
+})();
+
+const MODES = { colors: colorsMode, helpers: helpersMode, temp: tempMode };
+
+/* ================= state =================
+   One draft per kind of story, kept in this browser only. */
+const KEY = 'color-story-lab-2';
+let store = { drafts: {}, sound: true };
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (saved && saved.drafts) store = Object.assign(store, saved);
+  else {   // drafts from the two separate labs that came before
+    [['color-story-lab', 'colors'], ['color-helpers-lab', 'helpers']].forEach(([k, mode]) => {
+      const old = JSON.parse(localStorage.getItem(k) || 'null');
+      if (old && old.story && old.story.hero) store.drafts[mode] = Object.assign({ mode }, old.story);
+      if (old && old.sound === false) store.sound = false;
+    });
+  }
+} catch (e) {}
+let st = null, view = 'start';
+const M = () => MODES[st.mode];
+const newStory = mode => Object.assign({ mode, screen: 'step', step: 0, title: '', author: '', extra: [] }, MODES[mode].fresh());
+const save = () => {
+  if (st) store.drafts[st.mode] = st;
+  try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+};
+
+const chosen = key => st[key] && (st[key] !== 'own' || st.own[key].trim());
+function story() {
+  const parts = M().story();
+  st.extra.forEach((t, i) => parts[3].push({ id: 'x' + i, text: t, extra: i }));
+  return parts;
+}
+const defaultTitle = () => M().title();
+const titleText = () => st.title.trim() || defaultTitle();
+
+/* ================= icons ================= */
+const I = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
+  speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/></svg>',
+  noteOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/><path d="M3 3l18 18" stroke-width="2.6"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><g fill="currentColor" stroke="none"><circle cx="8.5" cy="8.5" r="1.7"/><circle cx="15.5" cy="15.5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="15.5" cy="8.5" r="1.7"/><circle cx="8.5" cy="15.5" r="1.7"/></g></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+  print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z" fill="currentColor" fill-opacity=".15"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 5.5h6a3 3 0 0 1 3 3V20a2.5 2.5 0 0 0-2.5-2.5H3z"/><path d="M21 5.5h-6a3 3 0 0 0-3 3V20a2.5 2.5 0 0 1 2.5-2.5H21z"/></svg>',
+  save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M4.5 19.5h15"/></svg>',
+  palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.2-.5-1.3.3-2.8 1.9-2.8H18a3 3 0 0 0 3-3C21 7 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.5" fill="currentColor"/><circle cx="11" cy="7" r="1.5" fill="currentColor"/><circle cx="16" cy="8.5" r="1.5" fill="currentColor"/></svg>',
+};
+
+/* ================= sounds ================= */
+let actx = null;
+function tone(freq, at, dur, type = 'triangle', vol = 0.1) {
+  const t = actx.currentTime + at, o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const SFX = {
+  tap:   () => tone(700, 0, 0.07, 'sine', 0.06),
+  pick:  () => { tone(523, 0, 0.13); tone(784, 0.09, 0.2); },
+  back:  () => { tone(523, 0, 0.1, 'sine', 0.07); tone(392, 0.08, 0.14, 'sine', 0.07); },
+  magic: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.06, 0.15, 'triangle', 0.07)),
+  done:  () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, i === 3 ? 0.6 : 0.2, 'triangle', 0.1)),
+};
+function sfx(name) {
+  if (!store.sound) return;
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    SFX[name]();
+  } catch (e) {}
+}
+
+/* ================= reading aloud ================= */
+const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const readAllLabel = 'לְהַקְרִיא אֶת הַסִּפּוּר';
+let reading = 0;   // token of the current reading, 0 when silent
+function stopReading() {
+  reading = 0;
+  if (canSpeak) speechSynthesis.cancel();
+  app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+  app.querySelectorAll('[data-act="readAll"]').forEach(b => { b.innerHTML = `${I.speak}${readAllLabel}`; });
+}
+function read(items) {   // items: [{ id, text }]
+  if (!canSpeak) return;
+  stopReading();
+  const token = reading = Date.now();
+  const voice = speechSynthesis.getVoices().find(vo => /^(he|iw)/i.test(vo.lang));
+  let i = 0;
+  const next = () => {
+    if (reading !== token) return;
+    app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+    if (i >= items.length) { stopReading(); return; }
+    const it = items[i++];
+    const el = app.querySelector(`.sent[data-sid="${it.id}"]`);
+    if (el) el.classList.add('reading');
+    const u = new SpeechSynthesisUtterance(it.text.replace(/[״"]/g, ''));
+    u.lang = 'he-IL'; if (voice) u.voice = voice; u.rate = 0.85;
+    u.onend = next; u.onerror = next;
+    speechSynthesis.speak(u);
+  };
+  next();
+}
+function readAll(btn) {
+  if (reading) { stopReading(); return; }
+  const items = story().flat();
+  if (view === 'final') items.unshift({ id: 'title', text: titleText() });
+  read(items);
+  if (btn) btn.innerHTML = `${I.stop}לַעֲצֹר`;
+}
+
+/* ================= the printed book =================
+   Pages are drawn on canvas (A4 at 150 dpi): a cover, one page for each part
+   of the story with its picture at that moment, and a closing page. The same
+   page images feed the on-screen preview, printing, and the PDF. */
+const PW = 1240, PH = 1754, PAD = 90;
+const FONT_D = 'Rubik, "Noto Sans Hebrew", Arial, sans-serif';
+const FONT_B = '"Noto Sans Hebrew", Rubik, Arial, sans-serif';
+let bookPages = [];
+
+// The picture as it looked at the end of a given part.
+function stageAt(part) {
+  const keep = st;
+  const snap = Object.assign({}, st, { step: -1 });
+  M().later[part].forEach(k => { snap[k] = null; });
+  st = snap;
+  try { return M().stage(); } finally { st = keep; }
+}
+function svgImage(svg, w, h) {
+  const src = svg.replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" `);
+  return new Promise((ok, fail) => {
+    const img = new Image();
+    img.onload = () => ok(img); img.onerror = fail;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src);
+  });
+}
+function wrapLines(ctx, text, maxW) {
+  const lines = []; let line = '';
+  text.split(/\s+/).forEach(w => {
+    const test = line ? line + ' ' + w : w;
+    if (line && ctx.measureText(test).width > maxW) { lines.push(line); line = w; } else line = test;
+  });
+  if (line) lines.push(line);
+  return lines;
+}
+function blankPage(num) {
+  const c = document.createElement('canvas'); c.width = PW; c.height = PH;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, PW, PH);
+  ctx.strokeStyle = '#d8dee7'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(40, 40, PW - 80, PH - 80, 36) : ctx.rect(40, 40, PW - 80, PH - 80); ctx.stroke();
+  ctx.direction = 'rtl';
+  if (num) {
+    ctx.fillStyle = '#5a6476'; ctx.font = `500 30px ${FONT_D}`; ctx.textAlign = 'center';
+    ctx.fillText(String(num), PW / 2, PH - 78);
+  }
+  return { c, ctx };
+}
+function drawPicture(ctx, img, x, y, w, h) {
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 28) : ctx.rect(x, y, w, h); ctx.clip();
+  ctx.drawImage(img, x, y, w, h);
+  ctx.restore();
+  ctx.strokeStyle = '#1d2431'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 28) : ctx.rect(x, y, w, h); ctx.stroke();
+}
+function colorDots(ctx, y) {
+  const r = 13, gap = 44, x0 = PW / 2 - gap * 3;
+  COLORS.forEach((c, i) => { ctx.fillStyle = c.hex; ctx.beginPath(); ctx.arc(x0 + i * gap, y, r, 0, Math.PI * 2); ctx.fill(); });
+}
+// Lay out paragraphs at the largest size that fits; returns the size and lines per paragraph.
+function fitText(ctx, paras, maxW, maxH) {
+  for (const size of [50, 46, 42, 38, 34]) {
+    ctx.font = `400 ${size}px ${FONT_B}`;
+    const lh = size * 1.85, gap = size * 0.45;
+    const laid = paras.map(p => wrapLines(ctx, p, maxW));
+    const h = laid.reduce((s, l) => s + l.length * lh, 0) + gap * (paras.length - 1);
+    if (h <= maxH) return { size, lh, gap, laid, fits: true };
+  }
+  ctx.font = `400 34px ${FONT_B}`;
+  return { size: 34, lh: 34 * 1.85, gap: 34 * 0.45, laid: paras.map(p => wrapLines(ctx, p, maxW)), fits: false };
+}
+
+async function buildBook() {
+  try {
+    await Promise.all([
+      document.fonts.load(`700 80px Rubik`, 'אב'), document.fonts.load(`500 30px Rubik`, 'אב'),
+      document.fonts.load(`400 40px "Noto Sans Hebrew"`, 'אָב'),
+    ]);
+  } catch (e) {}
+  const pages = [];
+  const picW = PW - PAD * 2, picH = Math.round(picW * 230 / 400);
+
+  // cover
+  {
+    const { c, ctx } = blankPage(0);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#1d2431';
+    ctx.font = `700 88px ${FONT_D}`;
+    const lines = wrapLines(ctx, titleText(), PW - PAD * 2 - 40);
+    let y = 250;
+    lines.forEach(l => { ctx.fillText(l, PW / 2, y); y += 120; });
+    const img = await svgImage(M().stage(), picW, picH);
+    drawPicture(ctx, img, PAD, y - 30, picW, picH);
+    y += picH + 70;
+    if (st.author.trim()) {
+      ctx.font = `500 50px ${FONT_D}`; ctx.fillStyle = '#1d2431';
+      ctx.fillText(`מֵאֵת: ${st.author.trim()}`, PW / 2, y + 40);
+    }
+    colorDots(ctx, PH - 190);
+    ctx.font = `500 32px ${FONT_D}`; ctx.fillStyle = '#5a6476';
+    ctx.fillText('מַעְבֶּדֶת סִפּוּרִים', PW / 2, PH - 120);
+    pages.push(c);
+  }
+
+  // one page for each part, continuing on text-only pages if a part is long
+  const parts = story();
+  for (let p = 0; p < 4; p++) {
+    let paras = parts[p].map(s => s.text);
+    if (!paras.length) continue;
+    const img = await svgImage(stageAt(p), picW, picH);
+    let first = true;
+    while (paras.length) {
+      const { c, ctx } = blankPage(pages.length + 1);
+      let y = 130;
+      if (first) { drawPicture(ctx, img, PAD, y, picW, picH); y += picH + 80; }
+      ctx.textAlign = 'right'; ctx.fillStyle = '#5a6476'; ctx.font = `500 34px ${FONT_D}`;
+      ctx.fillText(M().parts[p], PW - PAD, y);
+      y += 40;
+      const maxH = PH - 170 - y;
+      let fit = fitText(ctx, paras, PW - PAD * 2, maxH);
+      let take = paras.length;
+      if (!fit.fits) {   // keep as many whole paragraphs as fit, the rest goes on the next page
+        let h = 0; take = 0;
+        for (const l of fit.laid) { const add = l.length * fit.lh + (take ? fit.gap : 0); if (h + add > maxH && take) break; h += add; take++; }
+        fit = fitText(ctx, paras.slice(0, take), PW - PAD * 2, maxH);
+      }
+      ctx.font = `400 ${fit.size}px ${FONT_B}`; ctx.fillStyle = '#1d2431'; ctx.textAlign = 'right';
+      y += fit.lh * 0.8;
+      fit.laid.forEach((lines, i) => {
+        if (i) y += fit.gap;
+        lines.forEach(l => { ctx.fillText(l, PW - PAD, y); y += fit.lh; });
+      });
+      pages.push(c);
+      paras = paras.slice(take);
+      first = false;
+    }
+  }
+
+  // closing page
+  {
+    const { c, ctx } = blankPage(0);
+    const img = await svgImage(`<svg viewBox="0 0 400 140">${COLORS.map((col, i) => drop(col.hex, i % 2 ? 'happy' : 'sleep', 50 + i * 50, 130, 70)).join('')}</svg>`, 1000, 350);
+    ctx.drawImage(img, (PW - 1000) / 2, 820, 1000, 350);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#1d2431'; ctx.font = `700 150px ${FONT_D}`;
+    ctx.fillText('הַסּוֹף', PW / 2, 720);
+    pages.push(c);
+  }
+  return pages.map(c => c.toDataURL('image/jpeg', 0.9));
+}
+
+const JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+function loadScript(src) {
+  return new Promise((ok, fail) => {
+    if (window.jspdf) { ok(); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail;
+    document.head.appendChild(s);
+  });
+}
+// Inside claude.ai the page hands files over through the downloads capability; opened as a file, it uses a normal download.
+const inViewer = !!(window.claude && window.claude.use);
+const downloadsReady = inViewer ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+const fileName = () => (titleText() || 'סיפור').replace(/[֑-ׇ]/g, '').replace(/[\\/:*?"<>|]/g, '').trim() + '.pdf';
+function bookStatus(text) { const el = document.getElementById('book-status'); if (el) el.textContent = text; }
+async function savePdf(btn) {
+  btn.disabled = true;
+  bookStatus('מְכִינִים אֶת הַקֹּבֶץ…');
+  try {
+    await loadScript(JSPDF);
+    const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
+    bookPages.forEach((url, i) => { if (i) pdf.addPage(); pdf.addImage(url, 'JPEG', 0, 0, 210, 297); });
+    const blob = pdf.output('blob');
+    if (inViewer) {
+      const dl = await downloadsReady;
+      if (!dl) { bookStatus('כָּאן אִי אֶפְשָׁר לִשְׁמֹר קְבָצִים.'); btn.hidden = true; return; }
+      await dl.save({ filename: fileName(), data: blob });
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = fileName();
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }
+    sfx('done');
+    bookStatus('הַסֵּפֶר נִשְׁמַר. פּוֹתְחִים אֶת הַקֹּבֶץ וּמַדְפִּיסִים.');
+  } catch (e) {
+    if (e && e.code === 'declined') bookStatus('');
+    else if (e && (e.code === 'unavailable' || e.code === 'not_granted')) { bookStatus('כָּאן אִי אֶפְשָׁר לִשְׁמֹר קְבָצִים.'); btn.hidden = true; }
+    else bookStatus('לֹא הִצְלַחְנוּ לִשְׁמֹר אֶת הַסֵּפֶר. בִּדְקוּ שֶׁיֵּשׁ אִינְטֶרְנֶט וְנַסּוּ שׁוּב.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ================= rendering ================= */
+const app = document.getElementById('story-app');
+let lastSeen = new Set();   // sentences already shown, so only new ones animate
+
+function render() {
+  stopReading();
+  clearTimeout(advanceTimer);
+  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  app.innerHTML = ({ start: startView, step: stepView, final: finalView, book: bookView })[view]();
+  if (focusKey) {
+    const el = app.querySelector(`[data-key="${focusKey}"]`);
+    if (el && !el.disabled) el.focus();
+  }
+  save();
+}
+
+function soundBtn() {
+  return `<button class="icon-btn${store.sound ? '' : ' off'}" data-act="sound" data-key="sound" aria-pressed="${store.sound}" aria-label="צְלִילִים">${store.sound ? I.note : I.noteOff}</button>`;
+}
+
+function startView() {
+  const kinds = Object.values(MODES).map(m => {
+    const draft = store.drafts[m.id] && store.drafts[m.id].hero;
+    return `<div class="kind">
+      <button class="kind-card" data-act="${draft ? 'resume' : 'new'}" data-mode="${m.id}" data-key="kind-${m.id}">
+        ${m.art()}<strong>${m.label}</strong><small>${m.hint}</small>
+      </button>
+      ${draft ? `<div class="kind-actions">
+        <button class="act primary" data-act="resume" data-mode="${m.id}" data-key="resume-${m.id}">${I.next}לְהַמְשִׁיךְ</button>
+        <button class="act" data-act="new" data-mode="${m.id}" data-key="new-${m.id}">${I.plus}סִפּוּר חָדָשׁ</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div class="bar"><span style="flex:1"></span>${soundBtn()}</div>
+    <div class="start">
+      <h1>מַעְבֶּדֶת סִפּוּרִים</h1>
+      <p>אֵיזֶה סִפּוּר נִכְתֹּב הַיּוֹם?</p>
+      <div class="kinds">${kinds}</div>
+      <button class="act" data-act="lab" data-key="lab">${I.palette}מִשְׂחַק עִרְבּוּב הַצְּבָעִים</button>
+    </div>`;
+}
+
+function stepsBar() {
+  const steps = M().steps;
+  return `<nav class="steps" aria-label="שְׁלַבִּים">${steps.map((s, i) => {
+    const open = steps.slice(0, i).every(p => chosen(p.key));
+    const cls = (chosen(s.key) ? ' done' : '') + (view === 'step' && i === st.step ? ' cur' : '');
+    return `<button class="stepdot${cls}" data-act="goto" data-i="${i}" data-key="dot${i}" aria-label="שָׁלָב ${i + 1}"
+      ${i === st.step && view === 'step' ? 'aria-current="step"' : ''} ${open ? '' : 'disabled'}>${i + 1}</button>`;
+  }).join('')}</nav>`;
+}
+
+function card(key, id, label, pic) {
+  const on = st[key] === id;
+  return `<button class="card${on ? ' on' : ''}" data-act="choose" data-k="${key}" data-id="${id}" data-key="${key}-${id}" aria-pressed="${on}">
+    ${pic}<span>${label}</span></button>`;
+}
+
+function storyHTML(final) {
+  const parts = story(), cur = M().steps[st.step];
+  const seen = new Set();
+  const body = parts.map((list, p) => {
+    const blank = !final && !list.length && cur.part === p;
+    if (!list.length && !blank) return '';
+    const rows = list.map(s => {
+      seen.add(s.id + s.text);
+      const isNew = !lastSeen.has(s.id + s.text) && lastSeen.size;
+      return `<div class="sent${isNew ? ' fresh' : ''}" data-sid="${s.id}">
+        ${canSpeak ? `<button class="spk" data-act="readOne" data-sid="${s.id}" data-key="say-${s.id}" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+        <span class="txt">${esc(s.text)}</span>
+        ${final && s.extra !== undefined ? `<button class="spk del" data-act="delExtra" data-i="${s.extra}" data-key="del-${s.extra}" aria-label="לִמְחֹק">${I.x}</button>` : ''}
+      </div>`;
+    }).join('') || `<div class="sent blank"><span class="txt">. . . . . .</span></div>`;
+    return `<section class="part"><h3>${M().parts[p]}</h3>${rows}</section>`;
+  }).join('');
+  lastSeen = seen;
+  const any = parts.some(l => l.length);
+  return `<div class="story-head"><h2>הַסִּפּוּר שֶׁלִּי</h2>
+      ${canSpeak && any && !final ? `<button class="act" data-act="readAll" data-key="readAll">${I.speak}${readAllLabel}</button>` : ''}</div>
+    ${body || '<div class="sent blank"><span class="txt">. . . . . .</span></div>'}`;
+}
+
+function stepView() {
+  const steps = M().steps, s = steps[st.step], last = st.step === steps.length - 1;
+  const own = s.own ? `<input class="own${st[s.key] === 'own' ? ' filled' : ''}" type="text" id="own-${s.key}" data-own="${s.key}" data-key="own-${s.key}"
+      value="${esc(st.own[s.key])}" placeholder="אוֹ כִּתְבוּ מִשְׁפָּט מִשֶּׁלָּכֶם" aria-label="אוֹ כִּתְבוּ מִשְׁפָּט מִשֶּׁלָּכֶם" maxlength="220">` : '';
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${stepsBar()}
+      ${soundBtn()}
+    </div>
+    <div class="work">
+      <section class="ask panel" aria-live="polite">
+        <h2>${s.q()}</h2>
+        ${M().choices(s)}
+        ${own}
+        <div class="tools">
+          <button class="act" data-act="surprise" data-key="surprise">${I.dice}הַפְתִּיעוּ אוֹתִי</button>
+          <button class="act primary" data-act="next" data-key="next" ${chosen(s.key) ? '' : 'disabled'}>${last ? `${I.star}סִיַּמְנוּ!` : `הַלְאָה${I.next}`}</button>
+        </div>
+      </section>
+      <div class="stage panel">${M().stage()}</div>
+      <section class="story panel" id="story">${storyHTML(false)}</section>
+    </div>`;
+}
+
+function finalView() {
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${stepsBar()}
+      ${soundBtn()}
+    </div>
+    <div class="work final">
+      <div class="stage panel">${M().stage()}</div>
+      <section class="story panel" id="story">
+        <label class="label" for="title">שֵׁם לַסִּפּוּר</label>
+        <div class="sent" data-sid="title">
+          ${canSpeak ? `<button class="spk" data-act="readOne" data-sid="title" data-key="say-title" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+          <input id="title" class="title-in txt" type="text" data-key="title" value="${esc(st.title)}" placeholder="${esc(defaultTitle())}" maxlength="60">
+        </div>
+        ${storyHTML(true)}
+      </section>
+      <section class="more panel">
+        <label class="label" for="extra">רוֹצִים לְהוֹסִיף עוֹד מִשְׁפָּט?</label>
+        <div class="add-row">
+          <input id="extra" class="own" type="text" data-key="extra" placeholder="כִּתְבוּ עוֹד מִשְׁפָּט" maxlength="220">
+          <button class="act primary" data-act="addExtra" data-key="addExtra" aria-label="לְהוֹסִיף">${I.plus}לְהוֹסִיף</button>
+        </div>
+        <label class="label" for="author">מִי כָּתַב אֶת הַסִּפּוּר?</label>
+        <input id="author" class="own" type="text" data-key="author" value="${esc(st.author)}" placeholder="הַשֵּׁם שֶׁלִּי" maxlength="40">
+        <div class="actions" style="margin-top:6px">
+          <button class="act primary big" data-act="book" data-key="book">${I.book}סֵפֶר לְהַדְפָּסָה</button>
+          ${canSpeak ? `<button class="act" data-act="readAll" data-key="readAll">${I.speak}${readAllLabel}</button>` : ''}
+          <button class="act" data-act="home" data-key="home">${I.plus}סִפּוּר חָדָשׁ</button>
+        </div>
+      </section>
+    </div>`;
+}
+
+function bookView() {
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <h2>הַסֵּפֶר שֶׁלִּי</h2>
+      ${soundBtn()}
+    </div>
+    <div class="book">
+      <div class="actions book-actions">
+        <button class="act primary big" data-act="pdf" data-key="pdf" disabled>${I.save}לִשְׁמֹר לְהַדְפָּסָה (PDF)</button>
+        ${inViewer ? '' : `<button class="act" data-act="print" data-key="print" disabled>${I.print}לְהַדְפִּיס</button>`}
+      </div>
+      <p class="book-status" id="book-status" role="status">מְכִינִים אֶת הַסֵּפֶר…</p>
+      <div class="pages" id="pages"></div>
+    </div>`;
+}
+async function showBook() {
+  const token = Symbol();
+  showBook.token = token;
+  try {
+    const pages = await buildBook();
+    if (showBook.token !== token || view !== 'book') return;
+    bookPages = pages;
+    const el = document.getElementById('pages');
+    el.innerHTML = pages.map((src, i) => `<figure class="page"><img src="${src}" alt="${i ? `עַמּוּד ${i + 1}` : 'כְּרִיכָה'}"></figure>`).join('');
+    app.querySelectorAll('[data-act="pdf"], [data-act="print"]').forEach(b => { b.disabled = false; });
+    bookStatus(`${pages.length} עַמּוּדִים`);
+  } catch (e) {
+    if (view === 'book') bookStatus('לֹא הִצְלַחְנוּ לְהָכִין אֶת הַסֵּפֶר. נַסּוּ שׁוּב.');
+  }
+}
+
+// Live update of the story while typing, without rebuilding the inputs.
+function refreshStory() {
+  stopReading();
+  const el = document.getElementById('story');
+  if (el && view === 'step') el.innerHTML = storyHTML(false);
+  const next = app.querySelector('[data-act="next"]');
+  if (next) next.disabled = !chosen(M().steps[st.step].key);
+  const stage = app.querySelector('.stage');
+  if (stage) stage.innerHTML = M().stage();
+  save();
+}
+
+/* ================= actions ================= */
+let advanceTimer = null;
+function go(nextView, step) {
+  if (step !== undefined) st.step = step;
+  view = nextView;
+  if (st) st.screen = view === 'final' || view === 'book' ? 'final' : 'step';
+  render();
+  window.scrollTo(0, 0);
+  if (view === 'book') showBook();
+}
+function forward() {
+  if (!chosen(M().steps[st.step].key)) return;
+  if (st.step < M().steps.length - 1) { sfx('tap'); go('step', st.step + 1); }
+  else { sfx('done'); go('final'); }
+}
+function choose(key, id) {
+  st[key] = id;
+  if (st.own[key] !== undefined) st.own[key] = '';
+  M().chose(key, id);
+  sfx('pick');
+  render();
+  // one tap is enough: move on after the child has seen the choice
+  advanceTimer = setTimeout(forward, 700);
+}
+let spinning = false;
+function surprise() {
+  if (spinning) return;
+  const s = M().steps[st.step];
+  const ids = M().options(s), pool = ids.filter(id => id !== st[s.key]);
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+  const cards = [...app.querySelectorAll(`.card[data-k="${s.key}"]`)];
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  sfx('magic');
+  if (reduce || !cards.length) { choose(s.key, winner); return; }
+  spinning = true;
+  let n = 0;
+  const spin = () => {
+    cards.forEach(c => c.classList.remove('flash'));
+    if (n >= 7) { spinning = false; choose(s.key, winner); return; }
+    cards[(n * 3 + 1) % cards.length].classList.add('flash');
+    n++;
+    setTimeout(spin, 95);
+  };
+  spin();
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled || spinning) return;
+  clearTimeout(advanceTimer);
+  switch (b.dataset.act) {
+    case 'new': st = newStory(b.dataset.mode); lastSeen = new Set(); sfx('tap'); go('step', 0); break;
+    case 'resume': {
+      st = Object.assign(newStory(b.dataset.mode), store.drafts[b.dataset.mode]);
+      lastSeen = new Set(); sfx('tap');
+      go(st.screen === 'final' ? 'final' : 'step');
+      break;
+    }
+    case 'home': sfx('tap'); view = 'start'; render(); window.scrollTo(0, 0); break;
+    case 'lab': stopReading(); window.openApp('lab'); break;
+    case 'sound': store.sound = !store.sound; render(); sfx('tap'); break;
+    case 'choose': choose(b.dataset.k, b.dataset.id); break;
+    case 'surprise': surprise(); break;
+    case 'next': forward(); break;
+    case 'back':
+      sfx('back');
+      if (view === 'book') go('final');
+      else if (view === 'final') go('step', M().steps.length - 1);
+      else if (st.step > 0) go('step', st.step - 1);
+      else { view = 'start'; render(); }
+      break;
+    case 'goto': sfx('tap'); go('step', +b.dataset.i); break;
+    case 'readOne': {
+      const sid = b.dataset.sid;
+      if (sid === 'title') { read([{ id: 'title', text: titleText() }]); break; }
+      const s = story().flat().find(x => x.id === sid);
+      if (s) read([s]);
+      break;
+    }
+    case 'readAll': readAll(b); break;
+    case 'addExtra': addExtra(); break;
+    case 'delExtra': st.extra.splice(+b.dataset.i, 1); sfx('back'); render(); break;
+    case 'book': sfx('tap'); go('book'); break;
+    case 'pdf': savePdf(b); break;
+    case 'print': window.print(); break;
+  }
+});
+
+function addExtra() {
+  const input = document.getElementById('extra');
+  const t = input && input.value.trim();
+  if (!t) { if (input) input.focus(); return; }
+  st.extra.push(t);
+  sfx('pick');
+  render();
+  const again = document.getElementById('extra');
+  if (again) again.focus();
+}
+
+app.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.own) {
+    const key = t.dataset.own;
+    st.own[key] = t.value;
+    if (t.value.trim()) st[key] = 'own';
+    else if (st[key] === 'own') st[key] = null;
+    t.classList.toggle('filled', st[key] === 'own');
+    app.querySelectorAll(`.card[data-k="${key}"]`).forEach(c => {
+      const on = st[key] === c.dataset.id;
+      c.classList.toggle('on', on); c.setAttribute('aria-pressed', on);
+    });
+    clearTimeout(advanceTimer);
+    refreshStory();
+  } else if (t.id === 'title') { st.title = t.value; save(); }
+  else if (t.id === 'author') { st.author = t.value; save(); }
+});
+app.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (e.target.id === 'extra') { e.preventDefault(); addExtra(); }
+  else if (e.target.dataset.own && chosen(e.target.dataset.own)) { e.preventDefault(); forward(); }
+});
+
+if (canSpeak) speechSynthesis.getVoices();   // some browsers load voices lazily
+render();
+})();
+</script>
+<script>
+// One page, two apps: the color mixing lab (#app) and the story lab (#story-app).
+window.openApp = name => {
+  document.getElementById('app').hidden = name !== 'lab';
+  document.getElementById('story-app').hidden = name !== 'stories';
+  window.scrollTo(0, 0);
+};
+if (location.hash === '#stories') window.openApp('stories');
+</script>
+
 </body>
 </html>
