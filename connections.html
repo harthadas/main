@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
 <style>
-/* Layout: one calm column like מעבדת צבעים: solved groups stack on top, a 4×4 word grid below, actions at the bottom. Color appears only as the reward. */
+/* Layout: one calm column like מעבדת צבעים. A start screen picks the board (3 or 4 words per group); in play, solved groups stack on top, the word grid sits below, actions at the bottom. Color appears only as the reward. */
 :root {
   --paper: #f3f5f8;
   --surface: #ffffff;
@@ -23,6 +23,7 @@
   color-scheme: light;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body {
   margin: 0;
@@ -50,16 +51,16 @@ h1 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balanc
 
 /* ---------- board ---------- */
 .board { display: flex; flex-direction: column; gap: 10px; }
-.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .tile {
   position: relative;
-  min-height: 78px;
+  min-height: 84px;
   border: 2px solid var(--line);
   background: var(--surface);
   border-radius: var(--radius);
   font-family: var(--display);
   font-weight: 500;
-  font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+  font-size: clamp(1.45rem, 6.4vw, 1.9rem);
   line-height: 1.7;
   padding: 8px 4px;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
@@ -97,6 +98,31 @@ h1 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balanc
   .tile { transition: none; }
 }
 
+/* 4 words per group: the original 4×4 board */
+.size-4 .grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.size-4 .tile { min-height: 78px; font-size: clamp(1.15rem, 4.6vw, 1.5rem); }
+
+/* ---------- start screen ---------- */
+.choose { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.mode {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 24px 18px; display: flex; flex-direction: column; align-items: center; gap: 12px;
+  font-family: var(--display); text-align: center;
+  transition: border-color .15s, transform .15s;
+}
+.mode:hover { border-color: var(--ink-soft); }
+.mode:active { transform: scale(.98); }
+.mode strong { font-size: 1.45rem; font-weight: 700; line-height: 1.5; }
+.mode span.note { font-family: var(--body); color: var(--ink-soft); font-size: 1.05rem; }
+.mini { display: grid; gap: 5px; }
+.mini i { width: 18px; height: 14px; border-radius: 4px; background: var(--line); }
+.mini i:nth-child(-n+4) { background: var(--ink); }
+.mini.m3 { grid-template-columns: repeat(3, 18px); }
+.mini.m3 i:nth-child(4) { background: var(--line); }
+.mini.m3 i:nth-child(-n+3) { background: var(--ink); }
+.mini.m4 { grid-template-columns: repeat(4, 18px); }
+.back { align-self: flex-start; font-size: 1.05rem; min-height: 48px; padding: 6px 18px; }
+
 /* ---------- message + actions ---------- */
 .msg { min-height: 2em; margin: 0; text-align: center; font-family: var(--display); font-weight: 500; font-size: 1.25rem; }
 .msg.good { color: var(--good); }
@@ -116,18 +142,33 @@ h1 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balanc
 @media (max-width: 420px) {
   body { font-size: 17px; }
   .grid { gap: 7px; }
-  .tile { min-height: 70px; border-radius: 14px; }
+  .tile, .size-4 .tile { min-height: 70px; border-radius: 14px; }
   .act { padding: 8px 18px; font-size: 1.1rem; }
 }
 </style>
 </head>
 <body>
 <div id="app">
+  <button class="act back" id="back" type="button" hidden>→ לוּחַ אַחֵר</button>
   <h1>מָה הַקֶּשֶׁר?</h1>
-  <p class="sub">מִצְאוּ 4 מִלִּים שֶׁיֵּשׁ בֵּינֵיהֶן קֶשֶׁר.</p>
+  <section id="home">
+    <div class="choose">
+      <button class="mode" type="button" data-board="3">
+        <span class="mini m3" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <strong>3 מִלִּים בְּכָל קְבוּצָה</strong>
+        <span class="note">כִּתּוֹת א–ב · 12 מִלִּים</span>
+      </button>
+      <button class="mode" type="button" data-board="4">
+        <span class="mini m4" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <strong>4 מִלִּים בְּכָל קְבוּצָה</strong>
+        <span class="note">16 מִלִּים</span>
+      </button>
+    </div>
+  </section>
+  <p class="sub" id="sub" hidden></p>
   <div class="board" id="board"></div>
   <p class="msg" id="msg" role="status" aria-live="polite"></p>
-  <div class="actions" id="actions">
+  <div class="actions" id="actions" hidden>
     <button class="act primary" id="check" type="button">בְּדִיקָה</button>
     <button class="act" id="shuffle" type="button">עִרְבּוּב</button>
     <button class="act" id="clear" type="button">בִּטּוּל בְּחִירָה</button>
@@ -135,9 +176,22 @@ h1 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balanc
   </div>
 </div>
 <script>
-// הלוח: 4 קבוצות, בכל קבוצה 4 מילים. כדי ליצור לוח חדש מחליפים רק את הרשימה הזאת.
-// c = הצבע שמוצג ברמז ובקבוצה שנפתרה. tone = צבע הרקע של הקבוצה שנפתרה.
-const GROUPS = [
+// שני לוחות. כדי לשנות לוח מחליפים רק את רשימת הקבוצות שלו.
+// c = הצבע שמוצג ברמז ובקבוצה שנפתרה (null = בלי עיגול). tone = צבע הרקע של הקבוצה שנפתרה.
+const BOARDS = {
+  // כיתות א–ב: 4 קבוצות, בכל קבוצה 3 מילים
+  "3": [
+  { name: "צִבְעֵי יְסוֹד", tone: "#fbe3a6", words: [
+    { w: "אָדֹם", c: "#d7263d" }, { w: "צָהֹב", c: "#f5c518" }, { w: "כָּחֹל", c: "#1f5fbf" } ] },
+  { name: "צְבָעִים חַמִּים", tone: "#fde2cc", words: [
+    { w: "כָּתֹם", c: "#f08a24" }, { w: "בּוֹרְדוֹ", c: "#7a1f2b" }, { w: "חוּם", c: "#8a5a32" } ] },
+  { name: "צְבָעִים קָרִים", tone: "#d6eaf7", words: [
+    { w: "יָרֹק בָּהִיר", c: "#8fd16a" }, { w: "תְּכֵלֶת", c: "#7cc6ec" }, { w: "לָבָן", c: "#ffffff" } ] },
+  { name: "צוֹבְעִים בְּעֶזְרָתָם", tone: "#e6e7e3", words: [
+    { w: "מִכְחוֹל", c: null }, { w: "טוּשׁ", c: null }, { w: "עִפָּרוֹן", c: null } ] },
+  ],
+  // 4 קבוצות, בכל קבוצה 4 מילים
+  "4": [
   { name: "צְבָעִים חַמִּים", tone: "#fde2cc", words: [
     { w: "אָדֹם", c: "#d7263d" }, { w: "כָּתֹם", c: "#f08a24" },
     { w: "צָהֹב", c: "#f5c518" }, { w: "בּוֹרְדוֹ", c: "#7a1f2b" } ] },
@@ -150,7 +204,9 @@ const GROUPS = [
   { name: "צִבְעֵי מַתָּכוֹת", tone: "#f1e4bf", words: [
     { w: "זָהָב", c: "#d4a72c" }, { w: "כֶּסֶף", c: "#c0c4cc" },
     { w: "אָרָד", c: "#a86a3c" }, { w: "נְחֹשֶׁת", c: "#c9743f" } ] },
-];
+  ],
+};
+let GROUPS, SIZE;
 
 const $ = id => document.getElementById(id);
 let tiles, selected, solved, fresh = -1, hint = false;
@@ -163,7 +219,31 @@ function shuffle(a) {
   return a;
 }
 
+function openBoard(key) {
+  GROUPS = BOARDS[key];
+  SIZE = GROUPS[0].words.length;
+  $("app").className = "size-" + SIZE;
+  $("home").hidden = true;
+  $("back").hidden = false;
+  $("sub").hidden = false;
+  $("sub").textContent = `מִצְאוּ ${SIZE} מִלִּים שֶׁיֵּשׁ בֵּינֵיהֶן קֶשֶׁר.`;
+  hint = false;
+  $("hint").setAttribute("aria-pressed", "false");
+  start();
+}
+
+function showHome() {
+  $("app").className = "";
+  $("home").hidden = false;
+  $("back").hidden = true;
+  $("sub").hidden = true;
+  $("board").innerHTML = "";
+  $("actions").hidden = true;
+  say("");
+}
+
 function start() {
+  fresh = -1;
   tiles = shuffle(GROUPS.flatMap((g, gi) => g.words.map(x => ({ ...x, g: gi }))));
   selected = new Set();
   solved = [];
@@ -186,7 +266,7 @@ function render() {
     row.className = "solved" + (gi === fresh ? " fresh" : "");
     row.style.background = g.tone;
     row.innerHTML = `<h2>${g.name}</h2><p>${g.words.map(x => x.w).join(" · ")}</p>
-      <div class="swatches">${g.words.map(x => `<span style="background:${x.c}"></span>`).join("")}</div>`;
+      <div class="swatches">${g.words.filter(x => x.c).map(x => `<span style="background:${x.c}"></span>`).join("")}</div>`;
     board.appendChild(row);
   }
   if (tiles.length) {
@@ -197,7 +277,7 @@ function render() {
       b.type = "button";
       b.className = "tile";
       b.setAttribute("aria-pressed", selected.has(t) ? "true" : "false");
-      b.innerHTML = (hint ? `<span class="dot" style="background:${t.c}"></span>` : "") + `<span>${t.w}</span>`;
+      b.innerHTML = (hint && t.c ? `<span class="dot" style="background:${t.c}"></span>` : "") + `<span>${t.w}</span>`;
       b.addEventListener("click", () => toggle(t));
       t.el = b;
       grid.appendChild(b);
@@ -211,24 +291,24 @@ function render() {
     $("again").addEventListener("click", start);
   }
   $("actions").hidden = !tiles.length;
-  $("check").disabled = selected.size !== 4;
+  $("check").disabled = selected.size !== SIZE;
   $("clear").disabled = selected.size === 0;
 }
 
 function toggle(t) {
   fresh = -1;
   if (selected.has(t)) selected.delete(t);
-  else if (selected.size < 4) selected.add(t);
+  else if (selected.size < SIZE) selected.add(t);
   say("");
   render();
 }
 
 function check() {
-  if (selected.size !== 4) return;
+  if (selected.size !== SIZE) return;
   const counts = {};
   selected.forEach(t => { counts[t.g] = (counts[t.g] || 0) + 1; });
   const best = Math.max(...Object.values(counts));
-  if (best === 4) {
+  if (best === SIZE) {
     const gi = [...selected][0].g;
     solved.push(gi);
     fresh = gi;
@@ -238,7 +318,7 @@ function check() {
     render();
     return;
   }
-  say(best === 3 ? "כִּמְעַט! רַק מִלָּה אַחַת לֹא שַׁיֶּכֶת." : "לֹא הַפַּעַם. נַסּוּ שׁוּב.", best === 3 ? "near" : "");
+  say(best === SIZE - 1 ? "כִּמְעַט! רַק מִלָּה אַחַת לֹא שַׁיֶּכֶת." : "לֹא הַפַּעַם. נַסּוּ שׁוּב.", best === SIZE - 1 ? "near" : "");
   selected.forEach(t => {
     t.el.classList.remove("shake");
     void t.el.offsetWidth;
@@ -254,8 +334,13 @@ $("hint").addEventListener("click", () => {
   $("hint").setAttribute("aria-pressed", String(hint));
   render();
 });
+document.querySelectorAll("[data-board]").forEach(b =>
+  b.addEventListener("click", () => openBoard(b.dataset.board)));
+$("back").addEventListener("click", showHome);
 
-start();
+// קישור ישיר ללוח: ...#3 או ...#4
+const direct = location.hash.slice(1);
+if (BOARDS[direct]) openBoard(direct); else showHome();
 </script>
 </body>
 </html>
