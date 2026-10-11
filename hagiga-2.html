@@ -1,0 +1,719 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>חגיגה של צבעים 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: the same calm column and rainbow as level 1, so a child who did level 1 knows the way around.
+   What changes is the work: answers are words instead of pictures, four choices instead of three. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --track: #e3e8ef;
+  --good: #2f8a55;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+p { margin: 0; }
+svg { display: block; }
+.emo { font-family: var(--emoji); line-height: 1.2; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.bar h2 { font-size: 1.3rem; flex: 1; min-width: 0; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.sound {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 16px 6px 12px; min-height: 52px;
+  font-family: var(--display); font-weight: 500; font-size: 1.1rem;
+}
+.sound svg { width: 24px; height: 24px; }
+.sound.off { color: var(--ink-soft); border-style: dashed; }
+@media (max-width: 420px) { .sound { padding: 6px 12px; } .sound .txt { display: none; } }
+.dots { display: flex; gap: 8px; align-items: center; }
+.dots i { width: 12px; height: 12px; border-radius: 50%; background: var(--track); }
+.dots i.past { background: var(--ink-soft); }
+.dots i.now { background: var(--ink); width: 16px; height: 16px; }
+
+/* ---------- rainbow ---------- */
+.rainbow { width: 100%; height: auto; }
+.rainbow .new { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.4s ease-out .3s forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+
+/* ---------- home ---------- */
+.home { display: flex; flex-direction: column; align-items: center; gap: 22px; padding-block: 8px 12px; text-align: center; }
+.home .rainbow { max-width: 380px; }
+.home h1 { font-size: clamp(2rem, 8vw, 2.8rem); line-height: 1.3; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px 14px; }
+.level { font-size: 1rem; font-weight: 500; border: 2px solid var(--ink); border-radius: 999px; padding: 2px 14px; line-height: 1.6; }
+.home .by { color: var(--ink-soft); font-size: 1.05rem; }
+.home .tell { display: flex; align-items: center; gap: 10px; }
+.home .story { font-family: var(--display); font-size: 1.35rem; font-weight: 500; max-width: 32ch; }
+.start {
+  border: 0; border-radius: 999px; background: var(--ink); color: var(--surface);
+  font-family: var(--display); font-weight: 700; font-size: 1.5rem;
+  padding: 14px 40px; min-height: 68px; min-width: min(300px, 100%);
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+}
+.start svg { width: 28px; height: 28px; }
+.start:active { transform: scale(.97); }
+.plan { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%; }
+.stop {
+  position: relative;
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 14px 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  font-family: var(--display); font-size: 1.1rem; font-weight: 500; line-height: 1.4;
+}
+.stop .badge { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: var(--ink); border: 4px solid var(--c); background: var(--surface); }
+.stop .badge svg { width: 26px; height: 26px; }
+.stop.done .badge { background: var(--c); color: #ffffff; }
+.stop.next { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+.stop .tick { position: absolute; top: 8px; inset-inline-start: 8px; width: 26px; height: 26px; color: var(--good); }
+
+.teacher { width: 100%; text-align: start; background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 4px 18px; font-size: 1rem; }
+.teacher summary { cursor: pointer; font-family: var(--display); font-weight: 500; font-size: 1.1rem; padding-block: 10px; }
+.teacher ul { margin: 0 0 12px; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 6px; }
+.teacher h3 { font-family: var(--display); font-size: 1.05rem; font-weight: 500; margin: 4px 0 6px; }
+.stats { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+.stats td { padding: 4px 0; border-bottom: 1px solid var(--line); }
+.stats td:last-child { text-align: end; color: var(--ink-soft); }
+.teacher .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-bottom: 14px; }
+.link-btn { border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 16px; font-size: 1rem; }
+.link-btn.warn { border-color: #b4412f; color: #b4412f; }
+.note { color: var(--ink-soft); }
+
+/* ---------- question ---------- */
+.stage { display: flex; flex-direction: column; align-items: center; gap: 20px; padding-top: 12px; flex: 1; }
+.q { font-family: var(--display); font-weight: 700; font-size: clamp(1.4rem, 5.2vw, 1.8rem); text-align: center; text-wrap: balance; line-height: 1.5; display: flex; align-items: center; gap: 10px; }
+.say-btn { width: 44px; height: 44px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.say-btn svg { width: 22px; height: 22px; }
+
+.subject { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.word { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 10px 30px 12px; font-family: var(--display); font-size: 2rem; font-weight: 700; text-align: center; }
+.quote { background: var(--surface); border: 2px solid var(--line); border-inline-start: 6px solid var(--ink-soft); border-radius: 14px; padding: 10px 18px; font-size: 1.3rem; max-width: 34ch; text-align: center; }
+.quote b { font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; }
+
+.options { display: grid; gap: 12px; width: 100%; max-width: 640px; }
+.options.texts { grid-template-columns: repeat(2, 1fr); }
+.options.pots { grid-template-columns: repeat(4, 1fr); max-width: 560px; }
+.opt {
+  border: 3px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 14px 14px; min-height: 84px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--display); font-size: 1.25rem; font-weight: 500; line-height: 1.4; text-align: center;
+  transition: opacity .25s, border-color .2s, transform .15s;
+}
+.pots .opt { min-height: 124px; padding: 14px 4px 10px; }
+.opt:not(:disabled):active { transform: scale(.97); }
+.opt.right { border-color: var(--good); box-shadow: 0 0 0 3px var(--good); }
+.opt.picked { border-color: var(--ink); box-shadow: 0 0 0 3px var(--ink); }
+.opt.off { opacity: .28; }
+.blob {
+  display: block; width: 60px; height: 60px; border-radius: 50%; position: relative; flex: none;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,.08), inset 0 0 0 2px rgba(29,36,49,.18);
+}
+.blob::after { content: ""; position: absolute; top: 12px; inset-inline-end: 14px; width: 14px; height: 9px; border-radius: 50%; background: rgba(255,255,255,.45); }
+.blob.big { width: 96px; height: 96px; }
+.blob.big::after { top: 18px; inset-inline-end: 22px; width: 20px; height: 13px; }
+
+.fb { min-height: 132px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 12px; text-align: center; }
+.fb .msg { font-family: var(--display); font-size: 1.5rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.fb .msg svg { width: 32px; height: 32px; }
+.fb.good .msg { color: var(--good); }
+.fb.retry .msg { color: var(--ink-soft); font-weight: 500; }
+.fb .extra { font-size: 1.2rem; }
+
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.25rem;
+  padding: 10px 28px; min-height: 60px;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.act svg { width: 26px; height: 26px; }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act:disabled { opacity: .3; }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+
+/* ---------- mixing ---------- */
+.formula { display: flex; align-items: center; gap: 10px; }
+.formula .blob { width: 64px; height: 64px; }
+.formula .op { font-family: var(--display); font-size: 1.8rem; font-weight: 700; color: var(--ink-soft); }
+.target { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--display); font-size: 1.4rem; font-weight: 700; }
+
+/* ---------- sequencing ---------- */
+.seq { list-style: none; margin: 0; padding: 0; width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 8px; }
+.seq li { display: flex; align-items: center; gap: 12px; min-height: 52px; }
+.seq .num { width: 36px; height: 36px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-family: var(--display); font-weight: 700; flex: none; }
+.seq .line { flex: 1; min-width: 0; min-height: 48px; border: 2px dashed var(--line); border-radius: 14px; padding: 8px 14px; font-size: 1.15rem; display: flex; align-items: center; }
+.seq .line.full { border: 2px solid var(--good); background: var(--surface); }
+.pool { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 600px; }
+.pool .opt { min-height: 60px; font-size: 1.15rem; }
+.pool .opt.gone { visibility: hidden; }
+
+/* ---------- sentence builder ---------- */
+.make { width: 100%; max-width: 640px; background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; text-align: center; }
+.make h2 { font-size: 1.35rem; }
+.sentence { font-family: var(--display); font-size: 1.45rem; font-weight: 500; line-height: 1.8; }
+.sentence .gap { display: inline-block; min-width: 4.5em; border-bottom: 3px solid var(--ink-soft); margin-inline: 4px; }
+.sentence .gap.full { min-width: 0; margin-inline: 0; border-bottom-color: transparent; font-weight: 700; }
+.chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.chip { border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 14px 6px 12px; min-height: 48px; display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 1.1rem; }
+.chip .emo { font-size: 1.4rem; }
+.chip i { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.18); }
+.chip.on { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+.made { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.made .ring { width: 84px; height: 84px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 2px rgba(29,36,49,.18); }
+.made .emo { font-size: 2.8rem; }
+
+/* ---------- station finished ---------- */
+.done-view { display: flex; flex-direction: column; align-items: center; gap: 18px; padding-top: 12px; text-align: center; }
+.done-view .rainbow { max-width: 420px; }
+.done-view h1 { font-size: clamp(1.9rem, 7vw, 2.4rem); }
+.done-view .line { font-family: var(--display); font-size: 1.35rem; font-weight: 500; display: flex; align-items: center; gap: 10px; }
+.done-view .line i { width: 30px; height: 30px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.18); }
+
+@media (max-width: 560px) {
+  .plan { grid-template-columns: repeat(2, 1fr); }
+  .options.texts { grid-template-columns: 1fr; }
+}
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .options.pots { gap: 8px; }
+  .opt { font-size: 1.15rem; }
+  .blob { width: 50px; height: 50px; }
+  .formula .blob { width: 54px; height: 54px; }
+  .word { font-size: 1.7rem; }
+  .quote { font-size: 1.15rem; }
+  .sentence { font-size: 1.25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .rainbow .new { stroke-dashoffset: 0; }
+}
+</style>
+</head>
+<body>
+<div id="app" lang="he" dir="rtl"></div>
+
+<script>
+(() => {
+/* ================= colors ================= */
+const C = {
+  red: '#e0453a', orange: '#f08a24', yellow: '#f5c518', green: '#3a9d5d', blue: '#2d68c4', purple: '#7d4bb8',
+  pink: '#f5a3bd', brown: '#8a5a33', black: '#262a33', white: '#ffffff',
+};
+const CN = {
+  red: 'אָדֹם', orange: 'כָּתֹם', yellow: 'צָהֹב', green: 'יָרֹק', blue: 'כָּחֹל', purple: 'סָגֹל',
+  pink: 'וָרֹד', brown: 'חוּם', black: 'שָׁחֹר', white: 'לָבָן',
+};
+// station i gives back stripe i, outermost first
+const STRIPES = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+
+/* ================= icons ================= */
+const sv = (inner, w = 2.2) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${inner}</svg>`;
+const I = {
+  back: sv('<path d="M5 12h14"/><path d="M13 6l6 6-6 6"/>', 2.4),
+  next: sv('<path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/>', 2.4),
+  home: sv('<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>'),
+  redo: sv('<path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/>', 2.4),
+  check: sv('<path d="M5 12.5l4.5 4.5L19 7.5"/>', 3),
+  speak: sv('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 0 1 0 7"/><path d="M18.5 6a8.5 8.5 0 0 1 0 12"/>'),
+  play: sv('<circle cx="12" cy="12" r="9.5"/><path d="M10 8.5v7l5.5-3.5z" fill="currentColor"/>', 2),
+  mute: sv('<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>'),
+  read: sv('<path d="M3 5.5C5.5 4.5 9 4.5 12 6.5c3-2 6.5-2 9-1V19c-2.5-1-6-1-9 1-3-2-6.5-2-9-1z"/><path d="M12 6.5V20"/>'),
+  palette: sv('<path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.1-.5-1.3.4-2.4 1.8-2.4H18a3 3 0 0 0 3-3c0-5.6-4-10.5-9-10.5z"/><circle cx="7.5" cy="11" r="1.2"/><circle cx="10.5" cy="7" r="1.2"/><circle cx="15" cy="7.5" r="1.2"/>'),
+  mix: sv('<path d="M9 3s-5 6-5 9.5a5 5 0 0 0 10 0C14 9 9 3 9 3z"/><path d="M15 8s-5 5.5-5 8.5a5 5 0 0 0 10 0C20 13.5 15 8 15 8z"/>'),
+  rhyme: sv('<path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/>'),
+  word: sv('<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h5"/><path d="M15 15.5l2 2 3.5-4" />'),
+  order: sv('<path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 5l1.5-1v4"/><path d="M3.8 11.2a1.3 1.3 0 0 1 2.4.6c0 .9-2.4 1.8-2.4 2.7h2.5"/><path d="M3.8 17h2.2l-1.2 1.4a1.2 1.2 0 1 1-1.1 1.6"/>'),
+};
+
+/* ================= drawings ================= */
+const blob = (c, cls = '') => `<span class="blob ${cls}" style="background:${C[c]}"></span>`;
+
+function cloud(x, y) {
+  const puffs = [[-18, 2, 13], [0, -6, 17], [18, 2, 13], [0, 6, 13]];
+  return `<g>${puffs.map(([dx, dy, r]) => `<circle cx="${x + dx}" cy="${y + dy}" r="${r + 2}" fill="#d8dee7"/>`).join('')}
+    ${puffs.map(([dx, dy, r]) => `<circle cx="${x + dx}" cy="${y + dy}" r="${r}" fill="#ffffff"/>`).join('')}</g>`;
+}
+
+// the progress rainbow: grey tracks, coloured stripes for finished stations
+function rainbowSVG(fresh = -1) {
+  const cx = 120, cy = 118;
+  const paths = STRIPES.map((c, i) => {
+    const r = 104 - i * 13, d = `M${cx - r} ${cy}A${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+    return `<path d="${d}" fill="none" stroke="#e3e8ef" stroke-width="12"/>` +
+      (state.done.has(i) ? `<path class="${i === fresh ? 'new' : ''}" pathLength="1" d="${d}" fill="none" stroke="${C[c]}" stroke-width="12"/>` : '');
+  }).join('');
+  return `<svg class="rainbow" viewBox="0 0 240 132" role="img" aria-label="קֶשֶׁת עִם ${state.done.size} מִתּוֹךְ 6 צְבָעִים">${paths}${cloud(34, 116)}${cloud(206, 116)}</svg>`;
+}
+
+/* ================= content ================= */
+const txt = (label, correct) => ({ label, correct: !!correct });
+const pot = (id, correct) => ({ pic: blob(id), label: CN[id], correct: !!correct });
+
+// what the rainbow painted, by the book; four paints to choose from each time
+const ITEMS = [
+  { name: 'הַצְּפַרְדֵּעַ', c: 'green', from: ['green', 'purple', 'brown', 'yellow'] },
+  { name: 'הַשְּׁזִיף', c: 'purple', from: ['purple', 'orange', 'green', 'black'] },
+  { name: 'הַתַּפּוּז', c: 'orange', from: ['orange', 'red', 'yellow', 'brown'] },
+  { name: 'הָעוֹרֵב', c: 'black', from: ['black', 'white', 'blue', 'brown'] },
+  { name: 'הָאֲדָמָה', c: 'brown', from: ['brown', 'black', 'orange', 'green'] },
+  { name: 'הַבְּגָדִים בַּחֲגִיגָה בַּגַּן', c: 'white', from: ['white', 'red', 'blue', 'yellow'] },
+];
+
+// which two paints make each colour; pink is a step past the book
+const PAIRS = [
+  { res: 'green', make: ['yellow', 'blue'], say: 'צָהֹב וְכָחֹל עוֹשִׂים יָרֹק.' },
+  { res: 'purple', make: ['red', 'blue'], say: 'אָדֹם וְכָחֹל עוֹשִׂים סָגֹל.' },
+  { res: 'orange', make: ['red', 'yellow'], say: 'אָדֹם וְצָהֹב עוֹשִׂים כָּתֹם.' },
+  { res: 'pink', make: ['red', 'white'], say: 'אָדֹם וְלָבָן עוֹשִׂים וָרֹד.' },
+];
+const PAIR_POTS = ['red', 'yellow', 'blue', 'white'];
+
+// rhyming pairs from the book; the wrong answers belong to the same picture, so meaning alone does not give it away
+const RHYMES = [
+  { w: 'סָגֹל', opts: [txt('עָגֹל', 1), txt('שֻׁלְחָן'), txt('צָהֹב'), txt('שְׁזִיף')] },
+  { w: 'חוּם', opts: [txt('נָחוּם', 1), txt('אֲדָמָה'), txt('נוֹעָה'), txt('שְׂעָרוֹת')] },
+  { w: 'שָׁמַיִם', opts: [txt('מַיִם', 1), txt('עֲנָנִים'), txt('שֶׁמֶשׁ'), txt('יָם')] },
+  { w: 'פְּרָחִים', opts: [txt('אֲבַטִּיחִים', 1), txt('עַגְבָנִיּוֹת'), txt('גִּנָּה'), txt('עָלִים')] },
+  { w: 'כָּתֹם', opts: [txt('תֹּם', 1), txt('תַּפּוּז'), txt('שְׂמִיכָה'), txt('אוֹטוֹ')] },
+];
+
+const WORDS = [
+  { s: 'הַקֶּשֶׁת <b>מְטַפְטֶפֶת</b> צֶבַע.', opts: [txt('צֶבַע יוֹרֵד מִמֶּנָּה טִפּוֹת טִפּוֹת', 1), txt('הִיא צוֹבַעַת עִם מִכְחוֹל'), txt('הִיא עָפָה בַּשָּׁמַיִם'), txt('הִיא שָׁרָה שִׁיר')] },
+  { s: 'לִיאוֹר עָמַד <b>מִתְפַּלֵּא</b>.', opts: [txt('הוּא הָיָה מֻפְתָּע מְאוֹד', 1), txt('הוּא הָיָה עָיֵף'), txt('הוּא כָּעַס'), txt('הוּא רָץ מַהֵר')] },
+  { s: 'הַשֶּׁמֶשׁ <b>מְצִיצָה</b> מִן הַחַלּוֹן.', opts: [txt('מִסְתַּכֶּלֶת בְּשֶׁקֶט, קְצָת מֵהַצַּד', 1), txt('צוֹעֶקֶת חָזָק'), txt('בּוֹרַחַת מַהֵר'), txt('יְשֵׁנָה')] },
+  { s: 'הָעוֹרֵב עָף <b>בִּמְהִירוּת בָּזָק</b>.', opts: [txt('מַהֵר מְאוֹד', 1), txt('לְאַט מְאוֹד'), txt('בְּרַעַשׁ גָּדוֹל'), txt('רַק בַּלַּיְלָה')] },
+  { s: 'הַקֶּשֶׁת <b>נֶעֶלְמָה</b>.', opts: [txt('כְּבָר לֹא רוֹאִים אוֹתָהּ', 1), txt('הִיא גְּדוֹלָה מְאוֹד'), txt('הִיא חָזְרָה'), txt('הִיא נִשְׁבְּרָה')] },
+];
+
+const EVENTS = [
+  'לִיאוֹר רוֹאֶה קֶשֶׁת בַּשָּׁמַיִם.',
+  'לִיאוֹר קוֹרֵא לְאִמָּא.',
+  'הַקֶּשֶׁת מְטַפְטֶפֶת צָהֹב, כָּחֹל וְאָדֹם.',
+  'הַצְּבָעִים מִתְעַרְבְּבִים, וְיֵשׁ צְבָעִים חֲדָשִׁים.',
+  'לִיאוֹר רוֹאֶה אֶת עַצְמוֹ בַּמַּרְאָה.',
+  'הַקֶּשֶׁת נֶעֶלְמָה.',
+];
+
+const STATIONS = [
+  { name: 'הֲבָנַת הַסִּפּוּר', icon: 'read', steps: () => [
+    { q: 'מָתַי רָאָה לִיאוֹר אֶת הַקֶּשֶׁת?', options: [txt('בַּבֹּקֶר', 1), txt('בַּלַּיְלָה'), txt('בַּצָּהֳרַיִם'), txt('בָּעֶרֶב')] },
+    { q: 'אֵילוּ צְבָעִים הָיוּ בַּקֶּשֶׁת בַּהַתְחָלָה?', options: [txt('צָהֹב, כָּחֹל וְאָדֹם', 1), txt('יָרֹק, סָגֹל וְכָתֹם'), txt('לָבָן, שָׁחֹר וְחוּם'), txt('וָרֹד, צָהֹב וְיָרֹק')] },
+    { q: 'מָה רָצָה לִיאוֹר לַעֲשׂוֹת עִם אִמָּא?', options: [txt('לְטַפֵּס עַל הַקֶּשֶׁת וְלָקַחַת צֶבַע', 1), txt('לָלֶכֶת לַגַּן'), txt('לֶאֱכֹל אֲבַטִּיחַ'), txt('לִישֹׁן עוֹד קְצָת')] },
+    { q: 'לָמָּה לִיאוֹר הִתְפַּלֵּא?', options: [txt('כִּי הַצְּבָעִים הִתְעַרְבְּבוּ וְיָצְאוּ צְבָעִים חֲדָשִׁים', 1), txt('כִּי יָרַד גֶּשֶׁם'), txt('כִּי אִמָּא כָּעֲסָה'), txt('כִּי הוּא מָצָא כֶּלֶב')] },
+    { q: 'לָמָּה נֶעֶלְמָה הַקֶּשֶׁת בַּסּוֹף?', options: [txt('כִּי נִגְמַר לָהּ הַצֶּבַע', 1), txt('כִּי הִגִּיעַ הַלַּיְלָה'), txt('כִּי לִיאוֹר הָלַךְ לַגַּן'), txt('כִּי הִיא נָפְלָה עַל הַבַּיִת')] },
+  ] },
+  { name: 'מָה הַצֶּבַע?', icon: 'palette', steps: () => shuffle(ITEMS).map(it => ({
+    q: 'בַּסִּפּוּר, מָה הַצֶּבַע שֶׁל…', say: `בַּסִּפּוּר, מָה הַצֶּבַע שֶׁל ${it.name}?`, pots: true,
+    subject: () => `<div class="word">${it.name}</div>`,
+    options: it.from.map(id => pot(id, id === it.c)),
+  })) },
+  { name: 'מַעְבֶּדֶת צְבָעִים', icon: 'mix', steps: () => PAIRS.map(p => ({ type: 'pair', ...p })) },
+  { name: 'חֲרוּזִים', icon: 'rhyme', steps: () => RHYMES.map(r => ({
+    q: 'אֵיזוֹ מִלָּה מִתְחָרֶזֶת עִם…', say: `אֵיזוֹ מִלָּה מִתְחָרֶזֶת עִם ${r.w}?`,
+    subject: () => `<div class="word">${r.w}</div>`, options: r.opts,
+  })) },
+  { name: 'מִלִּים מֵהַסִּפּוּר', icon: 'word', steps: () => WORDS.map(w => ({
+    q: 'מָה פֵּרוּשׁ הַמִּלָּה הַמְּסֻמֶּנֶת?', say: `${w.s.replace(/<\/?b>/g, '')} מָה זֶה אוֹמֵר?`,
+    subject: () => `<p class="quote">${w.s}</p>`, options: w.opts,
+  })) },
+  { name: 'סֵדֶר הָאֵרוּעִים', icon: 'order', steps: () => [{ type: 'order' }] },
+];
+
+// the closing sentence: no right answer, only the child's own choice
+const THINGS = [['🏠', 'הַבַּיִת'], ['🐶', 'הַכֶּלֶב'], ['🌳', 'הָעֵץ'], ['🚲', 'הָאוֹפַנַּיִם'], ['👟', 'הַנַּעֲלַיִם'], ['☁️', 'הֶעָנָן']];
+const MAKE_COLORS = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'pink', 'brown'];
+
+/* ================= state ================= */
+const KEY = 'hagiga-shel-tzvaim-2';
+const state = {
+  view: 'home', st: 0, step: 0, steps: [], sub: {}, fresh: -1, run: null,
+  done: new Set(), stats: {}, sound: true, confirmReset: false, make: { thing: null, color: null },
+};
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+  state.done = new Set(saved.done || []);
+  state.stats = saved.stats || {};
+  if (typeof saved.sound === 'boolean') state.sound = saved.sound;
+} catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ done: [...state.done], stats: state.stats, sound: state.sound })); } catch (e) {} };
+
+function shuffle(a) {
+  a = a.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/* ================= sound =================
+   Speech reads every instruction. It is off for the whole activity once the switch in the corner is off.
+   The chime is short and quiet; wrong answers make no sound at all. */
+const canSpeak = 'speechSynthesis' in window;
+let heVoice = null;
+function pickVoice() {
+  if (!canSpeak) return;
+  heVoice = speechSynthesis.getVoices().find(v => /^he|^iw/i.test(v.lang)) || null;
+  const n = document.getElementById('voice-note');
+  if (n) n.hidden = !!heVoice;
+}
+if (canSpeak) { pickVoice(); speechSynthesis.addEventListener?.('voiceschanged', pickVoice); }
+
+function say(text) {
+  if (!canSpeak || !text || !state.sound) return;
+  speechSynthesis.cancel();
+  // speech engines read unpointed Hebrew best; keep the maqaf as a pause
+  const u = new SpeechSynthesisUtterance(text.replace(/־/g, ' ').replace(/[֑-ׇ]/g, ''));
+  u.lang = 'he-IL'; u.rate = 0.85;
+  if (heVoice) u.voice = heVoice;
+  speechSynthesis.speak(u);
+}
+
+let ac = null;
+function chime() {
+  if (!state.sound) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    [523.25, 659.25].forEach((f, i) => {
+      const o = ac.createOscillator(), g = ac.createGain(), t = ac.currentTime + i * 0.14;
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.07, t + 0.02); g.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+      o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 0.55);
+    });
+  } catch (e) {}
+}
+
+/* ================= views ================= */
+const app = document.getElementById('app');
+
+function render() {
+  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  app.innerHTML = ({ home: homeView, station: stationView, done: doneView, final: finalView })[state.view]();
+  if (focusKey) {
+    const el = app.querySelector(`[data-key="${focusKey}"]`);
+    if (el && !el.disabled) el.focus();
+  }
+  pickVoice();
+}
+
+const nextStation = () => { for (let i = 0; i < STATIONS.length; i++) if (!state.done.has(i)) return i; return -1; };
+
+function soundBtn() {
+  if (!canSpeak) return '';
+  return `<button class="sound ${state.sound ? '' : 'off'}" data-act="sound" data-key="sound" aria-pressed="${state.sound}" aria-label="${state.sound ? 'כִּבּוּי הַקְרָאָה' : 'הַפְעָלַת הַקְרָאָה'}">
+    ${state.sound ? I.speak : I.mute}<span class="txt">${state.sound ? 'הַקְרָאָה פּוֹעֶלֶת' : 'הַקְרָאָה כְּבוּיָה'}</span></button>`;
+}
+const sayBtn = (act = 'sayStep') => canSpeak && state.sound ? `<button class="say-btn" data-act="${act}" data-key="${act}" aria-label="לִשְׁמֹעַ שׁוּב">${I.play}</button>` : '';
+const plainBar = () => `<div class="bar"><span style="flex:1"></span>${soundBtn()}</div>`;
+
+const HOME_SAY = 'הַקֶּשֶׁת שׁוּב נֶעֶלְמָה! הַפַּעַם הַמְּשִׂימוֹת קָשׁוֹת יוֹתֵר. מוּכָנִים?';
+function homeView() {
+  const nx = nextStation();
+  const started = state.done.size > 0;
+  const rows = STATIONS.map((s, i) => {
+    const r = state.stats[i];
+    return `<tr><td>${s.name}</td><td>${r ? `${r[0]} מתוך ${r[1]} בניסיון הראשון` : 'עוד לא'}</td></tr>`;
+  }).join('');
+  return plainBar() + `<div class="home">
+      ${rainbowSVG()}
+      <div><h1>חֲגִיגָה שֶׁל צְבָעִים <span class="level">רָמָה 2</span></h1><p class="by">פְּעִילוּת לְפִי הַסֵּפֶר שֶׁל שׁוּלָה מוֹדָן</p></div>
+      <div class="tell"><p class="story">${HOME_SAY}</p>${sayBtn('sayHome')}</div>
+      ${nx < 0
+        ? `<button class="start" data-act="final" data-key="start">הַקֶּשֶׁת חָזְרָה! ${I.next}</button>`
+        : `<button class="start" data-act="go" data-i="${nx}" data-key="start">${started ? 'מַמְשִׁיכִים' : 'מַתְחִילִים'} ${I.next}</button>`}
+      <div class="plan">
+        ${STATIONS.map((s, i) => `<button class="stop ${state.done.has(i) ? 'done' : ''} ${i === nx ? 'next' : ''}" data-act="go" data-i="${i}" data-key="s${i}" style="--c:${C[STRIPES[i]]}">
+          ${state.done.has(i) ? `<span class="tick" aria-label="הוּשְׁלַם">${I.check}</span>` : ''}
+          <span class="badge">${I[s.icon]}</span>${s.name}</button>`).join('')}
+      </div>
+      <details class="teacher">
+        <summary>למורה</summary>
+        <ul>
+          <li>זו רמה 2, לתלמידים שכבר קוראים לבד. התשובות כתובות במילים במקום בתמונות, יש ארבע אפשרויות לבחירה, והשאלות דורשות לזכור פרטים מהסיפור ולהסיק מסקנות.</li>
+          <li>יש שש תחנות: הבנת הסיפור, צבעים מהסיפור, ערבוב צבעים (גם בכיוון ההפוך: מאילו שני צבעים יוצא ירוק), חרוזים מהספר, אוצר מילים וסדר האירועים. בסוף כל ילד משלים משפט משלו.</li>
+          <li>המבנה זהה לרמה 1: אחרי טעות האפשרות מתעמעמת והילד ממשיך לנסות, אין טיימר ואין ניקוד על המסך. ההקראה מוקראת בקול, ואפשר לכבות אותה בכפתור שבפינה.</li>
+        </ul>
+        <h3>תשובות נכונות בניסיון הראשון (במכשיר הזה)</h3>
+        <table class="stats"><tbody>${rows}</tbody></table>
+        <p class="note" id="voice-note" hidden>בדפדפן הזה לא נמצא קול בעברית, ולכן ייתכן שההקראה לא תעבוד. בדרך כלל היא עובדת ב-Chrome, ב-Edge ובאייפד.</p>
+        <div class="row">
+          ${state.confirmReset
+            ? `<span>למחוק את ההתקדמות ואת הנתונים?</span>
+               <button class="link-btn warn" data-act="reset" data-key="reset">כן, להתחיל מחדש</button>
+               <button class="link-btn" data-act="cancelReset" data-key="cancelReset">ביטול</button>`
+            : `<button class="link-btn" data-act="askReset" data-key="askReset">התחלה מחדש</button>`}
+        </div>
+      </details>
+    </div>`;
+}
+
+function stationBar() {
+  const s = STATIONS[state.st];
+  const n = state.steps.length;
+  return `<div class="bar">
+    <button class="icon-btn" data-act="home" data-key="home" aria-label="הַבַּיְתָה">${I.back}</button>
+    <h2>${s.name}</h2>
+    ${n > 1 ? `<div class="dots" aria-label="שְׁאֵלָה ${state.step + 1} מִתּוֹךְ ${n}">${state.steps.map((_, i) => `<i class="${i < state.step ? 'past' : i === state.step ? 'now' : ''}"></i>`).join('')}</div>` : ''}
+    ${soundBtn()}
+  </div>`;
+}
+
+const goodFb = (extra = '') => `<div class="fb good" aria-live="polite"><p class="msg">${I.check} נָכוֹן!</p>
+  ${extra ? `<p class="extra">${extra}</p>` : ''}
+  <button class="act primary" data-act="next" data-key="next">הַלְאָה ${I.next}</button></div>`;
+
+function stationView() {
+  const def = state.steps[state.step];
+  if (def.type === 'pair') return stationBar() + pairView(def);
+  if (def.type === 'order') return stationBar() + orderView();
+  const sub = state.sub;
+  return stationBar() + `<div class="stage">
+    <h1 class="q">${def.q}${sayBtn()}</h1>
+    ${def.subject ? `<div class="subject">${def.subject()}</div>` : ''}
+    <div class="options ${def.pots ? 'pots' : 'texts'}">
+      ${sub.order.map(k => {
+        const o = def.options[k];
+        const cls = sub.solved ? (o.correct ? 'right' : 'off') : (sub.wrong.includes(k) ? 'off' : '');
+        return `<button class="opt ${cls}" data-act="answer" data-i="${k}" data-key="o${k}" ${sub.solved || sub.wrong.includes(k) ? 'disabled' : ''}>${o.pic || ''}<span>${o.label}</span></button>`;
+      }).join('')}
+    </div>
+    ${sub.solved ? goodFb() : `<div class="fb ${sub.wrong.length ? 'retry' : ''}" aria-live="polite">${sub.wrong.length ? '<p class="msg">נַסּוּ שׁוּב</p>' : ''}</div>`}
+  </div>`;
+}
+
+const pairQ = def => `אֵילוּ שְׁנֵי צְבָעִים עוֹשִׂים ${CN[def.res]}?`;
+function pairView(def) {
+  const sub = state.sub;
+  return `<div class="stage">
+    <h1 class="q">${pairQ(def)}${sayBtn()}</h1>
+    <div class="subject">
+      ${sub.solved
+        ? `<div class="formula" aria-hidden="true">${blob(def.make[0])}<span class="op">+</span>${blob(def.make[1])}<span class="op">=</span>${blob(def.res)}</div>`
+        : `<div class="target">${blob(def.res, 'big')}${CN[def.res]}</div>`}
+    </div>
+    <p class="note">בַּחֲרוּ שְׁנֵי צְבָעִים.</p>
+    <div class="options pots">
+      ${PAIR_POTS.map(id => {
+        const on = sub.picked.includes(id);
+        const cls = sub.solved ? (def.make.includes(id) ? 'right' : 'off') : (on ? 'picked' : '');
+        return `<button class="opt ${cls}" data-act="pick" data-id="${id}" data-key="p${id}" aria-pressed="${on}" ${sub.solved ? 'disabled' : ''}>${blob(id)}<span>${CN[id]}</span></button>`;
+      }).join('')}
+    </div>
+    ${sub.solved ? goodFb(def.say)
+      : `<div class="fb ${sub.miss ? 'retry' : ''}" aria-live="polite">${sub.miss ? `<p class="msg">נַסּוּ שׁוּב</p>${sub.hint ? `<p class="extra">רֶמֶז: אֶחָד הַצְּבָעִים הוּא ${CN[def.make[0]]}.</p>` : ''}` : ''}</div>`}
+  </div>`;
+}
+
+const ORDER_Q = 'מָה קָרָה קֹדֶם? לַחֲצוּ עַל הַמִּשְׁפָּטִים לְפִי הַסֵּדֶר.';
+function orderView() {
+  const sub = state.sub;
+  return `<div class="stage">
+    <h1 class="q">${ORDER_Q}${sayBtn()}</h1>
+    <ol class="seq">
+      ${EVENTS.map((_, n) => {
+        const id = sub.placed[n];
+        return `<li><span class="num">${n + 1}</span><span class="line ${id != null ? 'full' : ''}">${id != null ? EVENTS[id] : ''}</span></li>`;
+      }).join('')}
+    </ol>
+    ${sub.solved ? goodFb('זֶה הַסֵּדֶר שֶׁל הַסִּפּוּר.')
+      : `<div class="pool">
+          ${sub.cards.map(id => `<button class="opt ${sub.placed.includes(id) ? 'gone' : ''}" data-act="place" data-i="${id}" data-key="c${id}" ${sub.placed.includes(id) ? 'disabled tabindex="-1"' : ''}>${EVENTS[id]}</button>`).join('')}
+        </div>
+        <div class="fb retry" aria-live="polite">${sub.miss ? '<p class="msg">נַסּוּ שׁוּב</p>' : ''}</div>`}
+  </div>`;
+}
+
+function doneView() {
+  const c = STRIPES[state.st];
+  const nx = nextStation();
+  return plainBar() + `<div class="done-view">
+    ${rainbowSVG(state.fresh)}
+    <h1>כָּל הַכָּבוֹד!</h1>
+    <p class="line"><i style="background:${C[c]}"></i>הַקֶּשֶׁת קִבְּלָה פַּס ${CN[c]}.</p>
+    <div class="actions">
+      ${nx >= 0 ? `<button class="act primary" data-act="go" data-i="${nx}" data-key="nextSt">לַתַּחֲנָה הַבָּאָה ${I.next}</button>` : ''}
+      <button class="act" data-act="home" data-key="home">${I.home} הַבַּיְתָה</button>
+    </div>
+  </div>`;
+}
+
+const FINAL_SAY = 'הַקֶּשֶׁת חָזְרָה! וְעַכְשָׁו אַתֶּם: מָה תִּצְבְּעוּ, וּבְאֵיזֶה צֶבַע?';
+const makeSentence = () => {
+  const m = state.make;
+  return `אֲנִי אֶצְבַּע אֶת ${m.thing != null ? THINGS[m.thing][1] : '…'} בְּצֶבַע ${m.color ? CN[m.color] : '…'}!`;
+};
+function finalView() {
+  const m = state.make;
+  const full = m.thing != null && m.color;
+  return plainBar() + `<div class="done-view">
+    ${rainbowSVG(state.fresh)}
+    <h1>הַקֶּשֶׁת חָזְרָה!</h1>
+    <section class="make">
+      <h2>וְעַכְשָׁו אַתֶּם: מָה תִּצְבְּעוּ, וּבְאֵיזֶה צֶבַע?</h2>
+      <p class="sentence">אֲנִי אֶצְבַּע אֶת
+        <span class="gap ${m.thing != null ? 'full' : ''}">${m.thing != null ? THINGS[m.thing][1] : ''}</span>
+        בְּצֶבַע <span class="gap ${m.color ? 'full' : ''}">${m.color ? CN[m.color] : ''}</span>!</p>
+      ${full ? `<div class="made"><span class="ring" style="background:${C[m.color]}"><span class="emo" aria-hidden="true">${THINGS[m.thing][0]}</span></span></div>` : ''}
+      <div class="chips" role="group" aria-label="מָה">
+        ${THINGS.map(([e, n], i) => `<button class="chip ${m.thing === i ? 'on' : ''}" data-act="thing" data-i="${i}" data-key="t${i}" aria-pressed="${m.thing === i}"><span class="emo" aria-hidden="true">${e}</span>${n}</button>`).join('')}
+      </div>
+      <div class="chips" role="group" aria-label="צֶבַע">
+        ${MAKE_COLORS.map(id => `<button class="chip ${m.color === id ? 'on' : ''}" data-act="color" data-id="${id}" data-key="k${id}" aria-pressed="${m.color === id}"><i style="background:${C[id]}"></i>${CN[id]}</button>`).join('')}
+      </div>
+    </section>
+    <div class="actions">
+      <button class="act primary" data-act="again" data-key="again">${I.redo} מְשַׂחֲקִים שׁוּב</button>
+      <button class="act" data-act="home" data-key="home">${I.home} הַבַּיְתָה</button>
+    </div>
+  </div>`;
+}
+
+/* ================= flow ================= */
+function stepSay() {
+  const def = state.steps[state.step];
+  if (def.type === 'pair') return `${pairQ(def)} בַּחֲרוּ שְׁנֵי צְבָעִים.`;
+  if (def.type === 'order') return ORDER_Q;
+  const opts = state.sub.order.map(k => def.options[k].label).join(', ');
+  return `${def.say || def.q} ${opts}.`;
+}
+
+function initStep() {
+  const def = state.steps[state.step];
+  if (def.type === 'order') {
+    let cards = shuffle(EVENTS.map((_, i) => i));
+    while (cards.every((id, i) => id === i)) cards = shuffle(cards);
+    state.sub = { cards, placed: [], miss: false, missed: false, solved: false };
+  } else if (def.type === 'pair') {
+    state.sub = { picked: [], misses: 0, miss: false, hint: false, solved: false };
+  } else {
+    state.sub = { order: shuffle(def.options.map((_, i) => i)), wrong: [], solved: false };
+  }
+}
+
+// first-try tally for the teacher's table; the child never sees it
+const tally = first => { state.run[1]++; if (first) state.run[0]++; };
+
+function go(view) { state.view = view; render(); window.scrollTo(0, 0); }
+
+function enterStation(i) {
+  state.st = i; state.step = 0; state.steps = STATIONS[i].steps(); state.run = [0, 0];
+  initStep(); go('station');
+  say(stepSay());
+}
+
+function completeStation() {
+  state.done.add(state.st); state.fresh = state.st; state.stats[state.st] = state.run; save();
+  chime();
+  if (state.done.size === STATIONS.length) { go('final'); say(FINAL_SAY); }
+  else { go('done'); say(`כָּל הַכָּבוֹד! הַקֶּשֶׁת קִבְּלָה פַּס ${CN[STRIPES[state.st]]}.`); }
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  const i = +b.dataset.i;
+  switch (b.dataset.act) {
+    case 'home': if (canSpeak) speechSynthesis.cancel(); state.confirmReset = false; go('home'); break;
+    case 'go': enterStation(i); break;
+    case 'final': state.fresh = -1; go('final'); say(FINAL_SAY); break;
+    case 'sound': state.sound = !state.sound; save(); if (!state.sound && canSpeak) speechSynthesis.cancel(); render(); break;
+    case 'sayHome': say(HOME_SAY); break;
+    case 'sayStep': say(stepSay()); break;
+    case 'answer': {
+      const def = state.steps[state.step], sub = state.sub;
+      if (sub.solved) return;
+      if (def.options[i].correct) {
+        sub.solved = true; tally(sub.wrong.length === 0); chime(); say('נָכוֹן!');
+      } else {
+        sub.wrong.push(i); say('נַסּוּ שׁוּב');
+      }
+      render(); break;
+    }
+    case 'pick': {
+      const def = state.steps[state.step], sub = state.sub, id = b.dataset.id;
+      if (sub.solved) return;
+      sub.miss = false;
+      sub.picked = sub.picked.includes(id) ? sub.picked.filter(x => x !== id) : [...sub.picked, id];
+      if (sub.picked.length === 2) {
+        if (def.make.every(x => sub.picked.includes(x))) {
+          sub.solved = true; tally(sub.misses === 0); chime(); say(`נָכוֹן! ${def.say}`);
+        } else {
+          sub.misses++; sub.miss = true; sub.hint = sub.misses >= 2;
+          // after two misses keep the first paint chosen for the child, so the next try can succeed
+          sub.picked = sub.hint ? [def.make[0]] : [];
+          say(sub.hint ? `נַסּוּ שׁוּב. רֶמֶז: אֶחָד הַצְּבָעִים הוּא ${CN[def.make[0]]}.` : 'נַסּוּ שׁוּב');
+        }
+      }
+      render(); break;
+    }
+    case 'place': {
+      const sub = state.sub;
+      if (i === sub.placed.length) {
+        sub.placed.push(i); tally(!sub.missed); sub.miss = false; sub.missed = false;
+        if (sub.placed.length === EVENTS.length) { sub.solved = true; chime(); say('נָכוֹן! זֶה הַסֵּדֶר שֶׁל הַסִּפּוּר.'); }
+      } else {
+        sub.miss = true; sub.missed = true; say('נַסּוּ שׁוּב. מָה קָרָה קֹדֶם?');
+      }
+      render(); break;
+    }
+    case 'thing': state.make.thing = i; render(); if (state.make.color) say(makeSentence()); break;
+    case 'color': state.make.color = b.dataset.id; render(); if (state.make.thing != null) say(makeSentence()); break;
+    case 'next':
+      if (state.step < state.steps.length - 1) {
+        state.step++; initStep(); render(); window.scrollTo(0, 0);
+        say(stepSay());
+      } else completeStation();
+      break;
+    case 'askReset': state.confirmReset = true; render(); break;
+    case 'cancelReset': state.confirmReset = false; render(); break;
+    // playing again keeps the teacher's table; only the teacher's reset clears it
+    case 'again': case 'reset':
+      if (b.dataset.act === 'reset') state.stats = {};
+      state.done = new Set(); state.make = { thing: null, color: null };
+      state.confirmReset = false; state.fresh = -1; save(); go('home'); break;
+  }
+});
+
+render();
+})();
+</script>
+</body>
+</html>
