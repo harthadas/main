@@ -1,0 +1,684 @@
+<title>אֵיךְ נוֹצָרִים צְבָעִים?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: a lab bench. The measuring beaker is the hero on one side, paints and gauges on the other; on a phone they stack with the paints right under the beaker. Paint is the only saturated color on screen. */
+:root {
+  --bench: #eaeeec;
+  --card: #fbfcfb;
+  --ink: #1b2420;
+  --ink-soft: #56645e;
+  --line: #d0d9d5;
+  --glass: #8fa29b;
+  --glass-fill: rgba(214, 228, 223, 0.35);
+  --good: #23784a;
+  --good-bg: #e2f2e8;
+  --near: #8a5a12;
+  --near-bg: #f6ecd8;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --r: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bench: #131816; --card: #1b2220; --ink: #e6ece9; --ink-soft: #9badA5; --line: #2d3733;
+    --glass: #6d817a; --glass-fill: rgba(120, 150, 140, 0.10);
+    --good: #7fd6a2; --good-bg: #183326; --near: #e6b860; --near-bg: #33280f;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bench: #131816; --card: #1b2220; --ink: #e6ece9; --ink-soft: #9badA5; --line: #2d3733;
+  --glass: #6d817a; --glass-fill: rgba(120, 150, 140, 0.10);
+  --good: #7fd6a2; --good-bg: #183326; --near: #e6b860; --near-bg: #33280f;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body {
+  margin: 0;
+  background: var(--bench);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-tap-highlight-color: transparent;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px; display: flex; flex-direction: column; gap: 18px; }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; opacity: .45; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.45; text-wrap: balance; }
+p { margin: 0; }
+
+/* ---------- header ---------- */
+header { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px 24px; }
+header h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); font-weight: 700; }
+.lede { color: var(--ink-soft); }
+.tabs { display: inline-flex; background: var(--card); border: 1.5px solid var(--line); border-radius: 999px; padding: 4px; gap: 4px; }
+.tabs button {
+  border: 0; background: transparent; border-radius: 999px; padding: 8px 18px;
+  font-family: var(--display); font-weight: 500; font-size: 1.02rem;
+}
+.tabs button[aria-pressed="true"] { background: var(--ink); color: var(--card); }
+
+/* ---------- challenge picker ---------- */
+.picker { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.levels { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.levels button {
+  border: 1.5px solid var(--line); background: transparent; border-radius: 999px; padding: 6px 16px;
+  font-family: var(--display); font-weight: 500;
+}
+.levels button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--card); }
+.progress { margin-inline-start: auto; color: var(--ink-soft); font-size: .92rem; font-variant-numeric: tabular-nums; }
+.chal-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.chal {
+  display: flex; align-items: center; gap: 10px; text-align: start;
+  border: 1.5px solid var(--line); background: transparent; border-radius: 14px; padding: 8px 10px;
+}
+.chal[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
+.chal .sw { width: 34px; height: 34px; border-radius: 50%; flex: none; border: 1.5px solid rgba(0,0,0,.12); }
+.chal .t { display: flex; flex-direction: column; line-height: 1.35; min-width: 0; }
+.chal .t b { font-family: var(--display); font-weight: 500; }
+.chal .t small { color: var(--good); font-size: .8rem; }
+
+/* ---------- bench grid ---------- */
+.bench {
+  display: grid; gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  grid-template-areas: "beaker paints" "beaker read" "beaker rules";
+  align-items: start;
+}
+.card { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--r); padding: 18px; }
+.beaker-card { grid-area: beaker; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.paints { grid-area: paints; }
+.read { grid-area: read; display: flex; flex-direction: column; gap: 18px; }
+.rules { grid-area: rules; }
+@media (max-width: 760px) {
+  .bench { grid-template-columns: minmax(0, 1fr); grid-template-areas: "beaker" "paints" "read" "rules"; }
+}
+.label { font-family: var(--display); font-weight: 500; font-size: .95rem; color: var(--ink-soft); letter-spacing: .01em; }
+
+/* target */
+.target { width: 100%; display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+.target .need { display: flex; flex-direction: column; align-items: flex-start; text-align: start; }
+.target .need h2 { font-size: 1.6rem; }
+.compare { display: flex; gap: 10px; }
+.compare figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: .82rem; color: var(--ink-soft); }
+.compare .sw { width: 64px; height: 64px; border-radius: 16px; border: 1.5px solid var(--line); transition: background-color .4s ease .25s; }
+.compare .sw.empty { background: repeating-linear-gradient(45deg, transparent 0 6px, var(--line) 6px 7px); }
+
+/* beaker */
+.beaker { width: min(100%, 280px); height: auto; overflow: visible; }
+@media (max-width: 760px) { .beaker { width: min(58%, 210px); } }
+.beaker .liquid { transform-box: fill-box; transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.3,.7,.3,1) .2s, fill .45s ease .25s; }
+.beaker .tick { stroke: var(--glass); stroke-width: 1.6; }
+.beaker .num { fill: var(--ink-soft); font: 600 11px var(--body); font-variant-numeric: tabular-nums; }
+.beaker .wall { fill: var(--glass-fill); stroke: var(--glass); stroke-width: 4; stroke-linejoin: round; stroke-linecap: round; }
+.beaker .gloss { fill: #fff; opacity: .22; }
+.count { color: var(--ink-soft); font-size: .92rem; font-variant-numeric: tabular-nums; }
+.result h2 { font-size: clamp(1.7rem, 5vw, 2.2rem); font-weight: 700; min-height: 1.45em; }
+.result p { color: var(--ink-soft); font-size: 1.05rem; font-variant-numeric: tabular-nums; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.btn {
+  border: 1.5px solid var(--line); background: transparent; border-radius: 999px; padding: 8px 18px;
+  font-family: var(--display); font-weight: 500;
+}
+.btn.solid { background: var(--ink); color: var(--card); border-color: var(--ink); }
+.btn:not(:disabled):hover { border-color: var(--ink); }
+.feedback { min-height: 1.6em; font-size: 1.05rem; max-width: 34ch; }
+.feedback.ok { color: var(--good); background: var(--good-bg); border-radius: 12px; padding: 8px 14px; font-weight: 600; }
+.feedback.near { color: var(--near); background: var(--near-bg); border-radius: 12px; padding: 8px 14px; }
+.feedback.plain { color: var(--ink); background: var(--bench); border-radius: 12px; padding: 8px 14px; }
+.hint { color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+/* paints */
+.paints { display: flex; flex-direction: column; gap: 14px; }
+.pots { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.pot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pot .add {
+  width: 100%; border: 1.5px solid var(--line); background: transparent; border-radius: 16px;
+  padding: 12px 6px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: border-color .15s, transform .12s;
+}
+.pot .add:not(:disabled):hover { border-color: var(--glass); }
+.pot .add:not(:disabled):active { transform: scale(.96); }
+.blob { position: relative; width: 52px; height: 52px; border-radius: 50%; box-shadow: inset 0 -5px 0 rgba(0,0,0,.14), inset 0 4px 0 rgba(255,255,255,.25); border: 1.5px solid rgba(0,0,0,.12); }
+.pname { font-family: var(--display); font-weight: 500; line-height: 1.2; }
+.role { font-size: .8rem; color: var(--ink-soft); line-height: 1.2; }
+.pot .sub { display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+.pot .n { min-width: 1.6em; text-align: center; font-weight: 600; }
+.pot .minus {
+  width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line); background: transparent;
+  font-size: 1.2rem; line-height: 1; display: grid; place-items: center; padding: 0;
+}
+
+/* gauges */
+.gauge { display: flex; flex-direction: column; gap: 6px; }
+.gauge .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.gauge .val { font-family: var(--display); font-weight: 500; }
+.track { position: relative; height: 18px; border-radius: 999px; border: 1.5px solid var(--line); }
+.track.light { background: linear-gradient(to left, #111, #fff); }
+.track .mark {
+  position: absolute; top: 50%; width: 26px; height: 26px; border-radius: 50%;
+  border: 3px solid var(--card); box-shadow: 0 0 0 1.5px var(--ink);
+  transform: translate(50%, -50%); transition: right .45s ease .25s, background-color .45s ease .25s;
+}
+.ends { display: flex; justify-content: space-between; font-size: .82rem; color: var(--ink-soft); }
+.ratio { display: flex; height: 30px; border-radius: 10px; overflow: hidden; border: 1.5px solid var(--line); background: var(--bench); }
+.ratio span { display: grid; place-items: center; font-weight: 600; font-size: .9rem; transition: flex-grow .4s ease; min-width: 0; overflow: hidden; }
+.note { font-size: .92rem; color: var(--ink-soft); }
+.muted { color: var(--ink-soft); font-size: .92rem; }
+
+/* rules */
+.rules ul { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.rules li { display: flex; align-items: center; gap: 12px; }
+.rules .sw { width: 30px; height: 30px; border-radius: 50%; flex: none; border: 1.5px solid rgba(0,0,0,.12); }
+.rules .eq { flex: 1; min-width: 0; font-variant-numeric: tabular-nums; }
+.rules .eq b { font-family: var(--display); font-weight: 500; }
+.rules .btn { padding: 4px 14px; font-size: .92rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="wrap" dir="rtl" lang="he">
+  <header>
+    <div>
+      <h1>אֵיךְ נוֹצָרִים צְבָעִים?</h1>
+      <p class="lede">מוֹסִיפִים טִפּוֹת לַכְּלִי וְרוֹאִים אֵיזֶה צֶבַע יוֹצֵא.</p>
+    </div>
+    <nav class="tabs" aria-label="מַצָּב">
+      <button id="tab-lab" data-mode="lab" aria-pressed="true">מַעְבָּדָה חָפְשִׁית</button>
+      <button id="tab-chal" data-mode="chal" aria-pressed="false">אֶתְגָּרִים</button>
+    </nav>
+  </header>
+
+  <section class="picker" id="picker" hidden>
+    <div class="levels" id="levels"></div>
+    <div class="chal-list" id="chal-list"></div>
+  </section>
+
+  <main class="bench">
+    <section class="card beaker-card">
+      <div class="target" id="target" hidden>
+        <div class="need">
+          <span class="label">צָרִיךְ לְהָכִין</span>
+          <h2 id="target-name"></h2>
+        </div>
+        <div class="compare">
+          <figure><div class="sw" id="sw-target"></div><figcaption>הַמַּטָּרָה</figcaption></figure>
+          <figure><div class="sw empty" id="sw-now"></div><figcaption>בַּכְּלִי</figcaption></figure>
+        </div>
+      </div>
+
+      <svg class="beaker" id="beaker" viewBox="0 -26 200 256" direction="ltr" role="img" aria-label="כְּלִי מְדִידָה">
+        <defs>
+          <clipPath id="inside"><rect x="38" y="20" width="124" height="200" rx="12"/></clipPath>
+        </defs>
+        <path class="wall" d="M24 14 Q36 15 36 28 V206 Q36 222 52 222 H148 Q164 222 164 206 V22 Q164 15 172 13"/>
+        <g clip-path="url(#inside)">
+          <rect class="liquid" id="liquid" x="38" y="52" width="124" height="168" style="transform: scaleY(0)"/>
+        </g>
+        <g id="ticks"></g>
+        <rect class="gloss" x="48" y="34" width="9" height="160" rx="4.5"/>
+        <g id="drops"></g>
+      </svg>
+      <p class="count" id="count"></p>
+
+      <div class="result" aria-live="polite">
+        <h2 id="name"></h2>
+        <p id="recipe"></p>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="undo">לְבַטֵּל טִפָּה אַחֲרוֹנָה</button>
+        <button class="btn" id="empty">לְרוֹקֵן אֶת הַכְּלִי</button>
+      </div>
+
+      <div id="chal-actions" class="row" hidden>
+        <button class="btn solid" id="check">בְּדִיקָה</button>
+        <button class="btn" id="hint-btn">רֶמֶז</button>
+        <button class="btn solid" id="next" hidden>לָאֶתְגָּר הַבָּא</button>
+      </div>
+      <p class="feedback" id="feedback" aria-live="polite" hidden></p>
+      <p class="hint" id="hint" hidden></p>
+    </section>
+
+    <section class="card paints" aria-label="צְבָעִים">
+      <h3 class="label">צִבְעֵי יְסוֹד</h3>
+      <div class="pots" id="pots-primary"></div>
+      <h3 class="label">לְהַבְהִיר, לְהַקְהוֹת, לְהַכְהוֹת</h3>
+      <div class="pots" id="pots-tone"></div>
+      <p class="muted" id="full-note">לְחִיצָה עַל צֶבַע מוֹסִיפָה טִפָּה. אֶפְשָׁר לְהוֹסִיף עַד 12 טִפּוֹת.</p>
+    </section>
+
+    <section class="card read">
+      <div class="gauge">
+        <div class="top"><span class="label">כַּמָּה הַצֶּבַע בָּהִיר</span><span class="val" id="light-val"></span></div>
+        <div class="track light"><div class="mark" id="light-mark"></div></div>
+        <div class="ends"><span>כֵּהֶה</span><span>בָּהִיר</span></div>
+      </div>
+      <div class="gauge">
+        <div class="top"><span class="label">כַּמָּה הַצֶּבַע חַי</span><span class="val" id="vivid-val"></span></div>
+        <div class="track" id="vivid-track"><div class="mark" id="vivid-mark"></div></div>
+        <div class="ends"><span>קֵהֶה</span><span>חַי</span></div>
+      </div>
+      <div class="gauge">
+        <span class="label">יַחַס צִבְעֵי הַיְּסוֹד</span>
+        <div class="ratio" id="ratio"></div>
+        <p class="note">הַיַּחַס קוֹבֵעַ אֶת הַגָּוֶן: 1 אָדֹם + 1 צָהֹב נוֹתֵן אוֹתוֹ כָּתֹם כְּמוֹ 2 אָדֹם + 2 צָהֹב.</p>
+      </div>
+    </section>
+
+    <section class="card rules" id="rules">
+      <h3 class="label">חֻקֵּי הָעִרְבּוּב</h3>
+      <ul id="rule-list"></ul>
+    </section>
+  </main>
+</div>
+<script>
+const PAINTS = [
+  { id: 'red',    name: 'אָדֹם',  kind: 'primary', rgb: [0.89, 0.12, 0.16] },
+  { id: 'yellow', name: 'צָהֹב',  kind: 'primary', rgb: [1.00, 0.84, 0.10] },
+  { id: 'blue',   name: 'כָּחֹל', kind: 'primary', rgb: [0.10, 0.32, 0.72] },
+  { id: 'white',  name: 'לָבָן',  kind: 'tone', role: 'מַבְהִיר', rgb: [1, 1, 1] },
+  { id: 'grey',   name: 'אָפֹר',  kind: 'tone', role: 'מַקְהֶה', rgb: [0.55, 0.55, 0.55] },
+  { id: 'black',  name: 'שָׁחֹר', kind: 'tone', role: 'מַכְהֶה', rgb: [0.09, 0.09, 0.1] },
+];
+const PAINT = Object.fromEntries(PAINTS.map(p => [p.id, p]));
+const MAX_DROPS = 12;
+
+// Corners of the red-yellow-blue paint cube (after Gossett & Chen).
+// Mixing primaries interpolates inside the cube, so red + yellow = orange.
+const CUBE = {
+  '000': [1, 1, 1],          '100': PAINT.red.rgb,
+  '010': PAINT.yellow.rgb,   '001': PAINT.blue.rgb,
+  '110': [1.00, 0.52, 0.08], '011': [0.16, 0.60, 0.26],
+  '101': [0.48, 0.17, 0.58], '111': [0.30, 0.17, 0.08],
+};
+function hueRGB(r, y, b) {
+  const m = Math.max(r, y, b); r /= m; y /= m; b /= m;
+  const out = [0, 0, 0];
+  for (const cr of [0, 1]) for (const cy of [0, 1]) for (const cb of [0, 1]) {
+    const w = (cr ? r : 1 - r) * (cy ? y : 1 - y) * (cb ? b : 1 - b);
+    const c = CUBE['' + cr + cy + cb];
+    for (let i = 0; i < 3; i++) out[i] += w * c[i];
+  }
+  return out;
+}
+// counts: {red, yellow, blue, white, grey, black}
+function mix(c) {
+  const P = c.red + c.yellow + c.blue, T = P + c.white + c.grey + c.black;
+  if (!T) return null;
+  const hue = P ? hueRGB(c.red, c.yellow, c.blue) : null;
+  const rgb = [0, 1, 2].map(i =>
+    ((hue ? P * hue[i] : 0) + c.white * PAINT.white.rgb[i] + c.grey * PAINT.grey.rgb[i] + c.black * PAINT.black.rgb[i]) / T);
+  const L = lab(rgb), chroma = Math.hypot(L[1], L[2]);
+  // vividness is measured against the clean hue: the primaries minus
+  // whatever part of all three cancels out into brown
+  const m = Math.min(c.red, c.yellow, c.blue), rest = [c.red - m, c.yellow - m, c.blue - m];
+  const pure = !P ? 0 : rest.some(Boolean) ? Math.hypot(...lab(hueRGB(...rest)).slice(1)) : 70;
+  return { rgb, lab: L, light: L[0] / 100, vivid: pure ? Math.min(1, chroma / pure) : 0, hue };
+}
+function lab(rgb) {
+  const lin = c => c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  const [R, G, B] = rgb.map(lin);
+  const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  const X = (0.4124*R + 0.3576*G + 0.1805*B) / 0.95047, Y = 0.2126*R + 0.7152*G + 0.0722*B, Z = (0.0193*R + 0.1192*G + 0.9505*B) / 1.08883;
+  return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
+}
+// CIEDE2000 color difference
+function deltaE(a, b) {
+  const [L1, a1, b1] = a, [L2, a2, b2] = b, rad = Math.PI / 180, p7 = Math.pow(25, 7);
+  const Cb = (Math.hypot(a1, b1) + Math.hypot(a2, b2)) / 2;
+  const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + p7)));
+  const ap1 = (1 + G) * a1, ap2 = (1 + G) * a2, C1 = Math.hypot(ap1, b1), C2 = Math.hypot(ap2, b2);
+  const hue = (x, y) => { if (!x && !y) return 0; const h = Math.atan2(y, x) / rad; return h >= 0 ? h : h + 360; };
+  const h1 = hue(ap1, b1), h2 = hue(ap2, b2);
+  let dh = 0; if (C1 * C2) { dh = h2 - h1; if (dh > 180) dh -= 360; else if (dh < -180) dh += 360; }
+  const dL = L2 - L1, dC = C2 - C1, dH = 2 * Math.sqrt(C1 * C2) * Math.sin(dh * rad / 2);
+  const Lb = (L1 + L2) / 2, Cpb = (C1 + C2) / 2;
+  let hb = h1 + h2; if (C1 * C2) { if (Math.abs(h1 - h2) > 180) hb += hb < 360 ? 360 : -360; hb /= 2; }
+  const T = 1 - 0.17*Math.cos((hb - 30)*rad) + 0.24*Math.cos(2*hb*rad) + 0.32*Math.cos((3*hb + 6)*rad) - 0.2*Math.cos((4*hb - 63)*rad);
+  const dT = 30 * Math.exp(-Math.pow((hb - 275) / 25, 2));
+  const RC = 2 * Math.sqrt(Math.pow(Cpb, 7) / (Math.pow(Cpb, 7) + p7));
+  const SL = 1 + 0.015 * Math.pow(Lb - 50, 2) / Math.sqrt(20 + Math.pow(Lb - 50, 2)), SC = 1 + 0.045 * Cpb, SH = 1 + 0.015 * Cpb * T;
+  const RT = -Math.sin(2 * dT * rad) * RC;
+  return Math.sqrt(Math.pow(dL/SL, 2) + Math.pow(dC/SC, 2) + Math.pow(dH/SH, 2) + RT * (dC/SC) * (dH/SH));
+}
+
+/* Naming follows the recipe: the primaries give the hue,
+   white / grey / black give the modifier. */
+const SECONDARY = { 'red+yellow': 'כָּתֹם', 'yellow+blue': 'יָרֹק', 'red+blue': 'סָגֹל' };
+const TINGE = { red: 'אֲדַמְדַּם', yellow: 'צְהַבְהַב', blue: 'כְּחַלְחַל' };
+const PRIM = ['red', 'yellow', 'blue'];
+function hueName(v) {               // v: {red, yellow, blue}
+  const on = PRIM.filter(id => v[id] > 0);
+  if (on.length === 1) return { name: PAINT[on[0]].name, fam: on[0] };
+  if (on.length === 2) {
+    const [a, b] = on, major = v[a] >= v[b] ? a : b, minor = major === a ? b : a;
+    const q = v[minor] / v[major], sec = SECONDARY[a + '+' + b];
+    if (q < 0.25) return { name: PAINT[major].name, fam: major };
+    if (q < 0.6) return { name: sec + ' ' + TINGE[major], fam: sec };
+    return { name: sec, fam: sec };
+  }
+  const m = Math.min(v.red, v.yellow, v.blue), tot = v.red + v.yellow + v.blue;
+  const rest = { red: v.red - m, yellow: v.yellow - m, blue: v.blue - m };
+  if (!rest.red && !rest.yellow && !rest.blue) return { name: 'חוּם', fam: 'brown', dark: true };
+  const base = hueName(rest), mud = 3 * m / tot;
+  const warm = ['red', 'כָּתֹם'].includes(base.fam);
+  if (warm && mud >= 0.4) return { name: 'חוּם', fam: 'brown' };
+  return { name: base.name, fam: base.fam, dull: true };
+}
+function colorName(c, mixed) {
+  const P = c.red + c.yellow + c.blue, T = P + c.white + c.grey + c.black;
+  if (!T) return '';
+  if (!P) {
+    const L = mixed.lab[0];
+    return L >= 92 ? 'לָבָן' : L >= 68 ? 'אָפֹר בָּהִיר' : L >= 42 ? 'אָפֹר' : L >= 18 ? 'אָפֹר כֵּהֶה' : 'שָׁחֹר';
+  }
+  const h = hueName(c);
+  let w = c.white / T, k = c.black / T, g = c.grey / T;
+  if (w >= 0.15 && k >= 0.15) { const both = Math.min(w, k); g += 2 * both; w -= both; k -= both; }
+  const opts = [
+    ['light', w >= 0.2 ? w : 0],
+    ['dark', k >= 0.15 ? k * 1.6 : 0],
+    ['dull', g >= 0.2 ? g : 0],
+  ].sort((x, y) => y[1] - x[1]);
+  const mod = opts[0][1] > 0 ? opts[0][0] : (h.dark ? 'dark' : h.dull ? 'dull' : null);
+  const very = (mod === 'light' && w >= 0.75) || (mod === 'dark' && k >= 0.6) || (mod === 'dull' && g >= 0.75);
+  if (mod === 'light' && h.fam === 'red' && h.name === PAINT.red.name)
+    return w >= 0.4 ? (very ? 'וָרֹד בָּהִיר' : 'וָרֹד') : 'אָדֹם בָּהִיר';
+  if (mod === 'light' && h.fam === 'blue' && h.name === PAINT.blue.name)
+    return w >= 0.4 ? (very ? 'תְּכֵלֶת בָּהִיר' : 'תְּכֵלֶת') : 'כָּחֹל בָּהִיר';
+  if (!mod || (h.dark && mod === 'light' && w < 0.5)) return h.name;
+  const word = { light: 'בָּהִיר', dark: 'כֵּהֶה', dull: 'קֵהֶה' }[mod];
+  return h.name + ' ' + word + (very ? ' מְאוֹד' : '');
+}
+
+/* ================= recipes, challenges ================= */
+const IDS = PAINTS.map(p => p.id);
+const zero = () => Object.fromEntries(IDS.map(id => [id, 0]));
+const R = o => Object.assign(zero(), o);
+const css = rgb => `rgb(${rgb.map(v => Math.round(Math.max(0, Math.min(1, v)) * 255)).join(' ')})`;
+const recipeText = c => IDS.filter(id => c[id]).map(id => `${c[id]} ${PAINT[id].name}`).join(' + ');
+
+const LEVELS = [
+  { name: 'בְּסִיסִי', items: [
+    { name: 'כָּתֹם', r: R({ red: 1, yellow: 1 }) },
+    { name: 'יָרֹק', r: R({ yellow: 1, blue: 1 }) },
+    { name: 'סָגֹל', r: R({ red: 1, blue: 1 }) },
+  ] },
+  { name: 'בָּהִיר', items: [
+    { name: 'וָרֹד', r: R({ red: 1, white: 2 }) },
+    { name: 'תְּכֵלֶת', r: R({ blue: 1, white: 2 }) },
+    { name: 'יָרֹק בָּהִיר', r: R({ yellow: 1, blue: 1, white: 2 }) },
+    { name: 'סָגֹל בָּהִיר', r: R({ red: 1, blue: 1, white: 2 }) },
+  ] },
+  { name: 'קֵהֶה וְכֵהֶה', items: [
+    { name: 'חוּם', r: R({ red: 2, yellow: 2, blue: 1 }) },
+    { name: 'כָּתֹם קֵהֶה', r: R({ red: 1, yellow: 1, grey: 2 }) },
+    { name: 'כָּחֹל כֵּהֶה', r: R({ blue: 2, black: 1 }) },
+    { name: 'יָרֹק קֵהֶה', r: R({ yellow: 1, blue: 1, grey: 2 }) },
+  ] },
+];
+const ALL = [];
+LEVELS.forEach((lv, li) => lv.items.forEach((it, i) => {
+  it.key = li + '-' + i; it.level = li; it.mix = mix(it.r); ALL.push(it);
+}));
+const MATCH = 6, NEAR = 14;   // CIEDE2000 units
+
+const RULES = [
+  R({ red: 1, yellow: 1 }), R({ yellow: 1, blue: 1 }), R({ red: 1, blue: 1 }),
+  R({ red: 2, yellow: 2, blue: 1 }), R({ red: 1, white: 2 }), R({ red: 1, yellow: 1, grey: 2 }), R({ blue: 2, black: 1 }),
+];
+
+/* ================= state ================= */
+const DONE_KEY = 'how-colors-done';
+let done = new Set();
+try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); } catch (e) {}
+const saveDone = () => { try { localStorage.setItem(DONE_KEY, JSON.stringify([...done])); } catch (e) {} };
+
+const S = { mode: 'lab', drops: [], level: 0, chal: '0-0', hint: false, solved: false };
+const counts = () => { const c = zero(); S.drops.forEach(id => c[id]++); return c; };
+const $ = id => document.getElementById(id);
+
+/* ================= build static parts ================= */
+function buildTicks() {
+  let s = '';
+  for (let i = 1; i <= MAX_DROPS; i++) {
+    const y = 220 - i * 14, long = i % 2 === 0;
+    s += `<line class="tick" x1="${long ? 146 : 152}" x2="162" y1="${y}" y2="${y}"/>`;
+    if (long) s += `<text class="num" x="141" y="${y + 4}" text-anchor="end">${i}</text>`;
+  }
+  $('ticks').innerHTML = s;
+}
+function potHTML(p) {
+  return `<div class="pot">
+    <button class="add" data-add="${p.id}" aria-label="לְהוֹסִיף טִפָּה שֶׁל ${p.name}">
+      <span class="blob" style="background:${css(p.rgb)}"></span>
+      <span class="pname">${p.name}</span>
+      ${p.role ? `<span class="role">${p.role}</span>` : ''}
+    </button>
+    <div class="sub">
+      <button class="minus" data-sub="${p.id}" aria-label="לְהוֹרִיד טִפָּה שֶׁל ${p.name}">−</button>
+      <span class="n" id="n-${p.id}">0</span>
+    </div>
+  </div>`;
+}
+function buildPots() {
+  $('pots-primary').innerHTML = PAINTS.filter(p => p.kind === 'primary').map(potHTML).join('');
+  $('pots-tone').innerHTML = PAINTS.filter(p => p.kind === 'tone').map(potHTML).join('');
+}
+function buildRules() {
+  $('rule-list').innerHTML = RULES.map((r, i) => {
+    const m = mix(r);
+    return `<li><span class="sw" style="background:${css(m.rgb)}"></span>
+      <span class="eq">${recipeText(r)} = <b>${colorName(r, m)}</b></span>
+      <button class="btn" data-rule="${i}">לְנַסּוֹת</button></li>`;
+  }).join('');
+}
+function buildPicker() {
+  $('levels').innerHTML = LEVELS.map((lv, i) =>
+    `<button data-level="${i}" aria-pressed="${S.level === i}">רָמָה ${i + 1}: ${lv.name}</button>`).join('') +
+    `<span class="progress">הֻשְׁלְמוּ ${ALL.filter(c => done.has(c.key)).length} מִתּוֹךְ ${ALL.length}</span>`;
+  $('chal-list').innerHTML = LEVELS[S.level].items.map(it =>
+    `<button class="chal" data-chal="${it.key}" aria-pressed="${S.chal === it.key}">
+      <span class="sw" style="background:${css(it.mix.rgb)}"></span>
+      <span class="t"><b>${it.name}</b>${done.has(it.key) ? '<small>הֻשְׁלַם</small>' : ''}</span>
+    </button>`).join('');
+}
+
+/* ================= render ================= */
+const lightWord = L => L < 25 ? 'כֵּהֶה מְאוֹד' : L < 45 ? 'כֵּהֶה' : L < 65 ? 'בֵּינוֹנִי' : L < 85 ? 'בָּהִיר' : 'בָּהִיר מְאוֹד';
+const vividWord = v => v < 0.2 ? 'קֵהֶה מְאוֹד' : v < 0.45 ? 'קֵהֶה' : v < 0.7 ? 'בֵּינוֹנִי' : v < 0.9 ? 'חַי' : 'חַי מְאוֹד';
+const darkText = rgb => 0.2126 * rgb[0] + 0.7152 * rgb[1] + 0.0722 * rgb[2] > 0.5;
+
+function render() {
+  const c = counts(), n = S.drops.length, m = mix(c);
+  const liquid = $('liquid');
+  liquid.style.transform = `scaleY(${n / MAX_DROPS})`;
+  if (m) liquid.style.fill = css(m.rgb);
+  $('count').textContent = `טִפּוֹת: ${n} מִתּוֹךְ ${MAX_DROPS}`;
+  $('name').textContent = m ? colorName(c, m) : 'הַכְּלִי רֵיק';
+  $('recipe').textContent = m ? recipeText(c) : 'לְחִיצָה עַל צֶבַע מוֹסִיפָה טִפָּה.';
+  $('undo').disabled = $('empty').disabled = !n;
+  IDS.forEach(id => {
+    $('n-' + id).textContent = c[id];
+    document.querySelector(`[data-sub="${id}"]`).disabled = !c[id];
+    document.querySelector(`[data-add="${id}"]`).disabled = n >= MAX_DROPS;
+  });
+  $('full-note').textContent = n >= MAX_DROPS
+    ? 'הַכְּלִי מָלֵא. אֶפְשָׁר לְהוֹרִיד טִפָּה אוֹ לְרוֹקֵן.'
+    : 'לְחִיצָה עַל צֶבַע מוֹסִיפָה טִפָּה. אֶפְשָׁר לְהוֹסִיף עַד 12 טִפּוֹת.';
+
+  // gauges
+  const L = m ? m.lab[0] : null;
+  $('light-val').textContent = m ? lightWord(L) : '';
+  $('light-mark').hidden = !m;
+  if (m) { $('light-mark').style.right = `${Math.max(0, Math.min(100, L))}%`; $('light-mark').style.backgroundColor = css(m.rgb); }
+  const hasHue = m && m.hue;
+  $('vivid-val').textContent = hasHue ? vividWord(m.vivid) : m ? 'אֵין גָּוֶן' : '';
+  $('vivid-mark').hidden = !m;
+  $('vivid-track').style.background = `linear-gradient(to left, rgb(140 140 140), ${hasHue ? css(m.hue) : 'rgb(140 140 140)'})`;
+  if (m) { $('vivid-mark').style.right = `${(hasHue ? m.vivid : 0) * 100}%`; $('vivid-mark').style.backgroundColor = css(m.rgb); }
+
+  // primary ratio
+  const P = c.red + c.yellow + c.blue;
+  $('ratio').innerHTML = P
+    ? ['red', 'yellow', 'blue'].filter(id => c[id]).map(id =>
+        `<span style="flex-grow:${c[id]};background:${css(PAINT[id].rgb)};color:${darkText(PAINT[id].rgb) ? '#1b2420' : '#fff'}">${c[id]}</span>`).join('')
+    : '<span class="muted" style="flex-grow:1">עוֹד אֵין צִבְעֵי יְסוֹד בַּכְּלִי</span>';
+
+  // challenge parts
+  const chal = S.mode === 'chal';
+  $('picker').hidden = !chal; $('target').hidden = !chal; $('chal-actions').hidden = !chal;
+  $('rules').hidden = chal;
+  if (!chal) { $('feedback').hidden = true; $('hint').hidden = true; }
+  $('tab-lab').setAttribute('aria-pressed', !chal); $('tab-chal').setAttribute('aria-pressed', chal);
+  if (chal) {
+    const it = ALL.find(x => x.key === S.chal);
+    $('target-name').textContent = it.name;
+    $('sw-target').style.backgroundColor = css(it.mix.rgb);
+    $('sw-now').classList.toggle('empty', !m);
+    $('sw-now').style.backgroundColor = m ? css(m.rgb) : '';
+    $('hint').hidden = !S.hint;
+    $('hint').textContent = `מַתְכּוֹן אֶפְשָׁרִי: ${recipeText(it.r)}`;
+    $('check').hidden = S.solved; $('next').hidden = !S.solved;
+    buildPicker();
+  }
+}
+
+/* ================= drops ================= */
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function fallDrop(id, n) {
+  if (reduceMotion()) return;
+  const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  g.innerHTML = `<path d="M0 -12 C4 -5 7 -1 7 3 A7 7 0 0 1 -7 3 C-7 -1 -4 -5 0 -12 Z" fill="${css(PAINT[id].rgb)}" stroke="rgba(0,0,0,.25)" stroke-width="1"/>`;
+  $('drops').appendChild(g);
+  const end = 220 - (n - 1) * 14 - 6;
+  const a = g.animate([
+    { transform: 'translate(100px, -28px)', opacity: 0 },
+    { transform: 'translate(100px, -14px)', opacity: 1, offset: 0.15 },
+    { transform: `translate(100px, ${end}px)`, opacity: 1 },
+  ], { duration: 420, easing: 'cubic-bezier(.5,0,1,1)' });
+  a.onfinish = () => g.remove();
+}
+function changed() {
+  if (S.mode === 'chal') {
+    const it = ALL.find(x => x.key === S.chal), m = mix(counts());
+    const ok = m && deltaE(m.lab, it.mix.lab) <= MATCH;
+    if (ok && !S.solved) {
+      S.solved = true; done.add(it.key); saveDone();
+      showFeedback('ok', deltaE(m.lab, it.mix.lab) < 0.5 ? 'מְצֻיָּן! זֶה בְּדִיּוּק הַצֶּבַע.' : 'מְצֻיָּן! הַצֶּבַע מַתְאִים.');
+    } else if (!ok) {
+      S.solved = false; $('feedback').hidden = true;
+    }
+  }
+  render();
+}
+function addDrop(id) {
+  if (S.drops.length >= MAX_DROPS) return;
+  S.drops.push(id); fallDrop(id, S.drops.length); changed();
+}
+function subDrop(id) {
+  const i = S.drops.lastIndexOf(id); if (i < 0) return;
+  S.drops.splice(i, 1); changed();
+}
+function loadRecipe(r) {
+  S.drops = []; changed();
+  const seq = []; IDS.forEach(id => { for (let k = 0; k < r[id]; k++) seq.push(id); });
+  seq.forEach((id, k) => setTimeout(() => addDrop(id), reduceMotion() ? 0 : 160 * k));
+}
+
+/* ================= guidance ================= */
+function showFeedback(kind, text) {
+  const f = $('feedback'); f.hidden = false; f.className = 'feedback ' + kind; f.textContent = text;
+}
+// The single drop added or removed that brings the mix closest to the target.
+function bestMove(c, target) {
+  const dist = cc => { const m = mix(cc); return m ? deltaE(m.lab, target.lab) : Infinity; };
+  const total = IDS.reduce((s, id) => s + c[id], 0);
+  // Primaries get a small head start, so a hue that is off is fixed with
+  // the missing primary rather than covered up with white or black.
+  const cost = (id, d) => d + (PAINT[id].kind === 'tone' ? 3 : 0);
+  let best = null;
+  IDS.forEach(id => {
+    if (total < MAX_DROPS) { const d = dist({ ...c, [id]: c[id] + 1 }); if (!best || cost(id, d) < best.cost - 0.01) best = { id, add: true, d, cost: cost(id, d) }; }
+  });
+  IDS.forEach(id => {
+    if (c[id]) { const d = dist({ ...c, [id]: c[id] - 1 }); if (!best || cost(id, d) < best.cost - 0.5) best = { id, add: false, d, cost: cost(id, d) }; }
+  });
+  return best;
+}
+function check() {
+  const it = ALL.find(x => x.key === S.chal), c = counts(), m = mix(c);
+  if (!m) return showFeedback('plain', 'הַכְּלִי רֵיק. אֶפְשָׁר לְהַתְחִיל מִטִּפָּה שֶׁל צֶבַע.');
+  const d = deltaE(m.lab, it.mix.lab);
+  if (d <= MATCH) return changed();
+  const mv = bestMove(c, it.mix);
+  if (!mv || mv.d >= d - 0.5)
+    return showFeedback('plain', 'קָשֶׁה לְתַקֵּן בְּטִפָּה אַחַת. כְּדַאי לְרוֹקֵן וּלְנַסּוֹת שׁוּב, אוֹ לְהִסְתַּכֵּל בָּרֶמֶז.');
+  const nm = PAINT[mv.id].name, dL = m.lab[0] - it.mix.lab[0];
+  const C = l => Math.hypot(l[1], l[2]), dC = C(m.lab) - C(it.mix.lab);
+  let msg;
+  if (mv.id === 'white') msg = mv.add ? 'הוּא כֵּהֶה מִדַּי. אֶפְשָׁר לְהוֹסִיף לָבָן.' : 'הוּא בָּהִיר מִדַּי. אֶפְשָׁר לְהוֹרִיד טִפָּה שֶׁל לָבָן.';
+  else if (mv.id === 'grey') msg = mv.add ? 'הוּא חַי מִדַּי. אֶפְשָׁר לְהוֹסִיף אָפֹר.' : 'הוּא קֵהֶה מִדַּי. אֶפְשָׁר לְהוֹרִיד טִפָּה שֶׁל אָפֹר.';
+  else if (mv.id === 'black') msg = mv.add ? 'הוּא בָּהִיר מִדַּי. אֶפְשָׁר לְהוֹסִיף שָׁחֹר.' : 'הוּא כֵּהֶה מִדַּי. אֶפְשָׁר לְהוֹרִיד טִפָּה שֶׁל שָׁחֹר.';
+  else if (mv.add) {
+    msg = dL > 8 ? `הוּא בָּהִיר מִדַּי. אֶפְשָׁר לְהוֹסִיף עוֹד ${nm}.`
+      : dC < -10 ? `הוּא קֵהֶה מִדַּי. אֶפְשָׁר לְהוֹסִיף עוֹד ${nm}.`
+      : `חָסֵר בּוֹ ${nm}. אֶפְשָׁר לְהוֹסִיף טִפָּה שֶׁל ${nm}.`;
+  } else {
+    msg = dL < -8 ? `הוּא כֵּהֶה מִדַּי. אֶפְשָׁר לְהוֹרִיד טִפָּה שֶׁל ${nm}.`
+      : `יֵשׁ בּוֹ יוֹתֵר מִדַּי ${nm}. אֶפְשָׁר לְהוֹרִיד טִפָּה שֶׁל ${nm}.`;
+  }
+  if (d <= NEAR) showFeedback('near', 'כִּמְעַט! ' + msg);
+  else showFeedback('plain', msg);
+}
+
+/* ================= events ================= */
+function selectChal(key) {
+  S.chal = key; S.level = ALL.find(x => x.key === key).level;
+  S.drops = []; S.hint = false; S.solved = false; $('feedback').hidden = true;
+  render();
+}
+function nextChal() {
+  const i = ALL.findIndex(x => x.key === S.chal);
+  const after = [...ALL.slice(i + 1), ...ALL.slice(0, i + 1)];
+  const nx = after.find(x => !done.has(x.key));
+  if (!nx) { showFeedback('ok', 'כָּל הָאֶתְגָּרִים הֻשְׁלְמוּ! אֶפְשָׁר לְשַׂחֵק שׁוּב בְּכָל אֶתְגָּר.'); $('next').hidden = true; return; }
+  selectChal(nx.key);
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if (!t || t.disabled) return;
+  if (t.dataset.add) addDrop(t.dataset.add);
+  else if (t.dataset.sub) subDrop(t.dataset.sub);
+  else if (t.dataset.mode) {
+    S.mode = t.dataset.mode; S.drops = []; S.hint = false; S.solved = false;
+    if (S.mode === 'chal') { const nx = ALL.find(x => !done.has(x.key)); if (nx) { S.chal = nx.key; S.level = nx.level; } }
+    render();
+  }
+  else if (t.dataset.level) { S.level = +t.dataset.level; selectChal(LEVELS[S.level].items[0].key); }
+  else if (t.dataset.chal) selectChal(t.dataset.chal);
+  else if (t.dataset.rule) loadRecipe(RULES[+t.dataset.rule]);
+  else if (t.id === 'undo') { S.drops.pop(); changed(); }
+  else if (t.id === 'empty') { S.drops = []; changed(); }
+  else if (t.id === 'check') check();
+  else if (t.id === 'hint-btn') { S.hint = true; render(); }
+  else if (t.id === 'next') nextChal();
+});
+
+/* ================= start ================= */
+function start(saved) {
+  if (saved && saved.S) Object.assign(S, saved.S);
+  buildTicks(); buildPots(); buildRules();
+  if (!saved || !saved.S) S.drops = ['red', 'yellow', 'yellow'];   // open on a worked example
+  render();
+}
+window.claude?.hot?.snapshot?.(() => ({ S: { ...S, drops: [...S.drops] } }));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
