@@ -83,7 +83,7 @@ svg { display: block; }
 .work.final { grid-template-areas: "stage" "story" "more"; }
 @media (min-width: 860px) {
   .work { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "ask stage" "ask story"; align-items: start; }
-  .work.final { grid-template-areas: "stage story" "more story"; }
+  .work.final { grid-template-areas: "stage story" "more story"; grid-template-rows: auto 1fr; }
 }
 .panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
 .stage { grid-area: stage; overflow: hidden; }
@@ -145,7 +145,7 @@ svg { display: block; }
 .title-in::placeholder { color: var(--ink); opacity: .45; }
 .title-in:focus { border-bottom-style: solid; border-bottom-color: var(--ink); outline: none; }
 .label { font-family: var(--display); font-size: 1rem; color: var(--ink-soft); }
-.more { grid-area: more; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.more { grid-area: more; padding: 16px; display: flex; flex-direction: column; gap: 10px; align-self: start; }
 .add-row { display: flex; gap: 10px; align-items: stretch; }
 .add-row .own { flex: 1; min-width: 0; }
 
