@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מה הקשר? צבעים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: one calm column like מעבדת צבעים: solved groups stack on top, a 4×4 word grid below, actions at the bottom. Color appears only as the reward. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --good: #2f8a55;
+  --near: #b7791f;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 18px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 640px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 20px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; opacity: .45; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; font-size: clamp(1.7rem, 6vw, 2.3rem); text-align: center; }
+.sub { margin: 0; text-align: center; color: var(--ink-soft); font-size: 1.1rem; }
+
+/* ---------- board ---------- */
+.board { display: flex; flex-direction: column; gap: 10px; }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.tile {
+  position: relative;
+  min-height: 78px;
+  border: 2px solid var(--line);
+  background: var(--surface);
+  border-radius: var(--radius);
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(1.15rem, 4.6vw, 1.5rem);
+  line-height: 1.7;
+  padding: 8px 4px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  touch-action: manipulation;
+  transition: background-color .12s, border-color .12s, color .12s, transform .12s;
+}
+.tile:active { transform: scale(.96); }
+.tile[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid rgba(29, 36, 49, .25); flex: none; }
+.tile[aria-pressed="true"] .dot { border-color: rgba(255, 255, 255, .6); }
+
+.solved {
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+}
+.solved.fresh { animation: pop .35s ease-out; }
+.solved h2 { margin: 0; font-family: var(--display); font-weight: 700; font-size: 1.3rem; line-height: 1.6; }
+.solved p { margin: 0; font-size: 1.2rem; }
+.swatches { display: flex; gap: 6px; margin-top: 4px; }
+.swatches span { width: 22px; height: 22px; border-radius: 50%; border: 2px solid rgba(29, 36, 49, .2); }
+
+.shake { animation: shake .4s; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+@keyframes pop { from { transform: scale(.94); opacity: .4; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .shake, .solved.fresh { animation: none; }
+  .tile { transition: none; }
+}
+
+/* ---------- message + actions ---------- */
+.msg { min-height: 2em; margin: 0; text-align: center; font-family: var(--display); font-weight: 500; font-size: 1.25rem; }
+.msg.good { color: var(--good); }
+.msg.near { color: var(--near); }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.2rem;
+  padding: 10px 24px; min-height: 56px;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act[aria-pressed="true"] { border-color: var(--ink); }
+.done { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; padding-block: 8px; }
+.done h2 { margin: 0; font-family: var(--display); font-size: 1.7rem; color: var(--good); }
+
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .grid { gap: 7px; }
+  .tile { min-height: 70px; border-radius: 14px; }
+  .act { padding: 8px 18px; font-size: 1.1rem; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>מָה הַקֶּשֶׁר?</h1>
+  <p class="sub">מִצְאוּ 4 מִלִּים שֶׁיֵּשׁ בֵּינֵיהֶן קֶשֶׁר.</p>
+  <div class="board" id="board"></div>
+  <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  <div class="actions" id="actions">
+    <button class="act primary" id="check" type="button">בְּדִיקָה</button>
+    <button class="act" id="shuffle" type="button">עִרְבּוּב</button>
+    <button class="act" id="clear" type="button">בִּטּוּל בְּחִירָה</button>
+    <button class="act" id="hint" type="button" aria-pressed="false">רֶמֶז: צְבָעִים</button>
+  </div>
+</div>
+<script>
+// הלוח: 4 קבוצות, בכל קבוצה 4 מילים. כדי ליצור לוח חדש מחליפים רק את הרשימה הזאת.
+// c = הצבע שמוצג ברמז ובקבוצה שנפתרה. tone = צבע הרקע של הקבוצה שנפתרה.
+const GROUPS = [
+  { name: "צְבָעִים חַמִּים", tone: "#fde2cc", words: [
+    { w: "אָדֹם", c: "#d7263d" }, { w: "כָּתֹם", c: "#f08a24" },
+    { w: "צָהֹב", c: "#f5c518" }, { w: "בּוֹרְדוֹ", c: "#7a1f2b" } ] },
+  { name: "צְבָעִים קָרִים", tone: "#d6eaf7", words: [
+    { w: "כָּחֹל", c: "#1f5fbf" }, { w: "יָרֹק", c: "#2e9e4f" },
+    { w: "סָגֹל", c: "#7b3fa0" }, { w: "תְּכֵלֶת", c: "#7cc6ec" } ] },
+  { name: "צְבָעִים נֵיטְרָלִיִּים", tone: "#e6e7e3", words: [
+    { w: "שָׁחֹר", c: "#1d1d1d" }, { w: "לָבָן", c: "#ffffff" },
+    { w: "אָפֹר", c: "#9a9a9a" }, { w: "בֶּז'", c: "#d9c3a0" } ] },
+  { name: "צִבְעֵי מַתָּכוֹת", tone: "#f1e4bf", words: [
+    { w: "זָהָב", c: "#d4a72c" }, { w: "כֶּסֶף", c: "#c0c4cc" },
+    { w: "אָרָד", c: "#a86a3c" }, { w: "נְחֹשֶׁת", c: "#c9743f" } ] },
+];
+
+const $ = id => document.getElementById(id);
+let tiles, selected, solved, fresh = -1, hint = false;
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function start() {
+  tiles = shuffle(GROUPS.flatMap((g, gi) => g.words.map(x => ({ ...x, g: gi }))));
+  selected = new Set();
+  solved = [];
+  say("");
+  render();
+}
+
+function say(text, kind) {
+  const m = $("msg");
+  m.textContent = text;
+  m.className = "msg" + (kind ? " " + kind : "");
+}
+
+function render() {
+  const board = $("board");
+  board.innerHTML = "";
+  for (const gi of solved) {
+    const g = GROUPS[gi];
+    const row = document.createElement("div");
+    row.className = "solved" + (gi === fresh ? " fresh" : "");
+    row.style.background = g.tone;
+    row.innerHTML = `<h2>${g.name}</h2><p>${g.words.map(x => x.w).join(" · ")}</p>
+      <div class="swatches">${g.words.map(x => `<span style="background:${x.c}"></span>`).join("")}</div>`;
+    board.appendChild(row);
+  }
+  if (tiles.length) {
+    const grid = document.createElement("div");
+    grid.className = "grid";
+    tiles.forEach(t => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "tile";
+      b.setAttribute("aria-pressed", selected.has(t) ? "true" : "false");
+      b.innerHTML = (hint ? `<span class="dot" style="background:${t.c}"></span>` : "") + `<span>${t.w}</span>`;
+      b.addEventListener("click", () => toggle(t));
+      t.el = b;
+      grid.appendChild(b);
+    });
+    board.appendChild(grid);
+  } else {
+    const done = document.createElement("div");
+    done.className = "done";
+    done.innerHTML = `<h2>כָּל הַכָּבוֹד!</h2><button class="act primary" type="button" id="again">לְשַׂחֵק שׁוּב</button>`;
+    board.appendChild(done);
+    $("again").addEventListener("click", start);
+  }
+  $("actions").hidden = !tiles.length;
+  $("check").disabled = selected.size !== 4;
+  $("clear").disabled = selected.size === 0;
+}
+
+function toggle(t) {
+  fresh = -1;
+  if (selected.has(t)) selected.delete(t);
+  else if (selected.size < 4) selected.add(t);
+  say("");
+  render();
+}
+
+function check() {
+  if (selected.size !== 4) return;
+  const counts = {};
+  selected.forEach(t => { counts[t.g] = (counts[t.g] || 0) + 1; });
+  const best = Math.max(...Object.values(counts));
+  if (best === 4) {
+    const gi = [...selected][0].g;
+    solved.push(gi);
+    fresh = gi;
+    tiles = tiles.filter(t => t.g !== gi);
+    selected.clear();
+    say(tiles.length ? "יֹפִי! מְצָאתֶם קֶשֶׁר." : "מְצָאתֶם אֶת כָּל הַקְּשָׁרִים!", "good");
+    render();
+    return;
+  }
+  say(best === 3 ? "כִּמְעַט! רַק מִלָּה אַחַת לֹא שַׁיֶּכֶת." : "לֹא הַפַּעַם. נַסּוּ שׁוּב.", best === 3 ? "near" : "");
+  selected.forEach(t => {
+    t.el.classList.remove("shake");
+    void t.el.offsetWidth;
+    t.el.classList.add("shake");
+  });
+}
+
+$("check").addEventListener("click", check);
+$("shuffle").addEventListener("click", () => { shuffle(tiles); render(); });
+$("clear").addEventListener("click", () => { selected.clear(); say(""); render(); });
+$("hint").addEventListener("click", () => {
+  hint = !hint;
+  $("hint").setAttribute("aria-pressed", String(hint));
+  render();
+});
+
+start();
+</script>
+</body>
+</html>
