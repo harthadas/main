@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מִצְאוּ אֶת הַחֲרוּזִים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: one calm column; the board is two word columns with an open lane between them where the lines are drawn. Color appears only on matched pairs. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --glass: #97a3b6;
+  --miss: #c0504d;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 40px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+p { margin: 0; }
+svg { display: block; }
+
+/* ---------- home ---------- */
+.home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; text-align: center; }
+.home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.lead { color: var(--ink-soft); font-size: 1.2rem; max-width: 30ch; text-wrap: balance; }
+.demo { display: flex; align-items: center; direction: rtl; }
+.chip {
+  font-family: var(--display); font-weight: 500; font-size: 1.3rem;
+  border: 2px solid #2f8a55; background: #e8f3ed; border-radius: 14px; padding: 4px 16px;
+}
+.demo .wire { width: 64px; height: 5px; border-radius: 3px; background: #2f8a55; }
+.pick { font-size: 1.15rem; font-weight: 500; color: var(--ink-soft); }
+.levels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; max-width: 560px; }
+.level {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 20px 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: border-color .15s, transform .15s;
+}
+.level:hover { border-color: var(--glass); }
+.level:active { transform: scale(.98); }
+.level svg { width: 72px; height: 56px; margin-block-end: 6px; }
+.level strong { font-family: var(--display); font-size: 1.4rem; font-weight: 500; line-height: 1.4; }
+.level span { color: var(--ink-soft); font-size: 1rem; }
+
+/* ---------- game bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; flex-wrap: wrap; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.bar h2 { font-size: 1.35rem; }
+.dots { display: flex; flex-wrap: wrap; gap: 6px; margin-inline-start: auto; max-width: 50%; }
+.dots i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--glass); background: var(--surface); transition: background .2s, border-color .2s; }
+
+.title { text-align: center; padding-block: 12px 4px; }
+.title h1 { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+.title p { color: var(--ink-soft); font-size: 1.1rem; text-wrap: balance; }
+
+.say {
+  min-height: 2.6em; display: grid; place-items: center; text-align: center;
+  font-family: var(--display); font-size: 1.3rem; font-weight: 500; line-height: 1.5;
+  padding-block: 6px;
+}
+
+/* ---------- board ---------- */
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(56px, 20vw, 170px) minmax(0, 1fr);
+  padding-block: 8px;
+}
+.col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.col.a { grid-column: 1; }
+.col.b { grid-column: 3; }
+.lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
+.lines line { stroke-width: 5; stroke-linecap: round; fill: none; }
+.lines .temp { stroke: var(--ink); opacity: .55; stroke-dasharray: 2 10; }
+.lines .wrong { stroke: var(--miss); stroke-dasharray: 10 8; }
+
+.word {
+  position: relative;
+  min-height: 64px;
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 8px 14px;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  font-family: var(--display); font-size: clamp(1.3rem, 4.8vw, 1.75rem); font-weight: 500; line-height: 1.5;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+  transition: border-color .15s, background-color .2s, box-shadow .15s;
+}
+/* connector dot, sitting exactly on the inner edge (the side facing the lane) */
+.word::after {
+  content: ""; position: absolute; top: 50%;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--surface); border: 3px solid var(--glass);
+  transform: translateY(-50%);
+  transition: background-color .2s, border-color .2s;
+}
+.col.a .word::after { left: -9px; }
+.col.b .word::after { right: -9px; }
+.word:hover { border-color: var(--glass); }
+.word.sel, .word.hover { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.word.sel::after, .word.hover::after { background: var(--ink); border-color: var(--ink); }
+.word.done { border-color: var(--c); background: var(--tint); cursor: default; box-shadow: none; }
+.word.done::after { background: var(--c); border-color: var(--c); }
+.word.no { border-color: var(--miss); animation: shake .4s; }
+.word.no::after { border-color: var(--miss); }
+@keyframes shake {
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ---------- win ---------- */
+.win {
+  display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 20px 16px; margin-block: 8px 12px;
+}
+.win svg { width: 64px; height: 64px; animation: pop .5s ease-out; }
+.win h2 { font-size: 1.8rem; }
+.win p { color: var(--ink-soft); font-size: 1.15rem; }
+.win .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding-block-start: 4px; }
+.btn {
+  border: 2px solid var(--ink); border-radius: 999px; padding: 10px 24px;
+  font-family: var(--display); font-size: 1.2rem; font-weight: 500; background: var(--surface);
+}
+.btn.main { background: var(--ink); color: var(--surface); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+@media (max-width: 420px) {
+  .word { min-height: 56px; padding: 6px 8px; border-radius: 14px; }
+  .col { gap: 10px; }
+  .chip { font-size: 1.1rem; padding: 4px 12px; }
+  .demo .wire { width: 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main id="app">
+
+  <!-- ===== home: pick a level ===== -->
+  <section id="home" class="home">
+    <div class="demo" aria-hidden="true">
+      <span class="chip">סָגוֹל</span><span class="wire"></span><span class="chip">עָגוֹל</span>
+    </div>
+    <h1>מִצְאוּ אֶת הַחֲרוּזִים</h1>
+    <p class="lead">מִשְׁכוּ קַו בֵּין הַמִּלִּים הַמִּתְחָרְזוֹת בַּסִּפּוּר</p>
+    <h2 class="pick">בַּחֲרוּ רָמָה</h2>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- ===== game ===== -->
+  <section id="game" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="homeBtn" aria-label="חֲזָרָה לִבְחִירַת רָמָה">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4.5l8 7"/><path d="M6.5 10v9.5h11V10"/></svg>
+      </button>
+      <h2 id="levelName"></h2>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+    </div>
+
+    <div class="title">
+      <h1>מִצְאוּ אֶת הַחֲרוּזִים</h1>
+      <p>מִשְׁכוּ קַו בֵּין הַמִּלִּים הַמִּתְחָרְזוֹת בַּסִּפּוּר</p>
+    </div>
+
+    <div class="win" id="win" hidden>
+      <svg viewBox="0 0 64 64"><path d="M32 5l7.9 16.1 17.7 2.6-12.8 12.5 3 17.6L32 45.5l-15.8 8.3 3-17.6L6.4 23.7l17.7-2.6z" fill="#f2b632" stroke="#b7791f" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      <h2>כָּל הַכָּבוֹד!</h2>
+      <p>מְצָאתֶם אֶת כָּל הַחֲרוּזִים</p>
+      <div class="row">
+        <button class="btn main" id="againBtn">עוֹד סִבּוּב</button>
+        <button class="btn" id="otherBtn">רָמָה אַחֶרֶת</button>
+      </div>
+    </div>
+
+    <div class="say" id="say" aria-live="polite"></div>
+
+    <div class="board" id="board">
+      <div class="col a" id="colA"></div>
+      <div class="col b" id="colB"></div>
+      <svg class="lines" id="lines" aria-hidden="true"></svg>
+    </div>
+  </section>
+</main>
+
+<script>
+// The rhyming pairs from the story. Edit this list to change the game's words.
+const PAIRS = [
+  ['אִמָּא', 'קָדִימָה'],
+  ['עוֹלָם', 'כֻּלָּם'],
+  ['הָמוֹן', 'לִימוֹן'],
+  ['שָׁמַיִם', 'מַיִם'],
+  ['פְּרָחִים', 'אֲבַטִּיחִים'],
+  ['קוֹרֶה', 'רוֹאֶה'],
+  ['צְבָעִים', 'אֲחֵרִים'],
+  ['עָלִים', 'מְלָפְפוֹנִים'],
+  ['סָגוֹל', 'עָגוֹל'],
+  ['כָּתוֹם', 'תּוֹם'],
+  ['צֶבַע', 'רֶבַע'],
+  ['חָזָק', 'בָּזָק'],
+  ['חוּם', 'נַחוּם'],
+  ['לָבָן', 'זָקֵן'],
+  ['צָבְעָה', 'מַרְאָה'],
+  ['חוּלְצָה', 'מְצִיצָה'],
+  ['גַּרְבַּיִם', 'נַעֲלַיִם'],
+];
+
+const LEVELS = [
+  { name: 'קַל', n: 4 },
+  { name: 'בֵּינוֹנִי', n: 7 },
+  { name: 'קָשֶׁה', n: 10 },
+  { name: 'כָּל הַחֲרוּזִים', n: PAIRS.length },
+];
+
+// One color per found pair, in the order they are found.
+const COLORS = ['#2f8a55', '#3b6fd0', '#c2571a', '#8a4fc9', '#c23b6b', '#138a8a', '#b7791f', '#5d7a1f', '#a0452e', '#4a5bb8'];
+
+const $ = id => document.getElementById(id);
+const home = $('home'), game = $('game'), board = $('board'), svg = $('lines');
+const colA = $('colA'), colB = $('colB'), say = $('say'), dots = $('dots'), win = $('win');
+const SVGNS = 'http://www.w3.org/2000/svg';
+
+const state = { level: 0, total: 0, found: 0, links: [], sel: null, drag: null, temp: null };
+
+function shuffle(list) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function tint(hex) {
+  // the pair color mixed 12% into white, for the matched card background
+  const n = parseInt(hex.slice(1), 16);
+  const mix = c => Math.round(255 - (255 - c) * 0.12);
+  return `rgb(${mix(n >> 16)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
+}
+
+/* ---------- home ---------- */
+LEVELS.forEach((lv, i) => {
+  const b = document.createElement('button');
+  b.className = 'level';
+  // little picture of the game: i+1 rows of dot—line—dot
+  let rows = '';
+  const count = i + 1, gap = 48 / (count + 1), dot = Math.min(5, gap / 2 - 1);
+  for (let r = 1; r <= count; r++) {
+    const y = 4 + gap * r;
+    rows += `<line x1="14" y1="${y}" x2="58" y2="${y}" stroke="#97a3b6" stroke-width="3" stroke-linecap="round"/>` +
+            `<circle cx="12" cy="${y}" r="${dot}" fill="#1d2431"/><circle cx="60" cy="${y}" r="${dot}" fill="#1d2431"/>`;
+  }
+  b.innerHTML = `<svg viewBox="0 0 72 56" aria-hidden="true">${rows}</svg><strong>${lv.name}</strong><span>${lv.n} זוּגוֹת</span>`;
+  b.addEventListener('click', () => startLevel(i));
+  $('levels').appendChild(b);
+});
+
+function showHome() {
+  game.hidden = true;
+  home.hidden = false;
+  window.scrollTo(0, 0);
+}
+
+function startLevel(i) {
+  state.level = i;
+  home.hidden = true;
+  game.hidden = false;
+  newRound();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- round ---------- */
+function newRound() {
+  const lv = LEVELS[state.level];
+  const picked = shuffle(PAIRS.map((_, i) => i)).slice(0, lv.n);
+  const right = shuffle(picked);
+  let left;
+  // no pair starts on the same row, so every answer needs a real line across
+  do { left = shuffle(picked); } while (picked.length > 1 && left.some((id, k) => id === right[k]));
+
+  state.total = lv.n;
+  state.found = 0;
+  state.links = [];
+  state.sel = null;
+  state.drag = null;
+
+  $('levelName').textContent = lv.name;
+  colA.replaceChildren(...right.map(id => card(id, 'a')));
+  colB.replaceChildren(...left.map(id => card(id, 'b')));
+  svg.replaceChildren();
+  state.temp = line('temp');
+  state.temp.style.display = 'none';
+  dots.replaceChildren(...picked.map(() => document.createElement('i')));
+  say.textContent = '';
+  say.style.color = '';
+  win.hidden = true;
+}
+
+function card(id, col) {
+  const b = document.createElement('button');
+  b.className = 'word';
+  b.textContent = PAIRS[id][col === 'a' ? 0 : 1];
+  b.dataset.pair = id;
+  b.dataset.col = col;
+  b.setAttribute('aria-pressed', 'false');
+  return b;
+}
+
+function line(cls) {
+  const l = document.createElementNS(SVGNS, 'line');
+  l.setAttribute('class', cls);
+  svg.appendChild(l);
+  return l;
+}
+
+// where a card's connector dot sits, in board coordinates
+function anchor(c) {
+  const b = board.getBoundingClientRect(), r = c.getBoundingClientRect();
+  return { x: (c.dataset.col === 'a' ? r.left : r.right) - b.left, y: r.top + r.height / 2 - b.top };
+}
+
+function place(l, p, q) {
+  l.setAttribute('x1', p.x); l.setAttribute('y1', p.y);
+  l.setAttribute('x2', q.x); l.setAttribute('y2', q.y);
+}
+
+function redraw() {
+  for (const k of state.links) place(k.line, anchor(k.a), anchor(k.b));
+}
+
+function select(c) {
+  if (state.sel) { state.sel.classList.remove('sel'); state.sel.setAttribute('aria-pressed', 'false'); }
+  state.sel = c;
+  if (c) { c.classList.add('sel'); c.setAttribute('aria-pressed', 'true'); }
+}
+
+function setHover(c) {
+  board.querySelectorAll('.word.hover').forEach(w => w !== c && w.classList.remove('hover'));
+  if (c) c.classList.add('hover');
+}
+
+function tryMatch(x, y) {
+  select(null);
+  const [a, b] = x.dataset.col === 'a' ? [x, y] : [y, x];
+  if (a.dataset.pair === b.dataset.pair) {
+    const color = COLORS[state.found % COLORS.length];
+    for (const c of [a, b]) {
+      c.classList.add('done');
+      c.style.setProperty('--c', color);
+      c.style.setProperty('--tint', tint(color));
+      c.setAttribute('aria-disabled', 'true');
+    }
+    const l = line('match');
+    l.style.stroke = color;
+    place(l, anchor(a), anchor(b));
+    state.links.push({ line: l, a, b });
+    const dot = dots.children[state.found];
+    dot.style.background = color;
+    dot.style.borderColor = color;
+    state.found++;
+    say.style.color = color;
+    say.textContent = `נָכוֹן! ${a.textContent} – ${b.textContent}`;
+    if (state.found === state.total) setTimeout(finish, 600);
+  } else {
+    const l = line('wrong');
+    place(l, anchor(a), anchor(b));
+    a.classList.add('no'); b.classList.add('no');
+    say.style.color = '';
+    say.textContent = 'נַסּוּ שׁוּב';
+    setTimeout(() => { l.remove(); a.classList.remove('no'); b.classList.remove('no'); }, 800);
+  }
+}
+
+function finish() {
+  say.textContent = '';
+  win.hidden = false;
+  win.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  $('againBtn').focus({ preventScroll: true });
+}
+
+const cardAt = (x, y) => document.elementFromPoint(x, y)?.closest('.word');
+const open = c => c && !c.classList.contains('done') && board.contains(c);
+
+/* ---------- drawing a line: drag from one word to another, or tap one then the other ---------- */
+board.addEventListener('pointerdown', e => {
+  const c = e.target.closest('.word');
+  if (!open(c) || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  if (state.sel && state.sel !== c && state.sel.dataset.col !== c.dataset.col) { tryMatch(state.sel, c); return; }
+  select(c);
+  state.drag = { c, id: e.pointerId, x0: e.clientX, y0: e.clientY, moved: false };
+});
+
+window.addEventListener('pointermove', e => {
+  const d = state.drag;
+  if (!d || e.pointerId !== d.id) return;
+  if (!d.moved && Math.hypot(e.clientX - d.x0, e.clientY - d.y0) < 8) return;
+  d.moved = true;
+  const b = board.getBoundingClientRect();
+  place(state.temp, anchor(d.c), { x: e.clientX - b.left, y: e.clientY - b.top });
+  state.temp.style.display = '';
+  const t = cardAt(e.clientX, e.clientY);
+  setHover(open(t) && t.dataset.col !== d.c.dataset.col ? t : null);
+});
+
+function endDrag(e) {
+  const d = state.drag;
+  if (!d || e.pointerId !== d.id) return;
+  state.drag = null;
+  state.temp.style.display = 'none';
+  setHover(null);
+  if (!d.moved) return; // a tap: the word stays selected
+  const t = e.type === 'pointerup' ? cardAt(e.clientX, e.clientY) : null;
+  if (open(t) && t.dataset.col !== d.c.dataset.col) tryMatch(d.c, t);
+  else if (t !== d.c) select(null);
+}
+window.addEventListener('pointerup', endDrag);
+window.addEventListener('pointercancel', endDrag);
+
+// keyboard: Enter / Space on a word acts like a tap
+board.addEventListener('click', e => {
+  if (e.detail !== 0) return;
+  const c = e.target.closest('.word');
+  if (!open(c)) return;
+  if (state.sel && state.sel !== c && state.sel.dataset.col !== c.dataset.col) tryMatch(state.sel, c);
+  else select(state.sel === c ? null : c);
+});
+
+$('homeBtn').addEventListener('click', showHome);
+$('otherBtn').addEventListener('click', showHome);
+$('againBtn').addEventListener('click', () => { newRound(); window.scrollTo(0, 0); });
+
+new ResizeObserver(redraw).observe(board);
+window.addEventListener('resize', redraw);
+document.fonts?.ready.then(redraw);
+</script>
+</body>
+</html>
