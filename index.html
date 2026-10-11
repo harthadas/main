@@ -63,7 +63,7 @@ svg { display: block; }
 .home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding-block: 24px; }
 .home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
 .logo { display: flex; gap: 10px; align-items: flex-end; }
-.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; width: 100%; max-width: 760px; }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 720px; }
 .mode {
   border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
   padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;
@@ -447,14 +447,6 @@ function homeView() {
           <circle cx="44" cy="30" r="7" fill="${css(PAINT.blue.rgb)}"/>
         </svg>
         סִפּוּרִים
-      </a>
-      <a class="mode" href="helpers.html">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle cx="24" cy="20" r="9" fill="#f0c4a0" stroke="#1d2431" stroke-width="3"/>
-          <path d="M12 56 Q12 34 24 32 Q36 34 36 56 Z" fill="${css(PAINT.yellow.rgb)}" stroke="#1d2431" stroke-width="3" stroke-linejoin="round"/>
-          <path d="M48 26 C45 33 38 40 38 46 a10 10 0 0 0 20 0 C58 40 51 33 48 26 Z" fill="${css(PAINT.blue.rgb)}" stroke="#1d2431" stroke-width="3" stroke-linejoin="round"/>
-        </svg>
-        צְבָעִים לָעֶזְרָה
       </a>
     </div>
   </div>`;
