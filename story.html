@@ -1,0 +1,840 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>מעבדת סיפורים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Same calm language as the color lab: neutral paper, the color characters are the only saturated things on screen.
+   Wide screens: choices on the right, the picture and the growing story on the left. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --glass: #97a3b6;
+  --mark: #fff1b0;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+svg { display: block; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none; padding: 0;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn.off { color: var(--glass); }
+.bar h2 { font-size: 1.35rem; flex: 1; }
+.steps { flex: 1; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.stepdot {
+  width: 36px; height: 36px; border-radius: 50%; padding: 0;
+  border: 2px solid var(--line); background: var(--surface);
+  font-family: var(--display); font-weight: 700; font-size: 1rem; line-height: 1;
+  display: grid; place-items: center;
+}
+.stepdot.done { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.stepdot.cur { box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--ink); }
+.stepdot:disabled { opacity: .4; }
+
+/* ---------- start ---------- */
+.start { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; text-align: center; }
+.start h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.start p { margin: -18px 0 0; color: var(--ink-soft); font-family: var(--display); font-size: 1.25rem; }
+.start .hello { width: min(340px, 100%); }
+.start .actions { flex-direction: column; align-items: center; }
+
+/* ---------- work area ---------- */
+.work { display: grid; gap: 18px; padding-top: 14px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "ask" "story"; }
+.work.final { grid-template-areas: "stage" "story" "more"; }
+@media (min-width: 860px) {
+  .work { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "ask stage" "ask story"; align-items: start; }
+  .work.final { grid-template-areas: "stage story" "more story"; }
+}
+.panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+.stage { grid-area: stage; overflow: hidden; }
+.stage svg { width: 100%; height: auto; }
+
+.ask { grid-area: ask; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.ask h2 { font-size: 1.5rem; }
+.choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.choices.small { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.card {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 10px 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--display); font-size: 1.15rem; font-weight: 500; line-height: 1.5; text-align: center;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.card:hover { border-color: var(--glass); }
+.card:active { transform: scale(.97); }
+.card.on, .card.flash { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+.card.on { background: #f7f9fc; }
+.card svg { width: 100%; height: auto; }
+.choices.small .card svg { max-width: 70px; }
+.card .thumb { width: 100%; border-radius: 10px; overflow: hidden; }
+
+.own {
+  width: 100%; font-size: 1.15rem; line-height: 1.6;
+  padding: 12px 16px; border: 2px dashed var(--glass); border-radius: 16px; background: var(--paper);
+}
+.own::placeholder { color: var(--ink-soft); opacity: 1; }
+.own.filled { border-style: solid; border-color: var(--ink); background: var(--surface); }
+.own:focus-visible { outline-offset: 2px; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+
+/* ---------- story ---------- */
+.story { grid-area: story; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.story-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.story-head h2 { font-size: 1.3rem; }
+.part h3 { font-size: 1rem; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; }
+.sent { display: flex; align-items: flex-start; gap: 8px; font-size: 1.22rem; line-height: 1.9; }
+.sent + .sent { margin-top: 4px; }
+.sent .txt { flex: 1; min-width: 0; border-radius: 6px; padding-inline: 2px; transition: background .2s; overflow-wrap: anywhere; }
+.sent.reading .txt { background: var(--mark); }
+.sent.blank .txt { color: var(--glass); letter-spacing: .12em; }
+.sent.fresh .txt { animation: rise .45s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+.say {
+  flex: none; width: 40px; height: 40px; margin-top: 3px; border-radius: 50%; padding: 0;
+  border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center;
+}
+.say svg { width: 20px; height: 20px; }
+.say.del { color: var(--ink-soft); }
+.say.del svg { width: 14px; height: 14px; }
+
+/* ---------- final screen ---------- */
+.title-in {
+  width: 100%; border: 0; border-bottom: 2px dashed var(--glass); background: none;
+  font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.5; padding: 4px 2px;
+}
+.title-in::placeholder { color: var(--ink); opacity: .45; }
+.title-in:focus { border-bottom-style: solid; border-bottom-color: var(--ink); outline: none; }
+.label { font-family: var(--display); font-size: 1rem; color: var(--ink-soft); }
+.more { grid-area: more; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.add-row { display: flex; gap: 10px; align-items: stretch; }
+.add-row .own { flex: 1; min-width: 0; }
+
+/* ---------- buttons ---------- */
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.15rem; line-height: 1.4;
+  padding: 10px 22px; min-height: 54px; text-decoration: none; color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+}
+.act svg { width: 24px; height: 24px; flex: none; }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act.big { font-size: 1.4rem; font-weight: 700; min-height: 64px; padding-inline: 34px; min-width: min(300px, 100%); }
+.act:disabled { opacity: .3; }
+.act:not(:disabled):active { transform: scale(.97); }
+
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .stepdot { width: 29px; height: 29px; font-size: .9rem; border-width: 1.5px; }
+  .stepdot.cur { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+  .steps { gap: 5px; flex-wrap: nowrap; }
+  .bar { gap: 8px; }
+  .icon-btn { width: 46px; height: 46px; }
+  .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .choices.small { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sent { font-size: 1.15rem; }
+  .act { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+@media print {
+  body { background: #fff; }
+  .bar, .actions, .say, .more, .tools, .story-head .act { display: none !important; }
+  .work.final { display: block; }
+  .panel { border: 0; }
+  .stage { max-width: 520px; margin: 0 auto 12px; }
+  .title-in { border: 0; text-align: center; }
+}
+</style>
+</head>
+<body>
+<div id="app" lang="he" dir="rtl"></div>
+
+<script>
+(() => {
+/* ================= content =================
+   The hero and the friend are colors. "צֶבַע" is masculine, so every verb
+   about them is masculine; what changes with the choices is the article
+   (הָאָדֹם / הַכָּחֹל), "to" (לָאָדֹם / לַכָּחֹל), the joining vav
+   (וְשָׂמֵחַ / וּבַיְשָׁן) and the name of the color born from a hug. */
+const COLORS = [
+  { id: 'red',    hex: '#ef3b44', name: 'אָדֹם',  def: 'הָאָדֹם',  to: 'לָאָדֹם' },
+  { id: 'orange', hex: '#fb7a2c', name: 'כָּתֹם', def: 'הַכָּתֹם', to: 'לַכָּתֹם' },
+  { id: 'yellow', hex: '#fad21e', name: 'צָהֹב',  def: 'הַצָּהֹב',  to: 'לַצָּהֹב' },
+  { id: 'green',  hex: '#2f9e55', name: 'יָרֹק',  def: 'הַיָּרֹק',  to: 'לַיָּרֹק' },
+  { id: 'blue',   hex: '#1f6fd6', name: 'כָּחֹל', def: 'הַכָּחֹל', to: 'לַכָּחֹל' },
+  { id: 'purple', hex: '#8a4cc2', name: 'סָגֹל',  def: 'הַסָּגֹל',  to: 'לַסָּגֹל' },
+  { id: 'pink',   hex: '#f58cb2', name: 'וָרֹד',  def: 'הַוָּרֹד',  to: 'לַוָּרֹד' },
+];
+const C = Object.fromEntries(COLORS.map(c => [c.id, c]));
+
+const TRAITS = [
+  { id: 'happy',   name: 'שָׂמֵחַ', and: 'וְשָׂמֵחַ', line: 'הוּא אָהַב לְחַיֵּךְ וְלָשִׁיר.' },
+  { id: 'shy',     name: 'בַּיְשָׁן', and: 'וּבַיְשָׁן', line: 'הוּא דִּבֵּר בְּשֶׁקֶט, וְלִפְעָמִים הִתְבַּיֵּשׁ.' },
+  { id: 'brave',   name: 'אַמִּיץ', and: 'וְאַמִּיץ', line: 'הוּא לֹא פָּחַד מִשּׁוּם דָּבָר.' },
+  { id: 'curious', name: 'סַקְרָן', and: 'וְסַקְרָן', line: 'הוּא אָהַב לִשְׁאֹל שְׁאֵלוֹת וְלִגְלוֹת דְּבָרִים חֲדָשִׁים.' },
+];
+
+const PLACES = [
+  { id: 'garden',  at: 'בַּגַּן' },
+  { id: 'forest',  at: 'בַּיַּעַר' },
+  { id: 'city',    at: 'בְּעִיר הַצְּבָעִים' },
+  { id: 'rainbow', at: 'עַל הַקֶּשֶׁת' },
+];
+
+// The color born from a hug of any two heroes.
+const MIX = {};
+[
+  ['red', 'orange', 'צֶבַע שְׁקִיעָה', '#f4582f'], ['red', 'yellow', 'כָּתֹם', '#fb8f22'],
+  ['red', 'green', 'חוּם', '#7a5236'],             ['red', 'blue', 'סָגֹל', '#7b3fa8'],
+  ['red', 'purple', 'צֶבַע דֻּבְדְּבָן', '#b0306e'], ['red', 'pink', 'צֶבַע תּוּת', '#e8475f'],
+  ['orange', 'yellow', 'צֶבַע זָהָב', '#f5b22a'],  ['orange', 'green', 'צֶבַע זַיִת', '#8a8a32'],
+  ['orange', 'blue', 'צֶבַע עָנָן', '#8f949b'],    ['orange', 'purple', 'צֶבַע שׁוֹקוֹלָד', '#6b3f2a'],
+  ['orange', 'pink', 'צֶבַע אֲפַרְסֵק', '#ffb38a'], ['yellow', 'green', 'צֶבַע פִּיסְטוּק', '#a5cf4a'],
+  ['yellow', 'blue', 'יָרֹק', '#2fa35a'],          ['yellow', 'purple', 'צֶבַע חוֹל', '#cbb58a'],
+  ['yellow', 'pink', 'צֶבַע מֶלוֹן', '#ffad7a'],    ['green', 'blue', 'טוּרְקִיז', '#1ea7a0'],
+  ['green', 'purple', 'צֶבַע אֶבֶן', '#6b6e6a'],   ['green', 'pink', 'צֶבַע עֵץ', '#a8825e'],
+  ['blue', 'purple', 'צֶבַע לַיְלָה', '#3b2f86'],  ['blue', 'pink', 'לִילָךְ', '#b39ddb'],
+  ['purple', 'pink', 'צֶבַע סִגָּלִית', '#c06ad0'],
+].forEach(([a, b, name, hex]) => { MIX[[a, b].sort().join('+')] = { name, hex }; });
+const mixOf = (a, b) => MIX[[a, b].sort().join('+')];
+
+const PROBLEMS = [
+  { id: 'fight', label: 'רִיב: מִי יָפֶה יוֹתֵר?',
+    text: (H, F) => `יוֹם אֶחָד, ${H.def} וְ${F.def} רָבוּ מִי יָפֶה יוֹתֵר. ״אֲנִי!״ צָעַק ${H.def}. ״לֹא, אֲנִי!״ צָעַק ${F.def}.` },
+  { id: 'other', label: 'רוֹצֶה צֶבַע אַחֵר',
+    text: (H, F) => `יוֹם אֶחָד, ${H.def} אָמַר ${F.to}: ״אֲנִי לֹא רוֹצֶה לִהְיוֹת ${H.name}. אֲנִי רוֹצֶה לִהְיוֹת ${F.name} כָּמוֹךָ!״` },
+  { id: 'lonely', label: 'לְבַד',
+    text: (H, F) => `יוֹם אֶחָד, ${F.def} נָסַע רָחוֹק, וְ${H.def} נִשְׁאַר לְבַד. הוּא הִרְגִּישׁ בּוֹדֵד וְעָצוּב.` },
+  { id: 'vanish', label: 'הַצְּבָעִים נֶעֱלָמִים',
+    text: H => `יוֹם אֶחָד, כָּל הַצְּבָעִים בָּעוֹלָם הִתְחִילוּ לְהֵעָלֵם. הַשָּׁמַיִם נִהְיוּ אֲפֹרִים, וְגַם ${H.def} הִתְחִיל לְהַחְוִיר.` },
+];
+const FEEL = { fight: 'עָצוּב כְּשֶׁאֲנַחְנוּ רָבִים', other: 'שֶׁאֲנִי לֹא מַסְפִּיק יָפֶה', lonely: 'בּוֹדֵד', vanish: 'מְפַחֵד' };
+
+const SOLUTIONS = [
+  { id: 'hug', label: 'חִבּוּק וְצֶבַע חָדָשׁ',
+    text: (H, F) => `${H.def} וְ${F.def} הִתְחַבְּקוּ חִבּוּק גָּדוֹל, וּמֵהַחִבּוּק נוֹלַד צֶבַע חָדָשׁ: ${F.id ? mixOf(H.id, F.id).name : '___'}!` },
+  { id: 'help', label: 'צְבָעִים בָּאִים לַעֲזֹר',
+    text: (H, F) => { const o = helpers(); return `פִּתְאוֹם הִגִּיעוּ ${o[0].def}, ${o[1].def} וְ${o[2].def}, וְאָמְרוּ: ״בָּאנוּ לַעֲזֹר!״ יַחַד הֵם מָצְאוּ פִּתְרוֹן.`; } },
+  { id: 'self', label: 'לֶאֱהֹב אֶת עַצְמִי',
+    text: H => `${H.def} הִסְתַּכֵּל בַּמַּרְאָה וְאָמַר: ״אֲנִי ${H.name}, וְזֶה מְצֻיָּן! טוֹב לִהְיוֹת מִי שֶׁאֲנִי.״` },
+  { id: 'tell', label: 'לְסַפֵּר מָה מַרְגִּישִׁים',
+    text: H => `${H.def} אָמַר בְּקוֹל: ״אֲנִי מַרְגִּישׁ ${FEEL[st.problem] || 'עָצוּב'}.״ כֻּלָּם הִקְשִׁיבוּ לוֹ, וְהוּא הִרְגִּישׁ טוֹב יוֹתֵר.` },
+];
+
+const ENDINGS = [
+  { id: 'friends', label: 'חֲבֵרִים לָנֶצַח',
+    text: (H, F) => `מֵאָז, ${H.def} וְ${F.def} הֵם הַחֲבֵרִים הֲכִי טוֹבִים בָּעוֹלָם.` },
+  { id: 'all', label: 'כָּל הַצְּבָעִים יָפִים',
+    text: H => `בַּסּוֹף, ${H.def} הֵבִין שֶׁכָּל הַצְּבָעִים יָפִים, כָּל אֶחָד בְּדֶרֶךְ מִשֶּׁלּוֹ.` },
+  { id: 'paint', label: 'קֶשֶׁת שֶׁל כֻּלָּם',
+    text: () => 'בַּסּוֹף, כֻּלָּם צִיְּרוּ יַחַד קֶשֶׁת עֲנָקִית, וְהָעוֹלָם הָיָה צִבְעוֹנִי וְשָׂמֵחַ.' },
+  { id: 'sleep', label: 'חִיּוּךְ לִפְנֵי הַשֵּׁנָה',
+    text: H => `בָּעֶרֶב, ${H.def} הָלַךְ לִישֹׁן עִם חִיּוּךְ גָּדוֹל. זֶה הָיָה יוֹם נִפְלָא!` },
+];
+
+const PARTS = ['הַתְחָלָה', 'הַבְּעָיָה', 'הַפִּתְרוֹן', 'הַסּוֹף'];
+const STEPS = [
+  { key: 'hero',     part: 0, q: () => 'אֵיזֶה צֶבַע יִהְיֶה הַגִּבּוֹר?' },
+  { key: 'trait',    part: 0, q: () => `אֵיזֶה אֹפִי יֵשׁ ${H().to}?` },
+  { key: 'friend',   part: 0, q: () => `מִי הֶחָבֵר שֶׁל ${H().def}?` },
+  { key: 'place',    part: 0, q: () => 'אֵיפֹה הֵם גָּרִים?' },
+  { key: 'problem',  part: 1, q: () => 'מָה הַבְּעָיָה?', own: true, list: PROBLEMS },
+  { key: 'solution', part: 2, q: () => 'אֵיךְ פּוֹתְרִים אֶת הַבְּעָיָה?', own: true, list: SOLUTIONS },
+  { key: 'ending',   part: 3, q: () => 'אֵיךְ הַסִּפּוּר נִגְמָר?', own: true, list: ENDINGS },
+];
+
+/* ================= state ================= */
+const KEY = 'color-story-lab';
+const fresh = () => ({
+  screen: 'step', step: 0,
+  hero: null, trait: null, friend: null, place: null, problem: null, solution: null, ending: null,
+  own: { problem: '', solution: '', ending: '' },
+  title: '', extra: [],
+});
+let st = null, soundOn = true;
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (saved && saved.story && saved.story.hero) st = Object.assign(fresh(), saved.story);
+  if (saved && saved.sound === false) soundOn = false;
+} catch (e) {}
+let view = 'start';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify({ story: st, sound: soundOn })); } catch (e) {} };
+
+const H = () => C[st.hero];
+const BLANK = { id: '', name: '___', def: '___', to: '___' };
+const F = () => st.friend ? C[st.friend] : BLANK;
+const helpers = () => COLORS.filter(c => c.id !== st.hero && c.id !== st.friend).slice(0, 3);
+const chosen = key => st[key] && (st[key] !== 'own' || st.own[key].trim());
+const esc = s => s.replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+const pick = (list, id) => list.find(o => o.id === id);
+
+/* ================= the story ================= */
+function story() {
+  const parts = [[], [], [], []];
+  if (!st.hero) return parts;
+  const h = H(), f = F(), trait = pick(TRAITS, st.trait), place = pick(PLACES, st.place);
+  parts[0].push({ id: 'open', text: `פַּעַם${place ? `, ${place.at},` : ''} גָּר צֶבַע ${h.name}${trait ? ' ' + trait.and : ''}.` });
+  if (trait) parts[0].push({ id: 'trait', text: trait.line });
+  if (st.friend) parts[0].push({ id: 'friend', text: `הוּא וְהַצֶּבַע ${f.def} הָיוּ חֲבֵרִים טוֹבִים.` });
+  STEPS.slice(4).forEach(s => {
+    const v = st[s.key];
+    if (v === 'own') { const t = st.own[s.key].trim(); if (t) parts[s.part].push({ id: s.key, text: t, own: true }); }
+    else if (v) parts[s.part].push({ id: s.key, text: pick(s.list, v).text(h, f) });
+  });
+  st.extra.forEach((t, i) => parts[3].push({ id: 'x' + i, text: t, extra: i }));
+  return parts;
+}
+const defaultTitle = () => st.hero ? (st.friend ? `${H().def} וְ${F().def}` : `הַצֶּבַע ${H().def}`) : '';
+const titleText = () => st.title.trim() || defaultTitle();
+
+/* ================= drawings ================= */
+const INK = '#1d2431';
+const DROP = 'M50 3 C44 19 12 42 12 62 A38 36 0 0 0 88 62 C88 42 56 19 50 3 Z';
+
+// A paint-drop character. mood: happy | shy | brave | curious | sad | angry | sleep
+function drop(hex, mood, cx, bottom, size, extra = '') {
+  const s = size / 100;
+  let px = 0, py = 0, face = '';
+  const line = d => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>`;
+  switch (mood) {
+    case 'shy':
+      py = 2.5; px = 1.5;
+      face = line('M44 77 Q50 81 56 77') + '<ellipse cx="27" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/><ellipse cx="73" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/>';
+      break;
+    case 'brave':
+      face = line('M35 72 Q50 87 65 72') + line('M28 45 L45 50') + line('M72 45 L55 50');
+      break;
+    case 'curious':
+      px = -2; py = -2.5;
+      face = `<circle cx="50" cy="77" r="4.6" fill="${INK}"/>` + line('M54 45 Q63 39 72 45');
+      break;
+    case 'sad':
+      py = 1.5;
+      face = line('M40 81 Q50 72 60 81') + line('M29 49 L44 45') + line('M71 49 L56 45');
+      break;
+    case 'angry':
+      face = line('M41 79 Q50 75 59 79') + line('M29 45 L45 51') + line('M71 45 L55 51');
+      break;
+    case 'sleep':
+      face = line('M38 74 Q50 84 62 74');
+      break;
+    default:
+      face = line('M37 72 Q50 86 63 72');
+  }
+  const eyes = mood === 'sleep'
+    ? line('M31 59 Q38 64 45 59') + line('M55 59 Q62 64 69 59')
+    : [38, 62].map(x => `<circle cx="${x}" cy="59" r="8.5" fill="#fff" stroke="${INK}" stroke-width="2.6"/><circle cx="${x + px}" cy="${59 + py}" r="4.3" fill="${INK}"/>`).join('');
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${s})" ${extra}>
+    <path d="${DROP}" fill="${hex}" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+    <ellipse cx="28" cy="46" rx="5" ry="9" fill="#fff" opacity=".45" transform="rotate(28 28 46)"/>
+    ${eyes}${face}</g>`;
+}
+function ghost(cx, bottom, size) {
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">
+    <path d="${DROP}" fill="#ffffff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="8 7"/>
+    <text x="50" y="76" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="34" fill="#97a3b6">?</text></g>`;
+}
+const heart = (x, y, r, fill = '#ef3b44') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 9 C-12 0 -10 -10 -4.5 -10 C-1.5 -10 0 -7.5 0 -6 C0 -7.5 1.5 -10 4.5 -10 C10 -10 12 0 0 9 Z" fill="${fill}" stroke="${INK}" stroke-width="${16 / r}"/>`;
+const sparkle = (x, y, r, fill = '#ffd84d') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 -10 L2.4 -2.4 L10 0 L2.4 2.4 L0 10 L-2.4 2.4 L-10 0 L-2.4 -2.4 Z" fill="${fill}"/>`;
+function rainbowArcs(cx, cy, r0, step, width) {
+  return COLORS.map((c, i) => {
+    const r = r0 - i * step;
+    return `<path d="M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}" fill="none" stroke="${c.hex}" stroke-width="${width}"/>`;
+  }).join('');
+}
+
+function scene(place) {
+  switch (place) {
+    case 'garden': {
+      const flowers = [[24, '#ef3b44'], [62, '#fad21e'], [104, '#8a4cc2'], [298, '#f58cb2'], [340, '#1f6fd6'], [378, '#fb7a2c']]
+        .map(([x, c]) => `<path d="M${x} 206 V182" stroke="#3e8f4f" stroke-width="3"/><circle cx="${x}" cy="178" r="9" fill="${c}"/><circle cx="${x}" cy="178" r="3.5" fill="#fff6c2"/>`).join('');
+      return `<rect width="400" height="230" fill="#e3f2ff"/><circle cx="58" cy="48" r="26" fill="#ffd84d"/>
+        <path d="M0 176 Q100 152 200 172 T400 166 V230 H0Z" fill="#a3dc93"/>${flowers}`;
+    }
+    case 'forest': {
+      const trees = [[30, '#3f9a58'], [88, '#57b36b'], [318, '#57b36b'], [374, '#3f9a58']]
+        .map(([x, c]) => `<rect x="${x - 6}" y="150" width="12" height="44" fill="#9a6b4a"/><path d="M${x} 62 L${x - 32} 154 H${x + 32} Z" fill="${c}"/><path d="M${x} 44 L${x - 24} 110 H${x + 24} Z" fill="${c}"/>`).join('');
+      return `<rect width="400" height="230" fill="#e8f5e3"/><path d="M0 184 Q200 164 400 184 V230 H0Z" fill="#7cc47f"/>${trees}`;
+    }
+    case 'city': {
+      const b = [[0, 58, 118, '#ffb4b4'], [62, 50, 158, '#a9d6ff'], [116, 54, 96, '#ffe08a'], [234, 52, 140, '#cdb9ff'], [290, 56, 104, '#b6e6b0'], [350, 50, 150, '#ffc79a']]
+        .map(([x, w, h, c]) => {
+          let win = '';
+          for (let y = 200 - h + 14; y < 184; y += 26) for (let wx = x + 10; wx < x + w - 14; wx += 18) win += `<rect x="${wx}" y="${y}" width="10" height="12" rx="2" fill="#fff" opacity=".85"/>`;
+          return `<rect x="${x}" y="${200 - h}" width="${w}" height="${h}" fill="${c}"/>${win}`;
+        }).join('');
+      return `<rect width="400" height="230" fill="#fff3dc"/>${b}<rect y="198" width="400" height="32" fill="#d4d8e2"/>
+        <path d="M10 215 H390" stroke="#fff" stroke-width="4" stroke-dasharray="22 16"/>`;
+    }
+    case 'rainbow':
+      return `<rect width="400" height="230" fill="#e6f1ff"/>${rainbowArcs(200, 238, 196, 15, 14)}
+        <g fill="#fff"><ellipse cx="200" cy="226" rx="230" ry="26"/><circle cx="30" cy="206" r="26"/><circle cx="68" cy="214" r="22"/><circle cx="370" cy="206" r="26"/><circle cx="332" cy="214" r="22"/></g>`;
+    default:
+      return `<rect width="400" height="230" fill="#fbfcfd"/><path d="M24 214 H376" stroke="#d8dee7" stroke-width="3" stroke-dasharray="10 9" stroke-linecap="round"/>`;
+  }
+}
+
+const TROUBLE = ['fight', 'other', 'lonely', 'vanish'];
+function heroMood() {
+  if (st.ending === 'sleep') return 'sleep';
+  if (TROUBLE.includes(st.problem) && !st.solution) return st.problem === 'fight' ? 'angry' : 'sad';
+  return st.trait || 'happy';
+}
+function stageSVG() {
+  const h = st.hero && H(), f = st.friend && F();
+  const trouble = TROUBLE.includes(st.problem) && !st.solution;
+  const hug = st.solution === 'hug' && f;
+  const hx = hug ? 250 : 272, fx = hug ? 150 : 128;
+  let back = '', front = '';
+  if (st.ending === 'paint' && st.place !== 'rainbow') back += `<g opacity=".9">${rainbowArcs(200, 150, 120, 9, 8)}</g>`;
+  if (st.ending === 'sleep') back += `<path d="M352 30 a24 24 0 1 0 18 40 a19 19 0 1 1 -18 -40 Z" fill="#fff2a8" stroke="${INK}" stroke-width="2"/>${sparkle(300, 40, 7, '#ffe27a')}${sparkle(330, 92, 5, '#ffe27a')}`;
+  if (st.ending === 'all') back += COLORS.map((c, i) => drop(c.hex, 'happy', 80 + i * 40, 74, 34)).join('');
+  if (st.solution === 'help') back += helpers().map((c, i) => drop(c.hex, 'happy', [44, 356, 200][i], [212, 212, 118][i], 54)).join('');
+  if (st.ending === 'friends' && f) front += heart(200, 64, 16);
+  if (st.solution === 'self' && h) front += heart(hx + 46, 70, 11, '#ff6f91');
+  if (st.solution === 'tell' && h) front += `<path d="M${hx - 92} 46 h70 a10 10 0 0 1 10 10 v24 a10 10 0 0 1 -10 10 h-46 l-12 12 v-12 h-12 a10 10 0 0 1 -10 -10 v-24 a10 10 0 0 1 10 -10 Z" fill="#fff" stroke="${INK}" stroke-width="2.5"/>
+    <g fill="${INK}"><circle cx="${hx - 72}" cy="68" r="4"/><circle cx="${hx - 57}" cy="68" r="4"/><circle cx="${hx - 42}" cy="68" r="4"/></g>`;
+  const friend = f ? drop(f.hex, st.problem === 'fight' && trouble ? 'angry' : 'happy', fx, 214, 104, st.problem === 'lonely' && trouble ? 'opacity=".22"' : '') : ghost(fx, 214, 104);
+  const hero = h ? drop(h.hex, heroMood(), hx, 214, 118) : ghost(hx, 214, 118);
+  if (hug) front += drop(mixOf(st.hero, st.friend).hex, 'happy', 200, 226, 58) + sparkle(168, 150, 8) + sparkle(236, 138, 6) + sparkle(200, 118, 7);
+  const grey = st.problem === 'vanish' && trouble;
+  return `<svg viewBox="0 0 400 230" role="img" aria-label="${esc(titleText() || 'הַגִּבּוֹרִים')}">
+    <defs><filter id="fade"><feColorMatrix type="saturate" values=".08"/></filter></defs>
+    <g ${grey ? 'filter="url(#fade)"' : ''}>${scene(st.place)}${back}${friend}${hero}${front}</g></svg>`;
+}
+
+// Small pictures on the choice cards (120 x 84).
+function icon(kind, id) {
+  const h = st.hero ? H() : C.red, f = st.friend ? F() : C.blue;
+  let g = '';
+  if (kind === 'problem') g = {
+    fight: drop(h.hex, 'angry', 86, 82, 62) + drop(f.hex, 'angry', 34, 82, 56) + `<path d="M60 8 l-7 12 h9 l-7 13" fill="none" stroke="#e09a00" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+    other: drop(h.hex, 'sad', 90, 82, 58) + drop(f.hex, 'happy', 30, 82, 54) + `<path d="M70 44 H50 M57 37 L50 44 L57 51" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+    lonely: drop(h.hex, 'sad', 60, 82, 64) + `<path d="M76 54 q-3 6 0 8 q3 -2 0 -8 Z" fill="#7cc4ff"/>`,
+    vanish: `<g filter="url(#fade)">${drop(h.hex, 'sad', 60, 82, 62)}</g>` + drop('#e3e7ee', 'sad', 20, 82, 30) + drop('#cfd5de', 'sad', 100, 82, 30),
+  }[id];
+  if (kind === 'solution') g = {
+    hug: drop(h.hex, 'happy', 84, 80, 56) + drop(f.hex, 'happy', 36, 80, 52) + drop(st.hero && st.friend ? mixOf(st.hero, st.friend).hex : '#7b3fa8', 'happy', 60, 84, 32) + sparkle(60, 16, 7),
+    help: drop(h.hex, 'happy', 60, 82, 58) + helpers().map((c, i) => drop(c.hex, 'happy', [16, 104, 60][i], [82, 82, 30][i], 28)).join(''),
+    self: drop(h.hex, 'happy', 60, 82, 62) + heart(92, 22, 9, '#ff6f91'),
+    tell: drop(h.hex, 'happy', 78, 82, 58) + `<path d="M8 10 h50 a8 8 0 0 1 8 8 v16 a8 8 0 0 1 -8 8 h-30 l-9 9 v-9 h-11 a8 8 0 0 1 -8 -8 v-16 a8 8 0 0 1 8 -8 Z" fill="#fff" stroke="${INK}" stroke-width="2.5"/><g fill="${INK}"><circle cx="21" cy="26" r="3.2"/><circle cx="33" cy="26" r="3.2"/><circle cx="45" cy="26" r="3.2"/></g>`,
+  }[id];
+  if (kind === 'ending') g = {
+    friends: drop(h.hex, 'happy', 88, 82, 54) + drop(f.hex, 'happy', 32, 82, 50) + heart(60, 26, 11),
+    all: COLORS.map((c, i) => drop(c.hex, 'happy', 12 + i * 16, 62 + (i % 2) * 18, 26)).join(''),
+    paint: rainbowArcs(60, 84, 56, 7, 6.5),
+    sleep: drop(h.hex, 'sleep', 64, 82, 62) + `<path d="M22 8 a14 14 0 1 0 10 24 a11 11 0 1 1 -10 -24 Z" fill="#fff2a8" stroke="${INK}" stroke-width="2"/>`,
+  }[id];
+  return `<svg viewBox="0 0 120 84" aria-hidden="true"><defs><filter id="fade"><feColorMatrix type="saturate" values=".08"/></filter></defs>${g}</svg>`;
+}
+
+/* ================= icons ================= */
+const I = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
+  speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/></svg>',
+  noteOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/><path d="M3 3l18 18" stroke-width="2.6"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><g fill="currentColor" stroke="none"><circle cx="8.5" cy="8.5" r="1.7"/><circle cx="15.5" cy="15.5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="15.5" cy="8.5" r="1.7"/><circle cx="8.5" cy="15.5" r="1.7"/></g></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+  print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z" fill="#fff"/></svg>',
+  palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.2-.5-1.3.3-2.8 1.9-2.8H18a3 3 0 0 0 3-3C21 7 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.5" fill="currentColor"/><circle cx="11" cy="7" r="1.5" fill="currentColor"/><circle cx="16" cy="8.5" r="1.5" fill="currentColor"/></svg>',
+};
+
+/* ================= sounds ================= */
+let actx = null;
+function tone(freq, at, dur, type = 'triangle', vol = 0.1) {
+  const t = actx.currentTime + at, o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const SFX = {
+  tap:   () => tone(700, 0, 0.07, 'sine', 0.06),
+  pick:  () => { tone(523, 0, 0.13); tone(784, 0.09, 0.2); },
+  back:  () => { tone(523, 0, 0.1, 'sine', 0.07); tone(392, 0.08, 0.14, 'sine', 0.07); },
+  magic: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.06, 0.15, 'triangle', 0.07)),
+  done:  () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, i === 3 ? 0.6 : 0.2, 'triangle', 0.1)),
+};
+function sfx(name) {
+  if (!soundOn) return;
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    SFX[name]();
+  } catch (e) {}
+}
+
+/* ================= reading aloud ================= */
+const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+let reading = 0;   // token of the current reading, 0 when silent
+function stopReading() {
+  reading = 0;
+  if (canSpeak) speechSynthesis.cancel();
+  app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+  app.querySelectorAll('[data-act="readAll"]').forEach(b => { b.innerHTML = `${I.speak}${readAllLabel}`; });
+}
+function read(items) {   // items: [{ id, text }]
+  if (!canSpeak) return;
+  stopReading();
+  const token = reading = Date.now();
+  const voice = speechSynthesis.getVoices().find(v => /^(he|iw)/i.test(v.lang));
+  let i = 0;
+  const next = () => {
+    if (reading !== token) return;
+    app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+    if (i >= items.length) { stopReading(); return; }
+    const it = items[i++];
+    const el = app.querySelector(`.sent[data-sid="${it.id}"]`);
+    if (el) el.classList.add('reading');
+    const u = new SpeechSynthesisUtterance(it.text.replace(/[״"]/g, ''));
+    u.lang = 'he-IL'; if (voice) u.voice = voice; u.rate = 0.85;
+    u.onend = next; u.onerror = next;
+    speechSynthesis.speak(u);
+  };
+  next();
+}
+const readAllLabel = 'לְהַקְרִיא אֶת הַסִּפּוּר';
+function readAll(btn) {
+  if (reading) { stopReading(); return; }
+  const items = story().flat();
+  if (view === 'final') items.unshift({ id: 'title', text: titleText() });
+  read(items);
+  if (btn) btn.innerHTML = `${I.stop}לַעֲצֹר`;
+}
+
+/* ================= rendering ================= */
+const app = document.getElementById('app');
+let lastSeen = new Set();   // sentences already shown, so only new ones animate
+
+function render() {
+  stopReading();
+  clearTimeout(advanceTimer);
+  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  app.innerHTML = ({ start: startView, step: stepView, final: finalView })[view]();
+  if (focusKey) {
+    const el = app.querySelector(`[data-key="${focusKey}"]`);
+    if (el && !el.disabled) el.focus();
+  }
+  save();
+}
+
+function soundBtn() {
+  return `<button class="icon-btn${soundOn ? '' : ' off'}" data-act="sound" data-key="sound" aria-pressed="${soundOn}" aria-label="צְלִילִים">${soundOn ? I.note : I.noteOff}</button>`;
+}
+
+function startView() {
+  const going = st && st.hero;
+  const hello = `<svg class="hello" viewBox="0 0 340 130" aria-hidden="true">
+    ${drop(C.blue.hex, 'curious', 70, 124, 92)}${drop(C.yellow.hex, 'happy', 170, 128, 112)}${drop(C.red.hex, 'shy', 270, 124, 92)}
+    ${sparkle(120, 24, 9)}${sparkle(226, 18, 7)}</svg>`;
+  return `<div class="bar"><span style="flex:1"></span>${soundBtn()}</div>
+    <div class="start">
+      ${hello}
+      <h1>מַעְבֶּדֶת סִפּוּרִים</h1>
+      <p>כּוֹתְבִים סִפּוּר עַל צְבָעִים</p>
+      <div class="actions">
+        ${going ? `<button class="act primary big" data-act="resume" data-key="resume">${I.next}לְהַמְשִׁיךְ אֶת הַסִּפּוּר</button>` : ''}
+        <button class="act ${going ? '' : 'primary big'}" data-act="new" data-key="new">${I.plus}סִפּוּר חָדָשׁ</button>
+        <a class="act" href="index.html">${I.palette}מַעְבֶּדֶת הַצְּבָעִים</a>
+      </div>
+    </div>`;
+}
+
+function stepsBar() {
+  return `<nav class="steps" aria-label="שְׁלַבִּים">${STEPS.map((s, i) => {
+    const open = STEPS.slice(0, i).every(p => chosen(p.key));
+    const cls = (chosen(s.key) ? ' done' : '') + (view === 'step' && i === st.step ? ' cur' : '');
+    return `<button class="stepdot${cls}" data-act="goto" data-i="${i}" data-key="dot${i}" aria-label="שָׁלָב ${i + 1}"
+      ${i === st.step && view === 'step' ? 'aria-current="step"' : ''} ${open ? '' : 'disabled'}>${i + 1}</button>`;
+  }).join('')}</nav>`;
+}
+
+function card(key, id, label, pic, small) {
+  const on = st[key] === id;
+  return `<button class="card${on ? ' on' : ''}" data-act="choose" data-k="${key}" data-id="${id}" data-key="${key}-${id}" aria-pressed="${on}">
+    ${pic}<span>${label}</span></button>`;
+}
+
+function choicesHTML(s) {
+  switch (s.key) {
+    case 'hero':
+      return `<div class="choices small">${COLORS.map(c => card('hero', c.id, c.name, `<svg viewBox="0 0 100 100" aria-hidden="true">${drop(c.hex, 'happy', 50, 98, 94)}</svg>`)).join('')}</div>`;
+    case 'friend':
+      return `<div class="choices small">${COLORS.filter(c => c.id !== st.hero).map(c => card('friend', c.id, c.name, `<svg viewBox="0 0 100 100" aria-hidden="true">${drop(c.hex, 'happy', 50, 98, 94)}</svg>`)).join('')}</div>`;
+    case 'trait':
+      return `<div class="choices small">${TRAITS.map(t => card('trait', t.id, t.name, `<svg viewBox="0 0 100 100" aria-hidden="true">${drop(H().hex, t.id, 50, 98, 94)}</svg>`)).join('')}</div>`;
+    case 'place':
+      return `<div class="choices">${PLACES.map(p => card('place', p.id, p.at, `<span class="thumb"><svg viewBox="0 0 400 230" aria-hidden="true">${scene(p.id)}</svg></span>`)).join('')}</div>`;
+    default:
+      return `<div class="choices">${s.list.map(o => card(s.key, o.id, o.label, icon(s.key, o.id))).join('')}</div>`;
+  }
+}
+
+function storyHTML(final) {
+  const parts = story(), cur = STEPS[st.step];
+  const seen = new Set();
+  const body = parts.map((list, p) => {
+    const blank = !final && !list.length && cur.part === p;
+    if (!list.length && !blank) return '';
+    const rows = list.map(s => {
+      seen.add(s.id + s.text);
+      const isNew = !lastSeen.has(s.id + s.text) && lastSeen.size;
+      return `<div class="sent${isNew ? ' fresh' : ''}" data-sid="${s.id}">
+        ${canSpeak ? `<button class="say" data-act="readOne" data-sid="${s.id}" data-key="say-${s.id}" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+        <span class="txt">${esc(s.text)}</span>
+        ${final && s.extra !== undefined ? `<button class="say del" data-act="delExtra" data-i="${s.extra}" data-key="del-${s.extra}" aria-label="לִמְחֹק">${I.x}</button>` : ''}
+      </div>`;
+    }).join('') || `<div class="sent blank"><span class="txt">. . . . . .</span></div>`;
+    return `<section class="part"><h3>${PARTS[p]}</h3>${rows}</section>`;
+  }).join('');
+  lastSeen = seen;
+  const any = parts.some(l => l.length);
+  return `<div class="story-head"><h2>הַסִּפּוּר שֶׁלִּי</h2>
+      ${canSpeak && any && !final ? `<button class="act" data-act="readAll" data-key="readAll">${I.speak}${readAllLabel}</button>` : ''}</div>
+    ${body || '<div class="sent blank"><span class="txt">. . . . . .</span></div>'}`;
+}
+
+function stepView() {
+  const s = STEPS[st.step], last = st.step === STEPS.length - 1;
+  const own = s.own ? `<input class="own${st[s.key] === 'own' ? ' filled' : ''}" type="text" data-own="${s.key}" data-key="own-${s.key}"
+      value="${esc(st.own[s.key])}" placeholder="אוֹ כִּתְבוּ מִשְׁפָּט מִשֶּׁלָּכֶם" aria-label="אוֹ כִּתְבוּ מִשְׁפָּט מִשֶּׁלָּכֶם" maxlength="220">` : '';
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${stepsBar()}
+      ${soundBtn()}
+    </div>
+    <div class="work">
+      <section class="ask panel" aria-live="polite">
+        <h2>${s.q()}</h2>
+        ${choicesHTML(s)}
+        ${own}
+        <div class="tools">
+          <button class="act" data-act="surprise" data-key="surprise">${I.dice}הַפְתִּיעוּ אוֹתִי</button>
+          <button class="act primary" data-act="next" data-key="next" ${chosen(s.key) ? '' : 'disabled'}>${last ? `${I.star}סִיַּמְנוּ!` : `הַלְאָה${I.next}`}</button>
+        </div>
+      </section>
+      <div class="stage panel">${stageSVG()}</div>
+      <section class="story panel" id="story">${storyHTML(false)}</section>
+    </div>`;
+}
+
+function finalView() {
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${stepsBar()}
+      ${soundBtn()}
+    </div>
+    <div class="work final">
+      <div class="stage panel">${stageSVG()}</div>
+      <section class="story panel" id="story">
+        <label class="label" for="title">שֵׁם לַסִּפּוּר</label>
+        <div class="sent" data-sid="title">
+          ${canSpeak ? `<button class="say" data-act="readOne" data-sid="title" data-key="say-title" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+          <input id="title" class="title-in txt" type="text" data-key="title" value="${esc(st.title)}" placeholder="${esc(defaultTitle())}" maxlength="60">
+        </div>
+        ${storyHTML(true)}
+      </section>
+      <section class="more panel">
+        <label class="label" for="extra">רוֹצִים לְהוֹסִיף עוֹד מִשְׁפָּט?</label>
+        <div class="add-row">
+          <input id="extra" class="own" type="text" data-key="extra" placeholder="כִּתְבוּ עוֹד מִשְׁפָּט" maxlength="220">
+          <button class="act primary" data-act="addExtra" data-key="addExtra" aria-label="לְהוֹסִיף">${I.plus}לְהוֹסִיף</button>
+        </div>
+        <div class="actions" style="margin-top:6px">
+          ${canSpeak ? `<button class="act primary big" data-act="readAll" data-key="readAll">${I.speak}${readAllLabel}</button>` : ''}
+          <button class="act" data-act="print" data-key="print">${I.print}לְהַדְפִּיס</button>
+          <button class="act" data-act="new" data-key="new">${I.plus}סִפּוּר חָדָשׁ</button>
+        </div>
+      </section>
+    </div>`;
+}
+
+// Live update of the story while typing, without rebuilding the inputs.
+function refreshStory() {
+  stopReading();
+  const el = document.getElementById('story');
+  if (el && view === 'step') el.innerHTML = storyHTML(false);
+  const next = app.querySelector('[data-act="next"]');
+  if (next) next.disabled = !chosen(STEPS[st.step].key);
+  const stage = app.querySelector('.stage');
+  if (stage) stage.innerHTML = stageSVG();
+  save();
+}
+
+/* ================= actions ================= */
+let advanceTimer = null;
+function go(nextView, step) {
+  if (step !== undefined) st.step = step;
+  view = nextView;
+  render();
+  window.scrollTo(0, 0);
+}
+function forward() {
+  if (!chosen(STEPS[st.step].key)) return;
+  if (st.step < STEPS.length - 1) { sfx('tap'); go('step', st.step + 1); }
+  else { sfx('done'); go('final'); }
+}
+function choose(key, id) {
+  st[key] = id;
+  if (st.own[key] !== undefined) st.own[key] = '';
+  if (key === 'hero' && st.friend === id) st.friend = null;
+  sfx('pick');
+  render();
+  // one tap is enough: move on after the child has seen the choice
+  advanceTimer = setTimeout(forward, 700);
+}
+function options(s) {
+  if (s.key === 'hero') return COLORS.map(c => c.id);
+  if (s.key === 'friend') return COLORS.filter(c => c.id !== st.hero).map(c => c.id);
+  if (s.key === 'trait') return TRAITS.map(t => t.id);
+  if (s.key === 'place') return PLACES.map(p => p.id);
+  return s.list.map(o => o.id);
+}
+let spinning = false;
+function surprise() {
+  if (spinning) return;
+  const s = STEPS[st.step];
+  const ids = options(s), pool = ids.filter(id => id !== st[s.key]);
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+  const cards = [...app.querySelectorAll(`.card[data-k="${s.key}"]`)];
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  sfx('magic');
+  if (reduce || !cards.length) { choose(s.key, winner); return; }
+  spinning = true;
+  let n = 0;
+  const spin = () => {
+    cards.forEach(c => c.classList.remove('flash'));
+    if (n >= 7) { spinning = false; choose(s.key, winner); return; }
+    cards[(n * 3 + 1) % cards.length].classList.add('flash');
+    n++;
+    setTimeout(spin, 95);
+  };
+  spin();
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled || spinning) return;
+  clearTimeout(advanceTimer);
+  switch (b.dataset.act) {
+    case 'new': st = fresh(); lastSeen = new Set(); sfx('tap'); go('step', 0); break;
+    case 'resume': sfx('tap'); go(st.screen === 'final' ? 'final' : 'step'); break;
+    case 'sound': soundOn = !soundOn; render(); sfx('tap'); break;
+    case 'choose': choose(b.dataset.k, b.dataset.id); break;
+    case 'surprise': surprise(); break;
+    case 'next': forward(); break;
+    case 'back':
+      sfx('back');
+      if (view === 'final') go('step', STEPS.length - 1);
+      else if (st.step > 0) go('step', st.step - 1);
+      else go('start');
+      break;
+    case 'goto': sfx('tap'); go('step', +b.dataset.i); break;
+    case 'readOne': {
+      const sid = b.dataset.sid;
+      if (sid === 'title') { read([{ id: 'title', text: titleText() }]); break; }
+      const s = story().flat().find(x => x.id === sid);
+      if (s) read([s]);
+      break;
+    }
+    case 'readAll': readAll(b); break;
+    case 'addExtra': addExtra(); break;
+    case 'delExtra': st.extra.splice(+b.dataset.i, 1); sfx('back'); render(); break;
+    case 'print': window.print(); break;
+  }
+  if (st) { st.screen = view === 'final' ? 'final' : 'step'; save(); }
+});
+
+function addExtra() {
+  const input = document.getElementById('extra');
+  const t = input && input.value.trim();
+  if (!t) { if (input) input.focus(); return; }
+  st.extra.push(t);
+  sfx('pick');
+  render();
+  const again = document.getElementById('extra');
+  if (again) again.focus();
+}
+
+app.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.own) {
+    const key = t.dataset.own;
+    st.own[key] = t.value;
+    if (t.value.trim()) st[key] = 'own';
+    else if (st[key] === 'own') st[key] = null;
+    t.classList.toggle('filled', st[key] === 'own');
+    app.querySelectorAll(`.card[data-k="${key}"]`).forEach(c => {
+      const on = st[key] === c.dataset.id;
+      c.classList.toggle('on', on); c.setAttribute('aria-pressed', on);
+    });
+    clearTimeout(advanceTimer);
+    refreshStory();
+  } else if (t.id === 'title') {
+    st.title = t.value;
+    save();
+  }
+});
+app.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (e.target.id === 'extra') { e.preventDefault(); addExtra(); }
+  else if (e.target.dataset.own && chosen(e.target.dataset.own)) { e.preventDefault(); forward(); }
+});
+
+if (canSpeak) speechSynthesis.getVoices();   // some browsers load voices lazily
+render();
+})();
+</script>
+</body>
+</html>

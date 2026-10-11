@@ -63,12 +63,13 @@ svg { display: block; }
 .home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding-block: 24px; }
 .home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
 .logo { display: flex; gap: 10px; align-items: flex-end; }
-.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 560px; }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 720px; }
 .mode {
   border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
   padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;
   font-family: var(--display); font-size: 1.45rem; font-weight: 500;
   transition: border-color .15s, transform .15s;
+  color: var(--ink); text-decoration: none;
 }
 .mode:hover { border-color: var(--glass); }
 .mode:active { transform: scale(.98); }
@@ -438,6 +439,15 @@ function homeView() {
         </svg>
         מְשִׂימוֹת
       </button>
+      <a class="mode" href="story.html">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M8 14h20a4 4 0 0 1 4 4v34a4 4 0 0 0-4-4H8z" fill="#ffffff" stroke="#1d2431" stroke-width="3.5" stroke-linejoin="round"/>
+          <path d="M56 14H36a4 4 0 0 0-4 4v34a4 4 0 0 1 4-4h20z" fill="#ffffff" stroke="#1d2431" stroke-width="3.5" stroke-linejoin="round"/>
+          <circle cx="20" cy="30" r="7" fill="${css(PAINT.red.rgb)}"/>
+          <circle cx="44" cy="30" r="7" fill="${css(PAINT.blue.rgb)}"/>
+        </svg>
+        סִפּוּרִים
+      </a>
     </div>
   </div>`;
 }
