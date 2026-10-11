@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>משחק זיכרון צבעים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Same calm palette as מעבדת צבעים: neutral screen, the card colors are the only saturated thing. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --glass: #97a3b6;
+  --back: #3b4659;
+  --good: #2f8a55;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+svg { display: block; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn[aria-pressed="false"] { color: var(--glass); }
+.progress { flex: 1; display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.progress span {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px dashed var(--glass);
+}
+.progress span.on { border: 0; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); }
+
+/* ---------- home ---------- */
+.home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; }
+.home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.logo { display: flex; gap: 10px; }
+.logo .mini { width: 52px; height: 70px; border-radius: 10px; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); }
+.logo .mini.back { background: var(--back); position: relative; }
+.logo .mini.back::after { content: ""; position: absolute; inset: 0; margin: auto; width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255,255,255,.55); }
+.logo .mini.word { background: var(--surface); display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: .95rem; }
+.group { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 100%; max-width: 560px; }
+.group h2 { font-size: 1.2rem; color: var(--ink-soft); font-weight: 500; }
+.choices { display: grid; gap: 14px; width: 100%; }
+.choices.two { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.choices.three { grid-template-columns: repeat(3, 1fr); }
+.choice {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 16px 12px; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  font-family: var(--display); font-size: 1.3rem; font-weight: 500;
+  transition: border-color .15s, transform .15s;
+}
+.choice:hover { border-color: var(--glass); }
+.choice:active { transform: scale(.98); }
+.choice[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.choice .pair { display: flex; gap: 8px; }
+.choice .pair i { width: 40px; height: 54px; border-radius: 8px; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); display: grid; place-items: center; font-style: normal; font-size: .85rem; font-weight: 700; background: var(--surface); }
+.choice .num { font-size: 1.8rem; font-weight: 700; line-height: 1.2; font-variant-numeric: tabular-nums; }
+
+.go {
+  border: 0; border-radius: 999px; background: var(--ink); color: var(--surface);
+  font-family: var(--display); font-weight: 700; font-size: 1.5rem;
+  padding: 14px 40px; min-height: 68px; min-width: min(320px, 100%);
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  transition: transform .15s;
+}
+.go svg { width: 30px; height: 30px; }
+.go:active { transform: scale(.97); }
+.link { color: var(--ink-soft); font-family: var(--display); font-size: 1.05rem; }
+
+/* ---------- board ---------- */
+.board {
+  --cols: 4;
+  display: grid; grid-template-columns: repeat(var(--cols), 1fr);
+  gap: 10px; padding-top: 16px;
+  width: 100%; max-width: calc(var(--cols) * 128px); margin-inline: auto;
+}
+.card {
+  border: 0; padding: 0; background: none;
+  aspect-ratio: 3 / 4; perspective: 700px;
+  touch-action: manipulation;
+}
+.card .in {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform .4s ease;
+}
+.card.open .in { transform: rotateY(180deg); }
+.card .face {
+  position: absolute; inset: 0; border-radius: 14px;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.card .back {
+  background: var(--back);
+  box-shadow: inset 0 0 0 5px var(--back), inset 0 0 0 7px rgba(255,255,255,.18);
+}
+.card .back::after { content: ""; width: 34%; aspect-ratio: 1; border-radius: 50%; border: 4px solid rgba(255,255,255,.5); }
+.card:not(.open):hover .back { background: #46536a; }
+.card .front {
+  transform: rotateY(180deg);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 2px var(--line);
+  padding: 8px; gap: 6px;
+}
+.card .swatch { flex: 1; width: 100%; border-radius: 9px; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); }
+.card .word {
+  font-family: var(--display); font-weight: 700; line-height: 1.5;
+  font-size: clamp(1.05rem, 4.6vw, 1.6rem); text-align: center;
+}
+.card .label { font-family: var(--display); font-weight: 500; font-size: clamp(.85rem, 3.4vw, 1.05rem); line-height: 1.4; min-height: 1.4em; }
+.card .bar-under { width: 70%; height: 10px; border-radius: 5px; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); visibility: hidden; }
+.card.done .front { box-shadow: inset 0 0 0 3px var(--good); }
+.card.done .bar-under { visibility: visible; }
+.card .tick { position: absolute; top: 4px; inset-inline-start: 4px; width: 26px; height: 26px; padding: 3px; border-radius: 50%; background: var(--surface); color: var(--good); visibility: hidden; }
+.card.done .tick { visibility: visible; }
+.card.done { cursor: default; }
+
+/* ---------- end ---------- */
+.end { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 24px; padding-block: 24px; text-align: center; }
+.end h1 { font-size: clamp(2rem, 7vw, 2.6rem); color: var(--good); display: flex; align-items: center; gap: 12px; }
+.end h1 svg { width: 40px; height: 40px; }
+.end .tries { font-family: var(--display); font-size: 1.25rem; color: var(--ink-soft); }
+.review { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 12px; width: 100%; max-width: 560px; }
+.review div { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: var(--display); font-weight: 500; font-size: 1.1rem; }
+.review i { width: 52px; height: 52px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(29,36,49,.14); }
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.2rem;
+  padding: 10px 24px; min-height: 56px;
+  display: inline-flex; align-items: center; gap: 10px;
+}
+.act svg { width: 24px; height: 24px; }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .board { gap: 8px; }
+  .card .front { padding: 6px; }
+  .choice { font-size: 1.15rem; padding: 14px 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app" lang="he" dir="rtl"></div>
+
+<script>
+(() => {
+/* ================= the cards ================= */
+const COLORS = [
+  { id: 'red',     name: 'אָדֹם',    hex: '#d62828' },
+  { id: 'gray',    name: 'אָפֹר',    hex: '#8d939c' },
+  { id: 'green',   name: 'יָרֹק',    hex: '#22964a' },
+  { id: 'blue',    name: 'כָּחֹל',    hex: '#1f5fd1' },
+  { id: 'white',   name: 'לָבָן',    hex: '#ffffff' },
+  { id: 'purple',  name: 'סָגֹל',    hex: '#7b3fb5' },
+  { id: 'yellow',  name: 'צָהֹב',    hex: '#f6d32d' },
+  { id: 'pink',    name: 'וָרֹד',    hex: '#f490bb' },
+  { id: 'black',   name: 'שָׁחֹר',    hex: '#1c1c1c' },
+  { id: 'orange',  name: 'כָּתֹם',    hex: '#f07f13' },
+  { id: 'sky',     name: 'תְּכֵלֶת',   hex: '#66c6ef' },
+  { id: 'lime',    name: 'יְרַקְרַק',  hex: '#a8d63a' },
+];
+const BY_ID = Object.fromEntries(COLORS.map(c => [c.id, c]));
+const SIZES = [6, 9, 12];
+const MISMATCH_MS = 1300;
+
+/* ================= state ================= */
+const SETTINGS_KEY = 'color-memory-settings';
+const settings = { mode: 'word', pairs: 6, speak: false };
+try { Object.assign(settings, JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')); } catch (e) {}
+if (!SIZES.includes(settings.pairs)) settings.pairs = 6;
+if (!['word', 'color'].includes(settings.mode)) settings.mode = 'word';
+const saveSettings = () => { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch (e) {} };
+
+const state = { view: 'home', cards: [], open: [], found: [], tries: 0 };
+let closeTimer = null;
+
+/* ================= speech (optional) ================= */
+const canSpeak = 'speechSynthesis' in window;
+function say(text) {
+  if (!canSpeak || !settings.speak) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'he-IL'; u.rate = 0.85;
+    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith('he'));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+/* ================= icons ================= */
+const I = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 5.5v13L6 12z"/></svg>',
+  redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+  tick: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  sound: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h4l5-4v13l-5-4H4z"/><path d="M16.5 9a4 4 0 0 1 0 6"/><path d="M19 6.5a7.5 7.5 0 0 1 0 11"/></svg>',
+  mute: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h4l5-4v13l-5-4H4z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/></svg>',
+};
+
+/* ================= game ================= */
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+function newGame() {
+  clearTimeout(closeTimer);
+  const picked = shuffle(COLORS.slice()).slice(0, settings.pairs);
+  // In "word" mode each pair is a color card and a word card; otherwise two identical color cards.
+  const second = settings.mode === 'word' ? 'word' : 'color';
+  state.cards = shuffle(picked.flatMap(c => [{ id: c.id, kind: 'color' }, { id: c.id, kind: second }]));
+  state.open = []; state.found = []; state.tries = 0;
+  state.view = 'game';
+  render();
+}
+
+function flip(i) {
+  const card = state.cards[i];
+  if (state.found.includes(card.id)) return;
+  // Any tap while a wrong pair is showing closes it at once, so the child never waits.
+  if (state.open.length === 2) { clearTimeout(closeTimer); state.open = []; }
+  if (state.open.includes(i)) return;
+  state.open.push(i);
+  if (state.open.length === 2) {
+    state.tries++;
+    const [a, b] = state.open.map(k => state.cards[k]);
+    if (a.id === b.id) {
+      state.found.push(a.id);
+      state.open = [];
+      say(BY_ID[a.id].name);
+      if (state.found.length === settings.pairs) {
+        update();
+        closeTimer = setTimeout(() => { state.view = 'end'; render(); }, 900);
+        return;
+      }
+    } else {
+      closeTimer = setTimeout(() => { state.open = []; update(); }, MISMATCH_MS);
+    }
+  }
+  update();
+}
+
+/* ================= rendering ================= */
+const app = document.getElementById('app');
+
+function render() {
+  app.innerHTML = ({ home: homeView, game: gameView, end: endView })[state.view]();
+  const first = app.querySelector('[data-autofocus]');
+  if (first) first.focus({ preventScroll: true });
+}
+
+function homeView() {
+  const pairChoice = (mode, label, pair) => `
+    <button class="choice" data-act="mode" data-val="${mode}" aria-pressed="${settings.mode === mode}">
+      <span class="pair" aria-hidden="true">${pair}</span>${label}
+    </button>`;
+  const r = BY_ID.red.hex, b = BY_ID.blue.hex;
+  return `<div class="home">
+    <div class="logo" aria-hidden="true">
+      <div class="mini" style="background:${r}"></div>
+      <div class="mini back"></div>
+      <div class="mini word">כָּחֹל</div>
+      <div class="mini" style="background:${b}"></div>
+    </div>
+    <h1>מִשְׂחַק זִכָּרוֹן</h1>
+    <div class="group">
+      <h2>אֵיךְ מְשַׂחֲקִים?</h2>
+      <div class="choices two">
+        ${pairChoice('word', 'צֶבַע + מִלָּה', `<i style="background:${r}"></i><i>אָדֹם</i>`)}
+        ${pairChoice('color', 'צֶבַע + צֶבַע', `<i style="background:${r}"></i><i style="background:${r}"></i>`)}
+      </div>
+    </div>
+    <div class="group">
+      <h2>כַּמָּה זוּגוֹת?</h2>
+      <div class="choices three">
+        ${SIZES.map(n => `<button class="choice" data-act="size" data-val="${n}" aria-pressed="${settings.pairs === n}" aria-label="${n} זוגות"><span class="num">${n}</span></button>`).join('')}
+      </div>
+    </div>
+    <button class="go" data-act="start">${I.play} לְשַׂחֵק</button>
+    <a class="link" href="index.html">לְמַעְבֶּדֶת הַצְּבָעִים</a>
+  </div>`;
+}
+
+function soundBtn() {
+  if (!canSpeak) return '';
+  return `<button class="icon-btn" data-act="speak" aria-pressed="${settings.speak}" aria-label="הקראת שם הצבע">${settings.speak ? I.sound : I.mute}</button>`;
+}
+
+function progressDots() {
+  return state.cards.filter(c => c.kind === 'color')
+    .map((_, k) => {
+      const id = state.found[k];
+      return id ? `<span class="on" style="background:${BY_ID[id].hex}"></span>` : '<span></span>';
+    }).join('');
+}
+
+function cols() {
+  const n = state.cards.length, wide = window.innerWidth >= 640;
+  if (n === 12) return wide ? 6 : 4;
+  if (n === 18) return wide ? 6 : 3;
+  return wide ? 6 : 4;
+}
+
+function cardHTML(c, i) {
+  const col = BY_ID[c.id];
+  const front = c.kind === 'color'
+    ? `<div class="swatch" style="background:${col.hex}"></div><div class="label"></div>`
+    : `<div class="word">${col.name}</div><div class="bar-under" style="background:${col.hex}"></div>`;
+  return `<button class="card" data-i="${i}" aria-label="קלף ${i + 1}">
+    <div class="in">
+      <div class="face back"></div>
+      <div class="face front">${front}<span class="tick" aria-hidden="true">${I.tick}</span></div>
+    </div>
+  </button>`;
+}
+
+function gameView() {
+  return `<div class="bar">
+      <button class="icon-btn" data-act="home" aria-label="מסך הבית">${I.home}</button>
+      <div class="progress" aria-hidden="true">${progressDots()}</div>
+      ${soundBtn()}
+    </div>
+    <div class="board" style="--cols:${cols()}">${state.cards.map(cardHTML).join('')}</div>
+    <p class="sr" aria-live="polite" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></p>`;
+}
+
+// Patch cards in place (no re-render) so the flip animation runs.
+function update() {
+  app.querySelectorAll('.card').forEach(el => {
+    const i = +el.dataset.i, c = state.cards[i], col = BY_ID[c.id];
+    const done = state.found.includes(c.id), open = done || state.open.includes(i);
+    el.classList.toggle('open', open);
+    el.classList.toggle('done', done);
+    const label = el.querySelector('.label');
+    if (label) label.textContent = done ? col.name : '';
+    el.setAttribute('aria-label', open ? (c.kind === 'word' ? col.name : 'צבע ' + col.name) + (done ? ', נמצא' : '') : 'קלף ' + (i + 1));
+    el.setAttribute('aria-disabled', done);
+  });
+  const p = app.querySelector('.progress');
+  if (p) p.innerHTML = progressDots();
+  const live = app.querySelector('.sr');
+  if (live && state.found.length) live.textContent = 'נמצא זוג: ' + BY_ID[state.found[state.found.length - 1]].name;
+}
+
+function endView() {
+  const found = state.found.map(id => BY_ID[id]);
+  return `<div class="end">
+    <h1>${I.star} כָּל הַכָּבוֹד! ${I.star}</h1>
+    <div class="tries">${found.length} זוּגוֹת בְּ־${state.tries} נִסְיוֹנוֹת</div>
+    <div class="review">${found.map(c => `<div><i style="background:${c.hex}"></i>${c.name}</div>`).join('')}</div>
+    <div class="actions">
+      <button class="act primary" data-act="start" data-autofocus>${I.redo} עוֹד פַּעַם</button>
+      <button class="act" data-act="home">${I.home} מָסָךְ רָאשִׁי</button>
+    </div>
+  </div>`;
+}
+
+/* ================= events ================= */
+app.addEventListener('click', e => {
+  const card = e.target.closest('.card');
+  if (card) { flip(+card.dataset.i); return; }
+  const btn = e.target.closest('[data-act]');
+  if (!btn) return;
+  const act = btn.dataset.act;
+  if (act === 'mode') { settings.mode = btn.dataset.val; saveSettings(); render(); }
+  else if (act === 'size') { settings.pairs = +btn.dataset.val; saveSettings(); render(); }
+  else if (act === 'start') newGame();
+  else if (act === 'home') { clearTimeout(closeTimer); state.view = 'home'; render(); }
+  else if (act === 'speak') {
+    settings.speak = !settings.speak; saveSettings();
+    btn.setAttribute('aria-pressed', settings.speak);
+    btn.innerHTML = settings.speak ? I.sound : I.mute;
+    if (settings.speak) say('צבעים');
+  }
+});
+window.addEventListener('resize', () => {
+  const b = app.querySelector('.board');
+  if (b) b.style.setProperty('--cols', cols());
+});
+if (canSpeak) speechSynthesis.getVoices();
+
+render();
+})();
+</script>
+</body>
+</html>
