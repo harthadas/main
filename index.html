@@ -53,19 +53,23 @@ svg { display: block; }
 
 
 /* ---------- home ---------- */
-.home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding-block: 24px; }
+.home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; }
+.home .group { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.home .group h2 { font-size: 1.35rem; color: var(--ink-soft); font-weight: 500; }
+.home .kinds { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); max-width: 728px; }
+.home .modes { max-width: 480px; }
 .home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
 .logo { display: flex; gap: 10px; align-items: flex-end; }
-.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; width: 100%; max-width: 720px; }
+.modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; max-width: 720px; }
 .mode {
   border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
-  padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;
+  padding: 22px 18px; display: flex; flex-direction: column; align-items: center; gap: 14px;
   font-family: var(--display); font-size: 1.45rem; font-weight: 500;
   transition: border-color .15s, transform .15s;
 }
 .mode:hover { border-color: var(--glass); }
 .mode:active { transform: scale(.98); }
-.mode svg { width: 76px; height: 76px; }
+.mode svg { width: 64px; height: 64px; }
 
 /* ---------- missions grid ---------- */
 .missions { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding-block: 16px; }
@@ -402,427 +406,7 @@ svg { display: block; }
 <div id="app" lang="he" dir="rtl"></div>
 <div id="story-app" lang="he" dir="rtl" hidden></div>
 
-<script>
-(() => {
-/* ================= paint model =================
-   Each base paint has a reflectance curve (16 bands, 400–700nm).
-   Paints mix by Kubelka–Munk: absorption/scattering ratios are averaged
-   by amount, so blue + yellow gives green, as with real paint. */
-const WL = [400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700];
-const CMF = [
-  [0.0143,0.0004,0.0679],[0.1344,0.0040,0.6456],[0.3483,0.0230,1.7471],[0.2908,0.0600,1.6692],
-  [0.0956,0.1390,0.8130],[0.0049,0.3230,0.2720],[0.0633,0.7100,0.0782],[0.2904,0.9540,0.0203],
-  [0.5945,0.9950,0.0039],[0.9163,0.8700,0.0017],[1.0622,0.6310,0.0008],[0.8544,0.3810,0.0002],
-  [0.4479,0.1750,0.0000],[0.1649,0.0610,0.0000],[0.0468,0.0170,0.0000],[0.0114,0.0041,0.0000]];
-const D65 = [82.75,93.43,104.86,117.81,115.92,109.35,104.79,104.41,100,95.79,90.01,87.7,83.7,80.21,78.28,71.61];
-let NORM = 0; for (let i = 0; i < WL.length; i++) NORM += D65[i] * CMF[i][1];
-const sig = (x, c, w) => 1 / (1 + Math.exp(-(x - c) / w));
-const curve = f => WL.map(f);
 
-// strength = tinting strength (how much one notch of this paint shifts a mix)
-const PAINTS = [
-  { id: 'red',    name: 'אָדֹם', strength: 1,    R: curve(l => 0.04 + 0.86*sig(l,592,9) + 0.09*sig(-l,-440,12)) },
-  { id: 'yellow', name: 'צָהֹב', strength: 1.5,  R: curve(l => 0.04 + 0.86*sig(l,502,10) - 0.06*sig(l,620,20)) },
-  { id: 'blue',   name: 'כָּחֹל', strength: 1,    R: curve(l => 0.03 + 0.62*sig(-l,-512,15) + 0.2*sig(l,660,12)) },
-  { id: 'white',  name: 'לָבָן', strength: 5,    R: curve(() => 0.93) },
-  { id: 'black',  name: 'שָׁחֹר', strength: 0.45, R: curve(() => 0.03) },
-];
-const PAINT = Object.fromEntries(PAINTS.map(p => [p.id, p]));
-const ks = r => (1 - r) * (1 - r) / (2 * r);
-const unks = k => 1 + k - Math.sqrt(k * k + 2 * k);
-
-function mixRGB(parts) {
-  let tot = 0;
-  parts.forEach(p => { tot += p.n * PAINT[p.id].strength; });
-  let X = 0, Y = 0, Z = 0;
-  WL.forEach((_, i) => {
-    let k = 0;
-    parts.forEach(p => { k += p.n * PAINT[p.id].strength / tot * ks(PAINT[p.id].R[i]); });
-    const e = D65[i] * unks(k);
-    X += e * CMF[i][0]; Y += e * CMF[i][1]; Z += e * CMF[i][2];
-  });
-  X /= NORM; Y /= NORM; Z /= NORM;
-  const gam = c => { c = Math.min(1, Math.max(0, c)); return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; };
-  return [3.2406*X - 1.5372*Y - 0.4986*Z, -0.9689*X + 1.8758*Y + 0.0415*Z, 0.0557*X - 0.2040*Y + 1.0570*Z]
-    .map(c => Math.round(gam(c) * 255));
-}
-const css = rgb => `rgb(${rgb[0]} ${rgb[1]} ${rgb[2]})`;
-
-function lab([r, g, b]) {
-  const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
-  const R = lin(r), G = lin(g), B = lin(b);
-  const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
-  const X = (0.4124*R + 0.3576*G + 0.1805*B) / 0.95047, Y = 0.2126*R + 0.7152*G + 0.0722*B, Z = (0.0193*R + 0.1192*G + 0.9505*B) / 1.08883;
-  return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
-}
-// CIEDE2000 color difference
-function deltaE(a, b) {
-  const [L1, a1, b1] = a, [L2, a2, b2] = b, rad = Math.PI / 180, p7 = Math.pow(25, 7);
-  const Cb = (Math.hypot(a1, b1) + Math.hypot(a2, b2)) / 2;
-  const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + p7)));
-  const ap1 = (1 + G) * a1, ap2 = (1 + G) * a2, C1 = Math.hypot(ap1, b1), C2 = Math.hypot(ap2, b2);
-  const hue = (x, y) => { if (!x && !y) return 0; const h = Math.atan2(y, x) / rad; return h >= 0 ? h : h + 360; };
-  const h1 = hue(ap1, b1), h2 = hue(ap2, b2);
-  let dh = 0; if (C1 * C2) { dh = h2 - h1; if (dh > 180) dh -= 360; else if (dh < -180) dh += 360; }
-  const dL = L2 - L1, dC = C2 - C1, dH = 2 * Math.sqrt(C1 * C2) * Math.sin(dh * rad / 2);
-  const Lb = (L1 + L2) / 2, Cpb = (C1 + C2) / 2;
-  let hb = h1 + h2; if (C1 * C2) { if (Math.abs(h1 - h2) > 180) hb += hb < 360 ? 360 : -360; hb /= 2; }
-  const T = 1 - 0.17*Math.cos((hb - 30)*rad) + 0.24*Math.cos(2*hb*rad) + 0.32*Math.cos((3*hb + 6)*rad) - 0.2*Math.cos((4*hb - 63)*rad);
-  const dT = 30 * Math.exp(-Math.pow((hb - 275) / 25, 2));
-  const RC = 2 * Math.sqrt(Math.pow(Cpb, 7) / (Math.pow(Cpb, 7) + p7));
-  const SL = 1 + 0.015 * Math.pow(Lb - 50, 2) / Math.sqrt(20 + Math.pow(Lb - 50, 2)), SC = 1 + 0.045 * Cpb, SH = 1 + 0.015 * Cpb * T;
-  const RT = -Math.sin(2 * dT * rad) * RC;
-  return Math.sqrt(Math.pow(dL/SL, 2) + Math.pow(dC/SC, 2) + Math.pow(dH/SH, 2) + RT * (dC/SC) * (dH/SH));
-}
-
-PAINTS.forEach(p => { p.rgb = mixRGB([{ id: p.id, n: 1 }]); });
-
-/* ================= missions =================
-   Each target is defined by a recipe, so it is always reachable
-   and its sample is exactly what the model paints. */
-const MISSIONS = [
-  { name: 'כָּתֹם',               recipe: { red: 1, yellow: 2 } },
-  { name: 'יָרֹק',                recipe: { blue: 1, yellow: 2 } },
-  { name: 'סָגֹל',                recipe: { red: 1, blue: 1 } },
-  { name: 'וָרֹד',                recipe: { red: 1, white: 2 } },
-  { name: 'אָפֹר',                recipe: { black: 1, white: 2 } },
-  { name: 'תְּכֵלֶת',              recipe: { blue: 1, white: 4 } },
-  { name: 'חוּם',                 recipe: { red: 2, yellow: 2, blue: 1 } },
-  { name: 'וָרֹד בָּהִיר מְאוֹד',     recipe: { red: 1, white: 6 } },
-  { name: 'הָאָפֹר הֲכִי כֵּהֶה',     recipe: { black: 6, white: 1 } },
-  { name: 'אָפֹר בָּהִיר מְאוֹד',     recipe: { black: 1, white: 6 } },
-  { name: 'בּוֹרְדוֹ',              recipe: { red: 5, blue: 1, black: 1 } },
-  { name: 'יָרֹק זַיִת',            recipe: { yellow: 3, black: 1 } },
-  { name: 'לִילָךְ',               recipe: { red: 1, blue: 1, white: 4 } },
-  { name: 'כָּחֹל כֵּהֶה',           recipe: { blue: 4, black: 1 } },
-  { name: 'אֲפַרְסֵק',             recipe: { red: 1, yellow: 2, white: 3 } },
-  { name: 'טוּרְקִיז',             recipe: { blue: 2, yellow: 1, white: 2 } },
-  { name: 'יָרֹק בָּהִיר',          recipe: { blue: 1, yellow: 3, white: 2 } },
-  { name: 'צָהֹב בָּהִיר',          recipe: { yellow: 1, white: 3 } },
-  { name: 'בֶּז׳',                 recipe: { red: 1, yellow: 1, black: 1, white: 5 } },
-  { name: 'יָרֹק כֵּהֶה',           recipe: { blue: 2, yellow: 2, black: 1 } },
-];
-MISSIONS.forEach(m => {
-  m.rgb = mixRGB(Object.entries(m.recipe).map(([id, n]) => ({ id, n })));
-  m.lab = lab(m.rgb);
-});
-
-// Error margins for elementary-school eyes (CIEDE2000 units).
-const MATCH = 6, CLOSE = 12;
-const MAX_N = 6, MAX_TUBES = 4;
-
-/* ================= state ================= */
-const state = { view: 'home', mode: 'free', mission: null, tubes: [] };
-const DONE_KEY = 'color-lab-done';
-let done = new Set();
-try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); } catch (e) {}
-const saveDone = () => { try { localStorage.setItem(DONE_KEY, JSON.stringify([...done])); } catch (e) {} };
-
-/* ================= icons ================= */
-const I = {
-  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
-  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
-  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
-  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
-  minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>',
-  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
-  mix: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 12c0-2 2-3 3.5-2s1.5 4-1 5.5-6.5.5-7.5-3S9 4.5 13 4.5s8 3 8 7.5-4 8.5-9 8.5"/></svg>',
-  redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/></svg>',
-  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
-  target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>',
-};
-
-/* ================= test tube =================
-   One drawing used everywhere: while choosing amounts and in the recipe,
-   so the notches a child counts are the same in both places. */
-const TUBE = { w: 64, h: 204, top: 22, bottom: 196, inX: 12, inW: 40 };
-const STEP = (TUBE.bottom - 26) / MAX_N;          // height of one notch
-let uid = 0;
-function tubeSVG(color, n, height) {
-  const id = 'tc' + (++uid);
-  const { w, h, top, bottom, inX, inW } = TUBE;
-  const r = inW / 2;
-  const inner = `M${inX} ${top} V${bottom - r} A${r} ${r} 0 0 0 ${inX + inW} ${bottom - r} V${top} Z`;
-  const fillY = bottom - n * STEP;
-  let ticks = '';
-  for (let i = 1; i <= MAX_N; i++) {
-    const y = bottom - i * STEP;
-    ticks += `<path d="M${inX} ${y}h${i % 2 ? 14 : 22}" stroke="#1d2431" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>`;
-  }
-  return `<svg width="${Math.round(w * height / h)}" height="${height}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
-    <defs><clipPath id="${id}"><path d="${inner}"/></clipPath></defs>
-    <path d="${inner}" fill="#e3e8ef"/>
-    ${n > 0 ? `<g clip-path="url(#${id})"><rect class="liquid" x="0" y="${fillY}" width="${w}" height="${h - fillY}" fill="${color}"/><rect x="0" y="${fillY}" width="${w}" height="3.5" fill="#1d2431" fill-opacity=".3"/></g>` : ''}
-    ${ticks}
-    <path d="${inner}" fill="none" stroke="#97a3b6" stroke-width="3"/>
-    <rect x="${inX - 6}" y="${top - 8}" width="${inW + 12}" height="9" rx="4.5" fill="#ffffff" stroke="#97a3b6" stroke-width="3"/>
-  </svg>`;
-}
-function emptyTubeSVG(height) {
-  const { w, h, top, bottom, inX, inW } = TUBE, r = inW / 2;
-  const inner = `M${inX} ${top} V${bottom - r} A${r} ${r} 0 0 0 ${inX + inW} ${bottom - r} V${top} Z`;
-  return `<svg width="${Math.round(w * height / h)}" height="${height}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
-    <path d="${inner}" fill="none" stroke="#97a3b6" stroke-width="2.5" stroke-dasharray="7 7"/></svg>`;
-}
-
-/* ================= rendering ================= */
-const app = document.getElementById('app');
-const small = () => window.matchMedia('(max-width: 420px)').matches;
-
-function render() {
-  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
-  uid = 0;
-  app.innerHTML = ({ home: homeView, missions: missionsView, lab: labView, result: resultView })[state.view]();
-  if (focusKey) {
-    const el = app.querySelector(`[data-key="${focusKey}"]`);
-    if (el && !el.disabled) el.focus();
-  }
-}
-
-function homeView() {
-  const logo = ['red', 'yellow', 'blue'].map((id, i) => tubeSVG(css(PAINT[id].rgb), [4, 3, 5][i], 120)).join('');
-  return `<div class="home">
-    <div class="logo">${logo}</div>
-    <h1>מַעְבֶּדֶת צְבָעִים</h1>
-    <div class="modes">
-      <button class="mode" data-act="free" data-key="free">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle cx="22" cy="26" r="14" fill="${css(PAINT.red.rgb)}"/>
-          <circle cx="42" cy="26" r="14" fill="${css(PAINT.yellow.rgb)}" fill-opacity=".9"/>
-          <circle cx="32" cy="43" r="14" fill="${css(PAINT.blue.rgb)}" fill-opacity=".85"/>
-        </svg>
-        מִשְׂחָק חָפְשִׁי
-      </button>
-      <button class="mode" data-act="missions" data-key="missions">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle cx="32" cy="32" r="26" fill="none" stroke="#1d2431" stroke-width="4"/>
-          <circle cx="32" cy="32" r="16" fill="${css(MISSIONS[2].rgb)}"/>
-          <circle cx="32" cy="32" r="6" fill="#ffffff"/>
-        </svg>
-        מְשִׂימוֹת
-      </button>
-      <button class="mode" data-act="stories" data-key="stories">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <path d="M8 14h20a4 4 0 0 1 4 4v34a4 4 0 0 0-4-4H8z" fill="#ffffff" stroke="#1d2431" stroke-width="3.5" stroke-linejoin="round"/>
-          <path d="M56 14H36a4 4 0 0 0-4 4v34a4 4 0 0 1 4-4h20z" fill="#ffffff" stroke="#1d2431" stroke-width="3.5" stroke-linejoin="round"/>
-          <circle cx="20" cy="30" r="7" fill="${css(PAINT.red.rgb)}"/>
-          <circle cx="44" cy="30" r="7" fill="${css(PAINT.blue.rgb)}"/>
-        </svg>
-        סִפּוּרִים
-      </button>
-    </div>
-  </div>`;
-}
-
-function missionsView() {
-  return `<div class="bar">
-      <button class="icon-btn" data-act="home" data-key="home" aria-label="הַבַּיְתָה">${I.back}</button>
-      <h2>מְשִׂימוֹת</h2>
-    </div>
-    <div class="missions">
-      ${MISSIONS.map((m, i) => `<button class="mission" data-act="pick" data-i="${i}" data-key="m${i}">
-        ${done.has(i) ? `<span class="done" style="color:var(--good)" aria-label="הַצְלָחָה">${I.star}</span>` : ''}
-        <span class="dot" style="background:${css(m.rgb)}"></span>
-        <span>${m.name}</span>
-      </button>`).join('')}
-    </div>`;
-}
-
-function targetCard() {
-  const m = MISSIONS[state.mission];
-  return `<div class="target">
-    <span class="dot" style="background:${css(m.rgb)}"></span>
-    <div><small>נַסּוּ לְהָכִין</small><strong>${m.name}</strong></div>
-  </div>`;
-}
-
-function labView() {
-  const isMission = state.mode === 'mission';
-  const used = new Set(state.tubes.map(t => t.id));
-  const full = state.tubes.length >= MAX_TUBES;
-  const th = small() ? 150 : 186;
-
-  const bank = PAINTS.map(p => {
-    const on = used.has(p.id);
-    return `<button class="pot${on ? ' on' : ''}" data-act="toggle" data-id="${p.id}" data-key="pot-${p.id}"
-      aria-pressed="${on}" ${!on && full ? 'disabled' : ''}>
-      <span class="paint" style="background:${css(p.rgb)}"></span>${p.name}</button>`;
-  }).join('');
-
-  let slots = '';
-  for (let i = 0; i < MAX_TUBES; i++) {
-    const t = state.tubes[i];
-    if (!t) {
-      slots += `<div class="slot ghost"><span class="step"></span>${emptyTubeSVG(th)}<span class="count"></span><span class="step"></span></div>`;
-      continue;
-    }
-    const p = PAINT[t.id];
-    slots += `<div class="slot">
-      <button class="step" data-act="more" data-i="${i}" data-key="more-${t.id}" aria-label="עוֹד ${p.name}" ${t.n >= MAX_N ? 'disabled' : ''}>${I.plus}</button>
-      <button class="remove" data-act="remove" data-i="${i}" data-key="rm-${t.id}" aria-label="לְהוֹצִיא ${p.name}">${I.x}</button>
-      <button class="tube-btn" data-act="level" data-i="${i}" data-key="tube-${t.id}" aria-label="${p.name} ${t.n}">${tubeSVG(css(p.rgb), t.n, th)}</button>
-      <span class="count">${t.n}</span>
-      <button class="step" data-act="less" data-i="${i}" data-key="less-${t.id}" aria-label="פָּחוֹת ${p.name}" ${t.n <= 1 ? 'disabled' : ''}>${I.minus}</button>
-    </div>`;
-  }
-
-  return `<div class="bar">
-      <button class="icon-btn" data-act="${isMission ? 'missions' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
-      ${isMission ? targetCard() : ''}
-    </div>
-    <div class="lab">
-      <div class="bank${state.tubes.length ? '' : ' empty'}">${bank}</div>
-      <div class="bench">${slots}</div>
-      <button class="mix" data-act="mix" data-key="mix" ${state.tubes.length < 2 ? 'disabled' : ''}>${I.mix}לְעַרְבֵּב</button>
-    </div>`;
-}
-
-function nearestName(l) {
-  let best = null, bd = Infinity;
-  PAINTS.forEach(p => { const d = deltaE(l, lab(p.rgb)); if (d < bd) { bd = d; best = p.name; } });
-  MISSIONS.forEach(m => { const d = deltaE(l, m.lab); if (d < bd) { bd = d; best = m.name; } });
-  return bd <= MATCH ? best : '';
-}
-
-// The single change (one notch more or less, or one paint added/removed)
-// that brings the mix closest to the target.
-function findHint(tubes, target) {
-  const dist = ts => deltaE(lab(mixRGB(ts)), target);
-  let best = null, bestD = dist(tubes);
-  const consider = (ts, h) => { const d = dist(ts); if (d < bestD - 0.5) { bestD = d; best = h; } };
-  tubes.forEach((t, i) => {
-    if (t.n < MAX_N) consider(tubes.map((u, j) => j === i ? { ...u, n: u.n + 1 } : u), { id: t.id, kind: 'more' });
-    if (t.n > 1) consider(tubes.map((u, j) => j === i ? { ...u, n: u.n - 1 } : u), { id: t.id, kind: 'less' });
-    else if (tubes.length > 1) consider(tubes.filter((_, j) => j !== i), { id: t.id, kind: 'without' });
-  });
-  if (tubes.length < MAX_TUBES) {
-    PAINTS.filter(p => !tubes.some(t => t.id === p.id))
-      .forEach(p => consider([...tubes, { id: p.id, n: 1 }], { id: p.id, kind: 'add' }));
-  }
-  return best;
-}
-
-function resultView() {
-  const isMission = state.mode === 'mission';
-  const rgb = mixRGB(state.tubes);
-  const l = lab(rgb);
-  const th = small() ? 104 : 128;
-  const total = state.tubes.reduce((s, t) => s + t.n, 0);
-
-  // swirl: each paint gets a slice proportional to its notches
-  let acc = 0;
-  const stops = state.tubes.map(t => {
-    const a = acc, b = acc + t.n / total * 360; acc = b;
-    return `${css(PAINT[t.id].rgb)} ${a}deg ${b}deg`;
-  }).join(', ');
-
-  const formula = state.tubes.map((t, i) =>
-    `${i ? '<span class="op">+</span>' : ''}<div class="item">${tubeSVG(css(PAINT[t.id].rgb), t.n, th)}<span class="count">${t.n}</span></div>`
-  ).join('') + `<span class="op">=</span><div class="item"><span class="blob" style="background:${css(rgb)}"></span><span class="count">&nbsp;</span></div>`;
-
-  let verdict = '', actions = '';
-  if (isMission) {
-    const m = MISSIONS[state.mission];
-    const d = deltaE(l, m.lab);
-    if (d <= MATCH) {
-      verdict = `<div class="verdict good"><div class="say">${I.star}כָּל הַכָּבוֹד!</div></div>`;
-      actions = (state.mission < MISSIONS.length - 1
-        ? `<button class="act primary" data-act="nextMission" data-key="next">מְשִׂימָה הַבָּאָה${I.next}</button>` : '')
-        + `<button class="act" data-act="missions" data-key="list">${I.target}כָּל הַמְּשִׂימוֹת</button>`;
-    } else {
-      const h = findHint(state.tubes, m.lab);
-      let hint = '';
-      if (h) {
-        const p = PAINT[h.id];
-        const words = { more: `עוֹד קְצָת ${p.name}`, add: `לְהוֹסִיף קְצָת ${p.name}`, less: `פָּחוֹת ${p.name}`, without: `בְּלִי ${p.name}` }[h.kind];
-        hint = `<div class="hint"><span class="chip" style="background:${css(p.rgb)}"></span>${words}</div>`;
-      }
-      verdict = `<div class="verdict ${d <= CLOSE ? 'near' : ''}"><div class="say">${d <= CLOSE ? 'קָרוֹב מְאוֹד!' : 'נַסּוּ שׁוּב'}</div>${hint}</div>`;
-      actions = `<button class="act primary" data-act="edit" data-key="edit">${I.redo}לְנַסּוֹת שׁוּב</button>`;
-    }
-  } else {
-    actions = `<button class="act primary" data-act="edit" data-key="edit">${I.back}לְשַׁנּוֹת</button>
-      <button class="act" data-act="fresh" data-key="fresh">${I.plus}חָדָשׁ</button>`;
-  }
-
-  const target = isMission
-    ? `<div class="vs"><span class="dot" style="background:${css(MISSIONS[state.mission].rgb)}"></span>${I.target}</div>` : '';
-
-  return `<div class="bar">
-      <button class="icon-btn" data-act="${isMission ? 'missions' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
-      ${isMission ? targetCard() : ''}
-    </div>
-    <div class="result">
-      <div class="bowl-row">
-        <div class="bowl" role="img" aria-label="הַצֶּבַע שֶׁיָּצָא">
-          <div class="swirl" style="background:conic-gradient(${stops})"></div>
-          <div class="final" style="background:${css(rgb)}"></div>
-        </div>
-        ${target}
-      </div>
-      ${isMission ? verdict : `<div class="name">${nearestName(l)}</div>`}
-      <section class="recipe" aria-label="מַתְכּוֹן">
-        <h2>הַמַּתְכּוֹן</h2>
-        <div class="formula">${formula}</div>
-      </section>
-      <div class="actions">${actions}</div>
-    </div>`;
-}
-
-/* ================= actions ================= */
-function go(view) { state.view = view; render(); window.scrollTo(0, 0); }
-
-app.addEventListener('click', e => {
-  const b = e.target.closest('[data-act]');
-  if (!b || b.disabled) return;
-  const i = +b.dataset.i;
-  switch (b.dataset.act) {
-    case 'home': go('home'); break;
-    case 'free': state.mode = 'free'; state.mission = null; state.tubes = []; go('lab'); break;
-    case 'missions': state.mode = 'mission'; go('missions'); break;
-    case 'stories': window.openApp('stories'); break;
-    case 'pick': state.mode = 'mission'; state.mission = i; state.tubes = []; go('lab'); break;
-    case 'nextMission': state.mission = Math.min(MISSIONS.length - 1, state.mission + 1); state.tubes = []; go('lab'); break;
-    case 'toggle': {
-      const at = state.tubes.findIndex(t => t.id === b.dataset.id);
-      if (at >= 0) state.tubes.splice(at, 1);
-      else if (state.tubes.length < MAX_TUBES) state.tubes.push({ id: b.dataset.id, n: 1 });
-      render(); break;
-    }
-    case 'remove': state.tubes.splice(i, 1); render(); break;
-    case 'more': state.tubes[i].n = Math.min(MAX_N, state.tubes[i].n + 1); render(); break;
-    case 'less': state.tubes[i].n = Math.max(1, state.tubes[i].n - 1); render(); break;
-    case 'level': {
-      // tap on the tube: fill up to the notch that was touched
-      const svg = b.querySelector('svg');
-      const box = svg.getBoundingClientRect();
-      let n;
-      if (e.detail === 0) n = state.tubes[i].n % MAX_N + 1;   // keyboard: step up, wrap around
-      else {
-        const y = (e.clientY - box.top) / box.height * TUBE.h;
-        n = Math.ceil((TUBE.bottom - y) / STEP);
-      }
-      state.tubes[i].n = Math.max(1, Math.min(MAX_N, n));
-      render(); break;
-    }
-    case 'mix': {
-      if (state.tubes.length < 2) return;
-      if (state.mode === 'mission' && deltaE(lab(mixRGB(state.tubes)), MISSIONS[state.mission].lab) <= MATCH) {
-        done.add(state.mission); saveDone();
-      }
-      go('result'); break;
-    }
-    case 'edit': go('lab'); break;
-    case 'fresh': state.tubes = []; go('lab'); break;
-  }
-});
-
-let lastSmall = small();
-window.addEventListener('resize', () => { if (small() !== lastSmall) { lastSmall = small(); render(); } });
-
-render();
-})();
-</script>
 
 <script>
 (() => {
@@ -1991,7 +1575,7 @@ function startView() {
       <h1>מַעְבֶּדֶת סִפּוּרִים</h1>
       <p>אֵיזֶה סִפּוּר נִכְתֹּב הַיּוֹם?</p>
       <div class="kinds">${kinds}</div>
-      <button class="act" data-act="lab" data-key="lab">${I.palette}מִשְׂחַק עִרְבּוּב הַצְּבָעִים</button>
+      <button class="act" data-act="lab" data-key="lab">${I.palette}לְמָסַךְ הַבַּיִת</button>
     </div>`;
 }
 
@@ -2193,7 +1777,7 @@ app.addEventListener('click', e => {
       go(st.screen === 'final' ? 'final' : 'step');
       break;
     }
-    case 'home': sfx('tap'); view = 'start'; render(); window.scrollTo(0, 0); break;
+    case 'home': sfx('tap'); stopReading(); window.openApp('lab'); break;
     case 'lab': stopReading(); window.openApp('lab'); break;
     case 'sound': store.sound = !store.sound; render(); sfx('tap'); break;
     case 'choose': choose(b.dataset.k, b.dataset.id); break;
@@ -2204,7 +1788,7 @@ app.addEventListener('click', e => {
       if (view === 'book') go('final');
       else if (view === 'final') go('step', M().steps.length - 1);
       else if (st.step > 0) go('step', st.step - 1);
-      else { view = 'start'; render(); }
+      else { stopReading(); window.openApp('lab'); }
       break;
     case 'goto': sfx('tap'); go('step', +b.dataset.i); break;
     case 'readOne': {
@@ -2257,7 +1841,454 @@ app.addEventListener('keydown', e => {
   else if (e.target.dataset.own && chosen(e.target.dataset.own)) { e.preventDefault(); forward(); }
 });
 
+// The home screen of the color lab lists the kinds of story and opens them through this.
+window.storyLab = {
+  kinds: () => Object.values(MODES).map(m => {
+    const draft = store.drafts[m.id] && store.drafts[m.id].hero;
+    return `<div class="kind">
+      <button class="kind-card" data-act="story-open" data-mode="${m.id}" data-key="kind-${m.id}">
+        ${m.art()}<strong>${m.label}</strong><small>${m.hint}</small>
+      </button>
+      ${draft ? `<div class="kind-actions">
+        <button class="act primary" data-act="story-open" data-mode="${m.id}" data-key="resume-${m.id}">${I.next}לְהַמְשִׁיךְ</button>
+        <button class="act" data-act="story-new" data-mode="${m.id}" data-key="new-${m.id}">${I.plus}סִפּוּר חָדָשׁ</button>
+      </div>` : ''}
+    </div>`;
+  }).join(''),
+  open(mode, startNew) {
+    const draft = store.drafts[mode];
+    st = !startNew && draft && draft.hero ? Object.assign(newStory(mode), draft) : newStory(mode);
+    lastSeen = new Set();
+    sfx('tap');
+    window.openApp('stories');
+    go(st.screen === 'final' ? 'final' : 'step');
+  },
+};
+
 if (canSpeak) speechSynthesis.getVoices();   // some browsers load voices lazily
+render();
+})();
+</script>
+
+<script>
+(() => {
+/* ================= paint model =================
+   Each base paint has a reflectance curve (16 bands, 400–700nm).
+   Paints mix by Kubelka–Munk: absorption/scattering ratios are averaged
+   by amount, so blue + yellow gives green, as with real paint. */
+const WL = [400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700];
+const CMF = [
+  [0.0143,0.0004,0.0679],[0.1344,0.0040,0.6456],[0.3483,0.0230,1.7471],[0.2908,0.0600,1.6692],
+  [0.0956,0.1390,0.8130],[0.0049,0.3230,0.2720],[0.0633,0.7100,0.0782],[0.2904,0.9540,0.0203],
+  [0.5945,0.9950,0.0039],[0.9163,0.8700,0.0017],[1.0622,0.6310,0.0008],[0.8544,0.3810,0.0002],
+  [0.4479,0.1750,0.0000],[0.1649,0.0610,0.0000],[0.0468,0.0170,0.0000],[0.0114,0.0041,0.0000]];
+const D65 = [82.75,93.43,104.86,117.81,115.92,109.35,104.79,104.41,100,95.79,90.01,87.7,83.7,80.21,78.28,71.61];
+let NORM = 0; for (let i = 0; i < WL.length; i++) NORM += D65[i] * CMF[i][1];
+const sig = (x, c, w) => 1 / (1 + Math.exp(-(x - c) / w));
+const curve = f => WL.map(f);
+
+// strength = tinting strength (how much one notch of this paint shifts a mix)
+const PAINTS = [
+  { id: 'red',    name: 'אָדֹם', strength: 1,    R: curve(l => 0.04 + 0.86*sig(l,592,9) + 0.09*sig(-l,-440,12)) },
+  { id: 'yellow', name: 'צָהֹב', strength: 1.5,  R: curve(l => 0.04 + 0.86*sig(l,502,10) - 0.06*sig(l,620,20)) },
+  { id: 'blue',   name: 'כָּחֹל', strength: 1,    R: curve(l => 0.03 + 0.62*sig(-l,-512,15) + 0.2*sig(l,660,12)) },
+  { id: 'white',  name: 'לָבָן', strength: 5,    R: curve(() => 0.93) },
+  { id: 'black',  name: 'שָׁחֹר', strength: 0.45, R: curve(() => 0.03) },
+];
+const PAINT = Object.fromEntries(PAINTS.map(p => [p.id, p]));
+const ks = r => (1 - r) * (1 - r) / (2 * r);
+const unks = k => 1 + k - Math.sqrt(k * k + 2 * k);
+
+function mixRGB(parts) {
+  let tot = 0;
+  parts.forEach(p => { tot += p.n * PAINT[p.id].strength; });
+  let X = 0, Y = 0, Z = 0;
+  WL.forEach((_, i) => {
+    let k = 0;
+    parts.forEach(p => { k += p.n * PAINT[p.id].strength / tot * ks(PAINT[p.id].R[i]); });
+    const e = D65[i] * unks(k);
+    X += e * CMF[i][0]; Y += e * CMF[i][1]; Z += e * CMF[i][2];
+  });
+  X /= NORM; Y /= NORM; Z /= NORM;
+  const gam = c => { c = Math.min(1, Math.max(0, c)); return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055; };
+  return [3.2406*X - 1.5372*Y - 0.4986*Z, -0.9689*X + 1.8758*Y + 0.0415*Z, 0.0557*X - 0.2040*Y + 1.0570*Z]
+    .map(c => Math.round(gam(c) * 255));
+}
+const css = rgb => `rgb(${rgb[0]} ${rgb[1]} ${rgb[2]})`;
+
+function lab([r, g, b]) {
+  const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const R = lin(r), G = lin(g), B = lin(b);
+  const f = t => t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+  const X = (0.4124*R + 0.3576*G + 0.1805*B) / 0.95047, Y = 0.2126*R + 0.7152*G + 0.0722*B, Z = (0.0193*R + 0.1192*G + 0.9505*B) / 1.08883;
+  return [116 * f(Y) - 16, 500 * (f(X) - f(Y)), 200 * (f(Y) - f(Z))];
+}
+// CIEDE2000 color difference
+function deltaE(a, b) {
+  const [L1, a1, b1] = a, [L2, a2, b2] = b, rad = Math.PI / 180, p7 = Math.pow(25, 7);
+  const Cb = (Math.hypot(a1, b1) + Math.hypot(a2, b2)) / 2;
+  const G = 0.5 * (1 - Math.sqrt(Math.pow(Cb, 7) / (Math.pow(Cb, 7) + p7)));
+  const ap1 = (1 + G) * a1, ap2 = (1 + G) * a2, C1 = Math.hypot(ap1, b1), C2 = Math.hypot(ap2, b2);
+  const hue = (x, y) => { if (!x && !y) return 0; const h = Math.atan2(y, x) / rad; return h >= 0 ? h : h + 360; };
+  const h1 = hue(ap1, b1), h2 = hue(ap2, b2);
+  let dh = 0; if (C1 * C2) { dh = h2 - h1; if (dh > 180) dh -= 360; else if (dh < -180) dh += 360; }
+  const dL = L2 - L1, dC = C2 - C1, dH = 2 * Math.sqrt(C1 * C2) * Math.sin(dh * rad / 2);
+  const Lb = (L1 + L2) / 2, Cpb = (C1 + C2) / 2;
+  let hb = h1 + h2; if (C1 * C2) { if (Math.abs(h1 - h2) > 180) hb += hb < 360 ? 360 : -360; hb /= 2; }
+  const T = 1 - 0.17*Math.cos((hb - 30)*rad) + 0.24*Math.cos(2*hb*rad) + 0.32*Math.cos((3*hb + 6)*rad) - 0.2*Math.cos((4*hb - 63)*rad);
+  const dT = 30 * Math.exp(-Math.pow((hb - 275) / 25, 2));
+  const RC = 2 * Math.sqrt(Math.pow(Cpb, 7) / (Math.pow(Cpb, 7) + p7));
+  const SL = 1 + 0.015 * Math.pow(Lb - 50, 2) / Math.sqrt(20 + Math.pow(Lb - 50, 2)), SC = 1 + 0.045 * Cpb, SH = 1 + 0.015 * Cpb * T;
+  const RT = -Math.sin(2 * dT * rad) * RC;
+  return Math.sqrt(Math.pow(dL/SL, 2) + Math.pow(dC/SC, 2) + Math.pow(dH/SH, 2) + RT * (dC/SC) * (dH/SH));
+}
+
+PAINTS.forEach(p => { p.rgb = mixRGB([{ id: p.id, n: 1 }]); });
+
+/* ================= missions =================
+   Each target is defined by a recipe, so it is always reachable
+   and its sample is exactly what the model paints. */
+const MISSIONS = [
+  { name: 'כָּתֹם',               recipe: { red: 1, yellow: 2 } },
+  { name: 'יָרֹק',                recipe: { blue: 1, yellow: 2 } },
+  { name: 'סָגֹל',                recipe: { red: 1, blue: 1 } },
+  { name: 'וָרֹד',                recipe: { red: 1, white: 2 } },
+  { name: 'אָפֹר',                recipe: { black: 1, white: 2 } },
+  { name: 'תְּכֵלֶת',              recipe: { blue: 1, white: 4 } },
+  { name: 'חוּם',                 recipe: { red: 2, yellow: 2, blue: 1 } },
+  { name: 'וָרֹד בָּהִיר מְאוֹד',     recipe: { red: 1, white: 6 } },
+  { name: 'הָאָפֹר הֲכִי כֵּהֶה',     recipe: { black: 6, white: 1 } },
+  { name: 'אָפֹר בָּהִיר מְאוֹד',     recipe: { black: 1, white: 6 } },
+  { name: 'בּוֹרְדוֹ',              recipe: { red: 5, blue: 1, black: 1 } },
+  { name: 'יָרֹק זַיִת',            recipe: { yellow: 3, black: 1 } },
+  { name: 'לִילָךְ',               recipe: { red: 1, blue: 1, white: 4 } },
+  { name: 'כָּחֹל כֵּהֶה',           recipe: { blue: 4, black: 1 } },
+  { name: 'אֲפַרְסֵק',             recipe: { red: 1, yellow: 2, white: 3 } },
+  { name: 'טוּרְקִיז',             recipe: { blue: 2, yellow: 1, white: 2 } },
+  { name: 'יָרֹק בָּהִיר',          recipe: { blue: 1, yellow: 3, white: 2 } },
+  { name: 'צָהֹב בָּהִיר',          recipe: { yellow: 1, white: 3 } },
+  { name: 'בֶּז׳',                 recipe: { red: 1, yellow: 1, black: 1, white: 5 } },
+  { name: 'יָרֹק כֵּהֶה',           recipe: { blue: 2, yellow: 2, black: 1 } },
+];
+MISSIONS.forEach(m => {
+  m.rgb = mixRGB(Object.entries(m.recipe).map(([id, n]) => ({ id, n })));
+  m.lab = lab(m.rgb);
+});
+
+// Error margins for elementary-school eyes (CIEDE2000 units).
+const MATCH = 6, CLOSE = 12;
+const MAX_N = 6, MAX_TUBES = 4;
+
+/* ================= state ================= */
+const state = { view: 'home', mode: 'free', mission: null, tubes: [] };
+const DONE_KEY = 'color-lab-done';
+let done = new Set();
+try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); } catch (e) {}
+const saveDone = () => { try { localStorage.setItem(DONE_KEY, JSON.stringify([...done])); } catch (e) {} };
+
+/* ================= icons ================= */
+const I = {
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  mix: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 12c0-2 2-3 3.5-2s1.5 4-1 5.5-6.5.5-7.5-3S9 4.5 13 4.5s8 3 8 7.5-4 8.5-9 8.5"/></svg>',
+  redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.5-5.8"/><path d="M20 4v5h-5"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+  target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>',
+};
+
+/* ================= test tube =================
+   One drawing used everywhere: while choosing amounts and in the recipe,
+   so the notches a child counts are the same in both places. */
+const TUBE = { w: 64, h: 204, top: 22, bottom: 196, inX: 12, inW: 40 };
+const STEP = (TUBE.bottom - 26) / MAX_N;          // height of one notch
+let uid = 0;
+function tubeSVG(color, n, height) {
+  const id = 'tc' + (++uid);
+  const { w, h, top, bottom, inX, inW } = TUBE;
+  const r = inW / 2;
+  const inner = `M${inX} ${top} V${bottom - r} A${r} ${r} 0 0 0 ${inX + inW} ${bottom - r} V${top} Z`;
+  const fillY = bottom - n * STEP;
+  let ticks = '';
+  for (let i = 1; i <= MAX_N; i++) {
+    const y = bottom - i * STEP;
+    ticks += `<path d="M${inX} ${y}h${i % 2 ? 14 : 22}" stroke="#1d2431" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  return `<svg width="${Math.round(w * height / h)}" height="${height}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <defs><clipPath id="${id}"><path d="${inner}"/></clipPath></defs>
+    <path d="${inner}" fill="#e3e8ef"/>
+    ${n > 0 ? `<g clip-path="url(#${id})"><rect class="liquid" x="0" y="${fillY}" width="${w}" height="${h - fillY}" fill="${color}"/><rect x="0" y="${fillY}" width="${w}" height="3.5" fill="#1d2431" fill-opacity=".3"/></g>` : ''}
+    ${ticks}
+    <path d="${inner}" fill="none" stroke="#97a3b6" stroke-width="3"/>
+    <rect x="${inX - 6}" y="${top - 8}" width="${inW + 12}" height="9" rx="4.5" fill="#ffffff" stroke="#97a3b6" stroke-width="3"/>
+  </svg>`;
+}
+function emptyTubeSVG(height) {
+  const { w, h, top, bottom, inX, inW } = TUBE, r = inW / 2;
+  const inner = `M${inX} ${top} V${bottom - r} A${r} ${r} 0 0 0 ${inX + inW} ${bottom - r} V${top} Z`;
+  return `<svg width="${Math.round(w * height / h)}" height="${height}" viewBox="0 0 ${w} ${h}" aria-hidden="true">
+    <path d="${inner}" fill="none" stroke="#97a3b6" stroke-width="2.5" stroke-dasharray="7 7"/></svg>`;
+}
+
+/* ================= rendering ================= */
+const app = document.getElementById('app');
+const small = () => window.matchMedia('(max-width: 420px)').matches;
+
+function render() {
+  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  uid = 0;
+  app.innerHTML = ({ home: homeView, missions: missionsView, lab: labView, result: resultView })[state.view]();
+  if (focusKey) {
+    const el = app.querySelector(`[data-key="${focusKey}"]`);
+    if (el && !el.disabled) el.focus();
+  }
+}
+
+function homeView() {
+  const logo = ['red', 'yellow', 'blue'].map((id, i) => tubeSVG(css(PAINT[id].rgb), [4, 3, 5][i], 120)).join('');
+  return `<div class="home">
+    <div class="logo">${logo}</div>
+    <h1>מַעְבֶּדֶת צְבָעִים</h1>
+    <section class="group">
+    <h2>מְעַרְבְּבִים צְבָעִים</h2>
+    <div class="modes">
+      <button class="mode" data-act="free" data-key="free">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="22" cy="26" r="14" fill="${css(PAINT.red.rgb)}"/>
+          <circle cx="42" cy="26" r="14" fill="${css(PAINT.yellow.rgb)}" fill-opacity=".9"/>
+          <circle cx="32" cy="43" r="14" fill="${css(PAINT.blue.rgb)}" fill-opacity=".85"/>
+        </svg>
+        מִשְׂחָק חָפְשִׁי
+      </button>
+      <button class="mode" data-act="missions" data-key="missions">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <circle cx="32" cy="32" r="26" fill="none" stroke="#1d2431" stroke-width="4"/>
+          <circle cx="32" cy="32" r="16" fill="${css(MISSIONS[2].rgb)}"/>
+          <circle cx="32" cy="32" r="6" fill="#ffffff"/>
+        </svg>
+        מְשִׂימוֹת
+      </button>
+    </div>
+    </section>
+    ${window.storyLab ? `<section class="group">
+      <h2>כּוֹתְבִים סִפּוּר</h2>
+      <div class="kinds">${window.storyLab.kinds()}</div>
+    </section>` : ''}
+  </div>`;
+}
+
+function missionsView() {
+  return `<div class="bar">
+      <button class="icon-btn" data-act="home" data-key="home" aria-label="הַבַּיְתָה">${I.back}</button>
+      <h2>מְשִׂימוֹת</h2>
+    </div>
+    <div class="missions">
+      ${MISSIONS.map((m, i) => `<button class="mission" data-act="pick" data-i="${i}" data-key="m${i}">
+        ${done.has(i) ? `<span class="done" style="color:var(--good)" aria-label="הַצְלָחָה">${I.star}</span>` : ''}
+        <span class="dot" style="background:${css(m.rgb)}"></span>
+        <span>${m.name}</span>
+      </button>`).join('')}
+    </div>`;
+}
+
+function targetCard() {
+  const m = MISSIONS[state.mission];
+  return `<div class="target">
+    <span class="dot" style="background:${css(m.rgb)}"></span>
+    <div><small>נַסּוּ לְהָכִין</small><strong>${m.name}</strong></div>
+  </div>`;
+}
+
+function labView() {
+  const isMission = state.mode === 'mission';
+  const used = new Set(state.tubes.map(t => t.id));
+  const full = state.tubes.length >= MAX_TUBES;
+  const th = small() ? 150 : 186;
+
+  const bank = PAINTS.map(p => {
+    const on = used.has(p.id);
+    return `<button class="pot${on ? ' on' : ''}" data-act="toggle" data-id="${p.id}" data-key="pot-${p.id}"
+      aria-pressed="${on}" ${!on && full ? 'disabled' : ''}>
+      <span class="paint" style="background:${css(p.rgb)}"></span>${p.name}</button>`;
+  }).join('');
+
+  let slots = '';
+  for (let i = 0; i < MAX_TUBES; i++) {
+    const t = state.tubes[i];
+    if (!t) {
+      slots += `<div class="slot ghost"><span class="step"></span>${emptyTubeSVG(th)}<span class="count"></span><span class="step"></span></div>`;
+      continue;
+    }
+    const p = PAINT[t.id];
+    slots += `<div class="slot">
+      <button class="step" data-act="more" data-i="${i}" data-key="more-${t.id}" aria-label="עוֹד ${p.name}" ${t.n >= MAX_N ? 'disabled' : ''}>${I.plus}</button>
+      <button class="remove" data-act="remove" data-i="${i}" data-key="rm-${t.id}" aria-label="לְהוֹצִיא ${p.name}">${I.x}</button>
+      <button class="tube-btn" data-act="level" data-i="${i}" data-key="tube-${t.id}" aria-label="${p.name} ${t.n}">${tubeSVG(css(p.rgb), t.n, th)}</button>
+      <span class="count">${t.n}</span>
+      <button class="step" data-act="less" data-i="${i}" data-key="less-${t.id}" aria-label="פָּחוֹת ${p.name}" ${t.n <= 1 ? 'disabled' : ''}>${I.minus}</button>
+    </div>`;
+  }
+
+  return `<div class="bar">
+      <button class="icon-btn" data-act="${isMission ? 'missions' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${isMission ? targetCard() : ''}
+    </div>
+    <div class="lab">
+      <div class="bank${state.tubes.length ? '' : ' empty'}">${bank}</div>
+      <div class="bench">${slots}</div>
+      <button class="mix" data-act="mix" data-key="mix" ${state.tubes.length < 2 ? 'disabled' : ''}>${I.mix}לְעַרְבֵּב</button>
+    </div>`;
+}
+
+function nearestName(l) {
+  let best = null, bd = Infinity;
+  PAINTS.forEach(p => { const d = deltaE(l, lab(p.rgb)); if (d < bd) { bd = d; best = p.name; } });
+  MISSIONS.forEach(m => { const d = deltaE(l, m.lab); if (d < bd) { bd = d; best = m.name; } });
+  return bd <= MATCH ? best : '';
+}
+
+// The single change (one notch more or less, or one paint added/removed)
+// that brings the mix closest to the target.
+function findHint(tubes, target) {
+  const dist = ts => deltaE(lab(mixRGB(ts)), target);
+  let best = null, bestD = dist(tubes);
+  const consider = (ts, h) => { const d = dist(ts); if (d < bestD - 0.5) { bestD = d; best = h; } };
+  tubes.forEach((t, i) => {
+    if (t.n < MAX_N) consider(tubes.map((u, j) => j === i ? { ...u, n: u.n + 1 } : u), { id: t.id, kind: 'more' });
+    if (t.n > 1) consider(tubes.map((u, j) => j === i ? { ...u, n: u.n - 1 } : u), { id: t.id, kind: 'less' });
+    else if (tubes.length > 1) consider(tubes.filter((_, j) => j !== i), { id: t.id, kind: 'without' });
+  });
+  if (tubes.length < MAX_TUBES) {
+    PAINTS.filter(p => !tubes.some(t => t.id === p.id))
+      .forEach(p => consider([...tubes, { id: p.id, n: 1 }], { id: p.id, kind: 'add' }));
+  }
+  return best;
+}
+
+function resultView() {
+  const isMission = state.mode === 'mission';
+  const rgb = mixRGB(state.tubes);
+  const l = lab(rgb);
+  const th = small() ? 104 : 128;
+  const total = state.tubes.reduce((s, t) => s + t.n, 0);
+
+  // swirl: each paint gets a slice proportional to its notches
+  let acc = 0;
+  const stops = state.tubes.map(t => {
+    const a = acc, b = acc + t.n / total * 360; acc = b;
+    return `${css(PAINT[t.id].rgb)} ${a}deg ${b}deg`;
+  }).join(', ');
+
+  const formula = state.tubes.map((t, i) =>
+    `${i ? '<span class="op">+</span>' : ''}<div class="item">${tubeSVG(css(PAINT[t.id].rgb), t.n, th)}<span class="count">${t.n}</span></div>`
+  ).join('') + `<span class="op">=</span><div class="item"><span class="blob" style="background:${css(rgb)}"></span><span class="count">&nbsp;</span></div>`;
+
+  let verdict = '', actions = '';
+  if (isMission) {
+    const m = MISSIONS[state.mission];
+    const d = deltaE(l, m.lab);
+    if (d <= MATCH) {
+      verdict = `<div class="verdict good"><div class="say">${I.star}כָּל הַכָּבוֹד!</div></div>`;
+      actions = (state.mission < MISSIONS.length - 1
+        ? `<button class="act primary" data-act="nextMission" data-key="next">מְשִׂימָה הַבָּאָה${I.next}</button>` : '')
+        + `<button class="act" data-act="missions" data-key="list">${I.target}כָּל הַמְּשִׂימוֹת</button>`;
+    } else {
+      const h = findHint(state.tubes, m.lab);
+      let hint = '';
+      if (h) {
+        const p = PAINT[h.id];
+        const words = { more: `עוֹד קְצָת ${p.name}`, add: `לְהוֹסִיף קְצָת ${p.name}`, less: `פָּחוֹת ${p.name}`, without: `בְּלִי ${p.name}` }[h.kind];
+        hint = `<div class="hint"><span class="chip" style="background:${css(p.rgb)}"></span>${words}</div>`;
+      }
+      verdict = `<div class="verdict ${d <= CLOSE ? 'near' : ''}"><div class="say">${d <= CLOSE ? 'קָרוֹב מְאוֹד!' : 'נַסּוּ שׁוּב'}</div>${hint}</div>`;
+      actions = `<button class="act primary" data-act="edit" data-key="edit">${I.redo}לְנַסּוֹת שׁוּב</button>`;
+    }
+  } else {
+    actions = `<button class="act primary" data-act="edit" data-key="edit">${I.back}לְשַׁנּוֹת</button>
+      <button class="act" data-act="fresh" data-key="fresh">${I.plus}חָדָשׁ</button>`;
+  }
+
+  const target = isMission
+    ? `<div class="vs"><span class="dot" style="background:${css(MISSIONS[state.mission].rgb)}"></span>${I.target}</div>` : '';
+
+  return `<div class="bar">
+      <button class="icon-btn" data-act="${isMission ? 'missions' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${isMission ? targetCard() : ''}
+    </div>
+    <div class="result">
+      <div class="bowl-row">
+        <div class="bowl" role="img" aria-label="הַצֶּבַע שֶׁיָּצָא">
+          <div class="swirl" style="background:conic-gradient(${stops})"></div>
+          <div class="final" style="background:${css(rgb)}"></div>
+        </div>
+        ${target}
+      </div>
+      ${isMission ? verdict : `<div class="name">${nearestName(l)}</div>`}
+      <section class="recipe" aria-label="מַתְכּוֹן">
+        <h2>הַמַּתְכּוֹן</h2>
+        <div class="formula">${formula}</div>
+      </section>
+      <div class="actions">${actions}</div>
+    </div>`;
+}
+
+/* ================= actions ================= */
+function go(view) { state.view = view; render(); window.scrollTo(0, 0); }
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  const i = +b.dataset.i;
+  switch (b.dataset.act) {
+    case 'home': go('home'); break;
+    case 'free': state.mode = 'free'; state.mission = null; state.tubes = []; go('lab'); break;
+    case 'missions': state.mode = 'mission'; go('missions'); break;
+    case 'story-open': window.storyLab.open(b.dataset.mode, false); break;
+    case 'story-new': window.storyLab.open(b.dataset.mode, true); break;
+    case 'pick': state.mode = 'mission'; state.mission = i; state.tubes = []; go('lab'); break;
+    case 'nextMission': state.mission = Math.min(MISSIONS.length - 1, state.mission + 1); state.tubes = []; go('lab'); break;
+    case 'toggle': {
+      const at = state.tubes.findIndex(t => t.id === b.dataset.id);
+      if (at >= 0) state.tubes.splice(at, 1);
+      else if (state.tubes.length < MAX_TUBES) state.tubes.push({ id: b.dataset.id, n: 1 });
+      render(); break;
+    }
+    case 'remove': state.tubes.splice(i, 1); render(); break;
+    case 'more': state.tubes[i].n = Math.min(MAX_N, state.tubes[i].n + 1); render(); break;
+    case 'less': state.tubes[i].n = Math.max(1, state.tubes[i].n - 1); render(); break;
+    case 'level': {
+      // tap on the tube: fill up to the notch that was touched
+      const svg = b.querySelector('svg');
+      const box = svg.getBoundingClientRect();
+      let n;
+      if (e.detail === 0) n = state.tubes[i].n % MAX_N + 1;   // keyboard: step up, wrap around
+      else {
+        const y = (e.clientY - box.top) / box.height * TUBE.h;
+        n = Math.ceil((TUBE.bottom - y) / STEP);
+      }
+      state.tubes[i].n = Math.max(1, Math.min(MAX_N, n));
+      render(); break;
+    }
+    case 'mix': {
+      if (state.tubes.length < 2) return;
+      if (state.mode === 'mission' && deltaE(lab(mixRGB(state.tubes)), MISSIONS[state.mission].lab) <= MATCH) {
+        done.add(state.mission); saveDone();
+      }
+      go('result'); break;
+    }
+    case 'edit': go('lab'); break;
+    case 'fresh': state.tubes = []; go('lab'); break;
+  }
+});
+
+document.addEventListener('show-lab', render);   // back from the story lab: refresh its drafts on the home screen
+
+let lastSmall = small();
+window.addEventListener('resize', () => { if (small() !== lastSmall) { lastSmall = small(); render(); } });
+
 render();
 })();
 </script>
@@ -2267,6 +2298,7 @@ window.openApp = name => {
   document.getElementById('app').hidden = name !== 'lab';
   document.getElementById('story-app').hidden = name !== 'stories';
   window.scrollTo(0, 0);
+  document.dispatchEvent(new Event('show-' + name));
 };
 if (location.hash === '#stories') window.openApp('stories');
 </script>
