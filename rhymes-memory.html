@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>זִכָּרוֹן חֲרוּזִים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Layout: one calm column; a grid of face-down cards. The card backs are the only dark element; color appears only on found pairs. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --glass: #97a3b6;
+  --back: #34425e;
+  --back-dot: #45557a;
+  --back-mark: #c9d2e3;
+  --miss: #c0504d;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 40px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+p { margin: 0; }
+svg { display: block; }
+
+/* ---------- home ---------- */
+.home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; text-align: center; }
+.home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.lead { color: var(--ink-soft); font-size: 1.2rem; max-width: 30ch; text-wrap: balance; }
+.demo { display: flex; align-items: center; gap: 10px; }
+.mini {
+  width: 84px; height: 64px; border-radius: 12px; display: grid; place-items: center;
+  font-family: var(--display); font-weight: 500; font-size: 1.2rem;
+}
+.mini.back { background-color: var(--back); background-image: radial-gradient(var(--back-dot) 2px, transparent 2.5px); background-size: 12px 12px; transform: rotate(-6deg); }
+.mini.up { border: 2px solid #2f8a55; background: #e8f3ed; }
+.pick { font-size: 1.15rem; font-weight: 500; color: var(--ink-soft); }
+.levels { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; width: 100%; max-width: 560px; }
+.level {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 20px 12px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: border-color .15s, transform .15s;
+}
+.level:hover { border-color: var(--glass); }
+.level:active { transform: scale(.98); }
+.level svg { width: 72px; height: 58px; margin-block-end: 6px; }
+.level strong { font-family: var(--display); font-size: 1.4rem; font-weight: 500; line-height: 1.4; }
+.level span { color: var(--ink-soft); font-size: 1rem; }
+
+/* ---------- game bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; flex-wrap: wrap; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.bar h2 { font-size: 1.35rem; }
+.dots { display: flex; flex-wrap: wrap; gap: 6px; margin-inline-start: auto; max-width: 50%; }
+.dots i { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--glass); background: var(--surface); transition: background .2s, border-color .2s; }
+
+.title { text-align: center; padding-block: 12px 4px; }
+.title h1 { font-size: clamp(1.6rem, 6vw, 2.2rem); }
+.title p { color: var(--ink-soft); font-size: 1.1rem; text-wrap: balance; }
+
+.say {
+  min-height: 2.6em; display: grid; place-items: center; text-align: center;
+  font-family: var(--display); font-size: 1.3rem; font-weight: 500; line-height: 1.5;
+  padding-block: 6px;
+}
+
+/* ---------- cards ---------- */
+.grid { --cols: 4; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 12px; padding-block: 4px; }
+.grid.c5 { --cols: 5; }
+.card {
+  position: relative; aspect-ratio: 4 / 3; max-width: 100%;
+  border: 0; padding: 0; background: none; border-radius: 16px;
+  perspective: 900px;
+}
+.inner {
+  position: absolute; inset: 0;
+  transform-style: preserve-3d;
+  transition: transform .45s ease;
+}
+.card.open .inner { transform: rotateY(180deg); }
+.face {
+  position: absolute; inset: 0; border-radius: 16px;
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+  display: grid; place-items: center;
+}
+.face.back {
+  background-color: var(--back);
+  background-image: radial-gradient(var(--back-dot) 2px, transparent 2.5px);
+  background-size: 14px 14px;
+  border: 2px solid var(--back);
+  transition: transform .15s;
+}
+.face.back svg { width: 40%; max-width: 56px; }
+.card:not(.open):hover .face.back { transform: translateY(-3px); }
+.face.front {
+  transform: rotateY(180deg);
+  background: var(--surface); border: 2px solid var(--line);
+  padding: 4px;
+  font-family: var(--display); font-size: clamp(0.9rem, 3.9vw, 1.6rem); font-weight: 500; line-height: 1.4;
+  text-align: center; white-space: nowrap;
+  transition: border-color .2s, background-color .2s;
+}
+.card.done { cursor: default; }
+.card.done .front { border-color: var(--c); background: var(--tint); box-shadow: inset 0 0 0 1px var(--c); }
+.card.no .front { border-color: var(--miss); }
+.card.no .inner { animation: shake .4s .3s; }
+@keyframes shake {
+  20% { transform: rotateY(180deg) translateX(-5px); }
+  40% { transform: rotateY(180deg) translateX(5px); }
+  60% { transform: rotateY(180deg) translateX(-3px); }
+  80% { transform: rotateY(180deg) translateX(3px); }
+}
+
+/* ---------- win ---------- */
+.win {
+  display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;
+  background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 20px 16px; margin-block: 8px 12px;
+}
+.win svg { width: 64px; height: 64px; animation: pop .5s ease-out; }
+.win h2 { font-size: 1.8rem; }
+.win p { color: var(--ink-soft); font-size: 1.15rem; }
+.win .row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; padding-block-start: 4px; }
+.btn {
+  border: 2px solid var(--ink); border-radius: 999px; padding: 10px 24px;
+  font-family: var(--display); font-size: 1.2rem; font-weight: 500; background: var(--surface);
+}
+.btn.main { background: var(--ink); color: var(--surface); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+@media (max-width: 520px) {
+  .grid { gap: 8px; }
+  .grid.c5 { --cols: 4; }
+  .card { aspect-ratio: 1 / 1; }
+  .card, .face { border-radius: 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<main id="app">
+
+  <!-- ===== home: pick a level ===== -->
+  <section id="home" class="home">
+    <div class="demo" aria-hidden="true">
+      <span class="mini up">חוּם</span><span class="mini up">נַחוּם</span><span class="mini back"></span>
+    </div>
+    <h1>זִכָּרוֹן חֲרוּזִים</h1>
+    <p class="lead">הִפְכוּ קְלָפִים וּמִצְאוּ זוּגוֹת שֶׁל חֲרוּזִים מֵהַסִּפּוּר</p>
+    <h2 class="pick">בַּחֲרוּ רָמָה</h2>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- ===== game ===== -->
+  <section id="game" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="homeBtn" aria-label="חֲזָרָה לִבְחִירַת רָמָה">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11.5 12 4.5l8 7"/><path d="M6.5 10v9.5h11V10"/></svg>
+      </button>
+      <h2 id="levelName"></h2>
+      <div class="dots" id="dots" aria-hidden="true"></div>
+    </div>
+
+    <div class="title">
+      <h1>זִכָּרוֹן חֲרוּזִים</h1>
+      <p>הִפְכוּ שְׁנֵי קְלָפִים. אִם הַמִּלִּים מִתְחָרְזוֹת, הֵן נִשְׁאָרוֹת פְּתוּחוֹת.</p>
+    </div>
+
+    <div class="win" id="win" hidden>
+      <svg viewBox="0 0 64 64"><path d="M32 5l7.9 16.1 17.7 2.6-12.8 12.5 3 17.6L32 45.5l-15.8 8.3 3-17.6L6.4 23.7l17.7-2.6z" fill="#f2b632" stroke="#b7791f" stroke-width="2.5" stroke-linejoin="round"/></svg>
+      <h2>כָּל הַכָּבוֹד!</h2>
+      <p>מְצָאתֶם אֶת כָּל הַחֲרוּזִים</p>
+      <div class="row">
+        <button class="btn main" id="againBtn">עוֹד סִבּוּב</button>
+        <button class="btn" id="otherBtn">רָמָה אַחֶרֶת</button>
+      </div>
+    </div>
+
+    <div class="say" id="say" aria-live="polite"></div>
+
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<script>
+// The rhyming pairs from the story (the same list as in rhymes.html). Edit this list to change the game's words.
+const PAIRS = [
+  ['אִמָּא', 'קָדִימָה'],
+  ['עוֹלָם', 'כֻּלָּם'],
+  ['הָמוֹן', 'לִימוֹן'],
+  ['שָׁמַיִם', 'מַיִם'],
+  ['פְּרָחִים', 'אֲבַטִּיחִים'],
+  ['קוֹרֶה', 'רוֹאֶה'],
+  ['צְבָעִים', 'אֲחֵרִים'],
+  ['עָלִים', 'מְלָפְפוֹנִים'],
+  ['סָגוֹל', 'עָגוֹל'],
+  ['כָּתוֹם', 'תּוֹם'],
+  ['צֶבַע', 'רֶבַע'],
+  ['חָזָק', 'בָּזָק'],
+  ['חוּם', 'נַחוּם'],
+  ['לָבָן', 'זָקֵן'],
+  ['צָבְעָה', 'מַרְאָה'],
+  ['חוּלְצָה', 'מְצִיצָה'],
+  ['גַּרְבַּיִם', 'נַעֲלַיִם'],
+];
+
+// cols: how many cards per row on a wide screen (phones always use 4)
+const LEVELS = [
+  { name: 'קַל', n: 4, cols: 4 },
+  { name: 'בֵּינוֹנִי', n: 6, cols: 4 },
+  { name: 'קָשֶׁה', n: 8, cols: 4 },
+  { name: 'קָשֶׁה מְאוֹד', n: 10, cols: 5 },
+];
+
+// How long two non-rhyming cards stay open before they turn back over.
+const SHOW_MS = 1300;
+
+// One color per found pair, in the order they are found.
+const COLORS = ['#2f8a55', '#3b6fd0', '#c2571a', '#8a4fc9', '#c23b6b', '#138a8a', '#b7791f', '#5d7a1f', '#a0452e', '#4a5bb8'];
+
+const BACK_MARK = '<svg viewBox="0 0 48 20" aria-hidden="true"><line x1="9" y1="10" x2="39" y2="10" stroke="#c9d2e3" stroke-width="3" stroke-linecap="round"/><circle cx="7" cy="10" r="6" fill="#c9d2e3"/><circle cx="41" cy="10" r="6" fill="#c9d2e3"/></svg>';
+
+const $ = id => document.getElementById(id);
+const home = $('home'), game = $('game'), grid = $('grid'), say = $('say'), dots = $('dots'), win = $('win');
+
+const state = { level: 0, total: 0, found: 0, up: [], lock: false, timer: 0 };
+
+function shuffle(list) {
+  const a = list.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function tint(hex) {
+  // the pair color mixed 12% into white, for the found card background
+  const n = parseInt(hex.slice(1), 16);
+  const mix = c => Math.round(255 - (255 - c) * 0.12);
+  return `rgb(${mix(n >> 16)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
+}
+
+/* ---------- home ---------- */
+LEVELS.forEach((lv, i) => {
+  const b = document.createElement('button');
+  b.className = 'level';
+  // little picture of the board: the real number of cards, in rows
+  const cards = lv.n * 2, cols = lv.cols, rows = Math.ceil(cards / cols);
+  const w = 64 / cols, h = 50 / rows;
+  let rects = '';
+  for (let k = 0; k < cards; k++) {
+    const x = 4 + (k % cols) * w, y = 4 + Math.floor(k / cols) * h;
+    rects += `<rect x="${x + 1}" y="${y + 1}" width="${w - 2}" height="${h - 2}" rx="2" fill="#34425e"/>`;
+  }
+  b.innerHTML = `<svg viewBox="0 0 72 58" aria-hidden="true">${rects}</svg><strong>${lv.name}</strong><span>${lv.n} זוּגוֹת</span>`;
+  b.addEventListener('click', () => startLevel(i));
+  $('levels').appendChild(b);
+});
+
+function showHome() {
+  clearTimeout(state.timer);
+  game.hidden = true;
+  home.hidden = false;
+  window.scrollTo(0, 0);
+}
+
+function startLevel(i) {
+  state.level = i;
+  home.hidden = true;
+  game.hidden = false;
+  newRound();
+  window.scrollTo(0, 0);
+}
+
+/* ---------- round ---------- */
+function newRound() {
+  clearTimeout(state.timer);
+  const lv = LEVELS[state.level];
+  const picked = shuffle(PAIRS.map((_, i) => i)).slice(0, lv.n);
+  const deck = shuffle(picked.flatMap(id => [[id, 0], [id, 1]]));
+
+  state.total = lv.n;
+  state.found = 0;
+  state.up = [];
+  state.lock = false;
+
+  $('levelName').textContent = lv.name;
+  grid.className = 'grid' + (lv.cols === 5 ? ' c5' : '');
+  grid.replaceChildren(...deck.map(([id, side]) => card(id, side)));
+  dots.replaceChildren(...picked.map(() => document.createElement('i')));
+  say.textContent = '';
+  say.style.color = '';
+  win.hidden = true;
+}
+
+function card(id, side) {
+  const b = document.createElement('button');
+  b.className = 'card';
+  b.dataset.pair = id;
+  b.dataset.word = PAIRS[id][side];
+  b.setAttribute('aria-label', 'קְלָף סָגוּר');
+  b.innerHTML = `<span class="inner"><span class="face back">${BACK_MARK}</span><span class="face front" lang="he"></span></span>`;
+  b.querySelector('.front').textContent = PAIRS[id][side];
+  return b;
+}
+
+function turn(c, open) {
+  c.classList.toggle('open', open);
+  c.setAttribute('aria-label', open ? c.dataset.word : 'קְלָף סָגוּר');
+}
+
+function check() {
+  const [x, y] = state.up;
+  state.up = [];
+  if (x.dataset.pair === y.dataset.pair) {
+    const color = COLORS[state.found % COLORS.length];
+    for (const c of [x, y]) {
+      c.classList.add('done');
+      c.style.setProperty('--c', color);
+      c.style.setProperty('--tint', tint(color));
+      c.setAttribute('aria-disabled', 'true');
+    }
+    const dot = dots.children[state.found];
+    dot.style.background = color;
+    dot.style.borderColor = color;
+    state.found++;
+    const [a, b] = PAIRS[+x.dataset.pair];
+    say.style.color = color;
+    say.textContent = `נָכוֹן! ${a} – ${b}`;
+    if (state.found === state.total) state.timer = setTimeout(finish, 700);
+  } else {
+    state.lock = true;
+    x.classList.add('no'); y.classList.add('no');
+    say.style.color = '';
+    say.textContent = 'נַסּוּ שׁוּב';
+    state.timer = setTimeout(() => {
+      for (const c of [x, y]) { c.classList.remove('no'); turn(c, false); }
+      state.lock = false;
+    }, SHOW_MS);
+  }
+}
+
+function finish() {
+  say.textContent = '';
+  win.hidden = false;
+  win.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'center' });
+  $('againBtn').focus({ preventScroll: true });
+}
+
+grid.addEventListener('click', e => {
+  const c = e.target.closest('.card');
+  if (!c || state.lock || c.classList.contains('open')) return;
+  turn(c, true);
+  state.up.push(c);
+  if (state.up.length === 2) check();
+  else say.textContent = '';
+});
+
+$('homeBtn').addEventListener('click', showHome);
+$('otherBtn').addEventListener('click', showHome);
+$('againBtn').addEventListener('click', () => { newRound(); window.scrollTo(0, 0); });
+</script>
+</body>
+</html>
