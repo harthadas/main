@@ -111,7 +111,7 @@ svg { display: block; }
 .teacher summary { cursor: pointer; font-family: var(--display); font-weight: 500; font-size: 1.1rem; padding-block: 10px; }
 .teacher ul { margin: 0 0 12px; padding-inline-start: 20px; display: flex; flex-direction: column; gap: 6px; }
 .teacher .row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding-bottom: 14px; }
-.link-btn { border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 16px; font-size: 1rem; }
+.link-btn { color: inherit; text-decoration: none; border: 2px solid var(--line); background: var(--surface); border-radius: 999px; padding: 6px 16px; font-size: 1rem; }
 .link-btn.warn { border-color: #b4412f; color: #b4412f; }
 .note { color: var(--ink-soft); }
 
@@ -570,6 +570,7 @@ function homeView() {
                <button class="link-btn warn" data-act="reset" data-key="reset">כן, להתחיל מחדש</button>
                <button class="link-btn" data-act="cancelReset" data-key="cancelReset">ביטול</button>`
             : `<button class="link-btn" data-act="askReset" data-key="askReset">התחלה מחדש</button>`}
+          <a class="link-btn" href="hagiga-2.html">מעבר לרמה 2</a>
         </div>
       </details>
     </div>`;
