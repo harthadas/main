@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
 <style>
 /* Same calm language as the color lab: neutral paper, the color characters are the only saturated things on screen.
-   Start: pick one of three kinds of story. Wide screens: choices on the right, the picture and the growing story on the left.
+   Start: pick one of three kinds of story, or one of the short language tasks below them. Wide screens: choices on the right, the picture and the growing story on the left.
    Book: the printed pages, previewed as paper sheets. */
 :root {
   --paper: #f3f5f8;
@@ -205,6 +205,59 @@ button, input { font: inherit; color: inherit; }
 .pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 18px; width: 100%; }
 .page { margin: 0; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(29,36,49,.08); }
 .page img { display: block; width: 100%; height: auto; }
+
+/* ---------- נִצָּנִים בְּשָׂפָה: language tasks ---------- */
+.tasks-sec { width: 100%; max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 18px; padding-top: 26px; border-top: 2px solid var(--line); }
+.tasks-sec h2 { font-size: clamp(1.6rem, 5vw, 2rem); }
+.tasks-sec p { margin: -8px 0 0; }
+.task-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; }
+.task-card > svg { width: min(150px, 100%); }
+.q-stars { display: inline-flex; gap: 2px; }
+.q-stars span { color: var(--line); display: inline-flex; }
+.q-stars span.on { color: #f2a20c; }
+.q-stars svg { width: 20px; height: 20px; }
+.q-done .q-stars svg { width: 46px; height: 46px; }
+.quiz { width: 100%; max-width: 720px; margin: 14px auto 0; padding: 20px 16px 22px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.q-head { display: flex; align-items: center; gap: 10px; }
+.q-head h2 { font-size: 1.5rem; }
+.q-head .spk { margin-top: 0; }
+.q-prompt { min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.q-word { font-family: var(--display); font-weight: 700; font-size: clamp(3rem, 14vw, 4.5rem); line-height: 1.5; }
+.q-word mark { background: var(--mark); color: inherit; border-radius: 10px; padding-inline: 4px; }
+.q-pic svg { width: 180px; max-width: 100%; height: auto; }
+.q-pic.small svg { width: 120px; }
+.q-sentence { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 8vw, 2.4rem); line-height: 1.6; }
+.q-gap { display: inline-block; min-width: 4.2em; border-bottom: 4px dashed var(--glass); }
+.q-gap.done { border-bottom: 4px solid var(--good); color: var(--good); min-width: 0; }
+.q-options { display: grid; gap: 14px; width: 100%; max-width: 560px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.q-options.blobs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.q-options.letters { max-width: 420px; }
+.q-opt {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  min-height: 88px; padding: 10px 6px; display: grid; place-items: center;
+  transition: border-color .15s, opacity .25s, transform .15s, box-shadow .15s;
+}
+.q-opt:hover { border-color: var(--glass); }
+.q-opt:not(:disabled):active { transform: scale(.96); }
+.q-opt svg { max-width: 100%; height: auto; }
+.q-opt.miss { opacity: .25; animation: shake .35s; }
+.q-opt.right { border-color: var(--good); box-shadow: 0 0 0 3px var(--good); }
+.q-opt-word { font-family: var(--display); font-size: clamp(1.4rem, 6vw, 1.9rem); font-weight: 700; line-height: 1.5; }
+.q-letter { font-family: var(--display); font-size: 3.2rem; font-weight: 700; line-height: 1; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.q-feedback { margin: 0; min-height: 1.6em; display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 1.5rem; font-weight: 700; }
+.q-feedback svg { width: 28px; height: 28px; }
+.q-feedback.good { color: var(--good); }
+.q-feedback.again { color: var(--near); }
+.q-dots { flex: 1; display: flex; justify-content: center; gap: 8px; }
+.q-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
+.q-dot.done { background: var(--ink); }
+.q-dot.cur { background: var(--surface); box-shadow: 0 0 0 3px var(--ink); }
+@media (max-width: 420px) {
+  .q-options { gap: 10px; }
+  .q-options.blobs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .q-opt { min-height: 76px; }
+}
 
 @media print {
   @page { size: A4; margin: 0; }
@@ -1048,7 +1101,7 @@ const MODES = { colors: colorsMode, helpers: helpersMode, temp: tempMode };
 /* ================= state =================
    One draft per kind of story, kept in this browser only. */
 const KEY = 'color-story-lab-2';
-let store = { drafts: {}, sound: true };
+let store = { drafts: {}, sound: true, tasks: {} };
 try {
   const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
   if (saved && saved.drafts) store = Object.assign(store, saved);
@@ -1350,6 +1403,205 @@ async function savePdf(btn) {
   }
 }
 
+/* ================= נִצָּנִים בְּשָׂפָה: short language tasks =================
+   Four sets of six one-tap questions for young readers, all about colors:
+   reading a color word, reading the color of a thing, agreement (זָכָר,
+   נְקֵבָה, רַבִּים) and the first letter of a color word. A right answer on
+   the first try earns a star; a wrong one fades out and the child tries again. */
+const QUIZ_LEN = 6;
+const FORMS = {   // masculine, feminine, plural
+  red:    ['אָדֹם', 'אֲדֻמָּה', 'אֲדֻמִּים'],
+  orange: ['כָּתֹם', 'כְּתֻמָּה', 'כְּתֻמִּים'],
+  yellow: ['צָהֹב', 'צְהֻבָּה', 'צְהֻבִּים'],
+  green:  ['יָרֹק', 'יְרֻקָּה', 'יְרֻקִּים'],
+  blue:   ['כָּחֹל', 'כְּחֻלָּה', 'כְּחֻלִּים'],
+  purple: ['סָגֹל', 'סְגֻלָּה', 'סְגֻלִּים'],
+  pink:   ['וָרֹד', 'וְרֻדָּה', 'וְרֻדִּים'],
+};
+// Things to look at, drawn in a 120 x 100 box.
+const THINGS = {
+  sun: { def: 'הַשֶּׁמֶשׁ', g: 1, color: 'yellow', pic: () => `<g stroke="#f2a20c" stroke-width="5" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+      const t = a * Math.PI / 180; return `<path d="M${60 + Math.cos(t) * 32} ${50 + Math.sin(t) * 32} L${60 + Math.cos(t) * 44} ${50 + Math.sin(t) * 44}"/>`; }).join('')}</g><circle cx="60" cy="50" r="24" fill="#fad21e" stroke="${INK}" stroke-width="3"/>` },
+  leaf: { def: 'הֶעָלֶה', g: 0, color: 'green', pic: () => `<path d="M20 82 C20 30 60 12 100 16 C104 56 80 90 20 82 Z" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><path d="M20 82 L84 30" stroke="#bde7c8" stroke-width="3"/>` },
+  strawberry: { def: 'הַתּוּת', g: 0, color: 'red', pic: () => `<path d="M60 92 C30 74 26 40 40 30 H80 C94 40 90 74 60 92 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M40 30 L50 18 L60 28 L70 18 L80 30 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>${[[50, 46], [68, 44], [58, 60], [46, 64], [72, 62], [60, 76]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="#ffe08a"/>`).join('')}` },
+  orange: { def: 'הַתַּפּוּז', g: 0, color: 'orange', pic: () => `<circle cx="60" cy="56" r="32" fill="#fb7a2c" stroke="${INK}" stroke-width="3"/><path d="M60 24 q10 -14 24 -8 q-8 12 -24 8 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2.5"/><circle cx="48" cy="46" r="3" fill="#fff" opacity=".6"/>` },
+  grapes: { def: 'הָעֲנָבִים', g: 2, color: 'purple', pic: () => `<path d="M60 10 V22" stroke="#9a6b4a" stroke-width="4" stroke-linecap="round"/>${[[46, 32], [60, 30], [74, 32], [40, 46], [54, 46], [68, 46], [80, 46], [48, 60], [62, 60], [74, 60], [56, 74], [68, 74], [62, 88]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9" fill="#8a4cc2" stroke="${INK}" stroke-width="2.2"/>`).join('')}` },
+  sea: { def: 'הַיָּם', g: 0, color: 'blue', pic: () => `<path d="M6 40 q14 -12 27 0 t27 0 t27 0 t27 0 V92 H6 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M6 60 q14 -10 27 0 t27 0 t27 0 t27 0" fill="none" stroke="#fff" stroke-width="3"/><path d="M12 78 q14 -8 27 0 t27 0 t27 0" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/>` },
+  sky: { def: 'הַשָּׁמַיִם', g: 2, color: 'blue', pic: () => `<rect x="6" y="8" width="108" height="84" rx="12" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><g fill="#fff" stroke="${INK}" stroke-width="2"><path d="M30 46 a8 8 0 0 1 2 -15 a11 11 0 0 1 20 -3 a9 9 0 0 1 12 10 a6 6 0 0 1 -2 8 Z"/><path d="M66 74 a7 7 0 0 1 2 -12 a9 9 0 0 1 16 -2 a7 7 0 0 1 10 8 a5 5 0 0 1 -2 6 Z"/></g>` },
+  pig: { def: 'הַחֲזִיר', g: 0, color: 'pink', pic: () => `<path d="M30 30 L26 10 L46 22 Z M90 30 L94 10 L74 22 Z" fill="#f58cb2" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="52" r="36" fill="#f58cb2" stroke="${INK}" stroke-width="3"/><circle cx="46" cy="42" r="4" fill="${INK}"/><circle cx="74" cy="42" r="4" fill="${INK}"/><ellipse cx="60" cy="62" rx="15" ry="11" fill="#ffb3cc" stroke="${INK}" stroke-width="2.5"/><circle cx="55" cy="62" r="3" fill="${INK}"/><circle cx="65" cy="62" r="3" fill="${INK}"/>` },
+  banana: { def: 'הַבָּנָנָה', g: 1, color: 'yellow', pic: () => `<path d="M18 30 C24 76 72 92 104 66 C96 64 92 60 90 56 C66 72 38 62 30 26 Z" fill="#fad21e" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M18 30 L24 22 L30 26" fill="none" stroke="#7a5236" stroke-width="4" stroke-linecap="round"/>` },
+  tomato: { def: 'הָעַגְבָנִיָּה', g: 1, color: 'red', pic: () => `<circle cx="60" cy="58" r="32" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M60 26 L52 18 L58 30 L44 28 L58 34 L60 42 L62 34 L76 28 L62 30 L68 18 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` },
+  frog: { def: 'הַצְּפַרְדֵּעַ', g: 1, color: 'green', pic: () => `<ellipse cx="60" cy="62" rx="40" ry="28" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="34" r="12" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="80" cy="34" r="12" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="33" r="6" fill="#fff"/><circle cx="80" cy="33" r="6" fill="#fff"/><circle cx="40" cy="34" r="3" fill="${INK}"/><circle cx="80" cy="34" r="3" fill="${INK}"/><path d="M44 66 q16 12 32 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>` },
+  carrots: { def: 'הַגְּזָרִים', g: 2, color: 'orange', pic: () => [[36, 0], [60, 4], [84, 0]].map(([x, d]) => `<path d="M${x - 9} ${26 + d} L${x + 9} ${26 + d} L${x} ${88 + d} Z" fill="#fb7a2c" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M${x} ${26 + d} l-6 -14 M${x} ${26 + d} l0 -16 M${x} ${26 + d} l6 -14" stroke="#2f9e55" stroke-width="3.5" stroke-linecap="round"/>`).join('') },
+};
+const LETTER_ITEMS = [   // [color, right letter, two other letters]
+  ['red', 'א', 'ע', 'ה'], ['blue', 'כ', 'ק', 'ח'], ['green', 'י', 'ו', 'ר'], ['yellow', 'צ', 'ס', 'ז'],
+  ['purple', 'ס', 'ש', 'צ'], ['pink', 'ו', 'ב', 'ז'], ['orange', 'כ', 'ק', 'ת'],
+];
+const shuffle = list => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const blob = (hex, size = 70) => `<svg viewBox="0 0 100 100" aria-hidden="true" style="width:${size}px">${drop(hex, 'happy', 50, 98, 94)}</svg>`;
+const thingPic = t => `<svg viewBox="0 0 120 100" aria-hidden="true">${THINGS[t].pic()}</svg>`;
+
+const TASKS = [
+  { id: 'read', title: 'קוֹרְאִים צְבָעִים', hint: 'קוֹרְאִים מִלָּה וּבוֹחֲרִים צֶבַע',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="44" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="30" fill="${INK}">כָּחֹל</text>${drop(C.blue.hex, 'happy', 60, 84, 34)}</svg>`,
+    make: () => shuffle(COLORS).slice(0, QUIZ_LEN).map(c => ({
+      q: 'אֵיזֶה צֶבַע כָּתוּב?',
+      prompt: `<div class="q-word">${c.name}</div>`,
+      answer: c.id,
+      options: shuffle([c, ...shuffle(COLORS.filter(o => o.id !== c.id)).slice(0, 3)]).map(o => ({ id: o.id, html: blob(o.hex), label: o.name })),
+      kind: 'blobs',
+    })) },
+  { id: 'thing', title: 'מָה הַצֶּבַע?', hint: 'מִסְתַּכְּלִים וְקוֹרְאִים',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><g transform="translate(20 0) scale(.8)">${THINGS.strawberry.pic()}</g></svg>`,
+    make: () => shuffle(['sun', 'leaf', 'strawberry', 'orange', 'grapes', 'sea', 'pig']).slice(0, QUIZ_LEN).map(t => {
+      const right = C[THINGS[t].color];
+      return {
+        q: `בְּאֵיזֶה צֶבַע ${THINGS[t].def}?`,
+        prompt: `<div class="q-pic">${thingPic(t)}</div>`,
+        answer: right.id,
+        options: shuffle([right, ...shuffle(COLORS.filter(o => o.id !== right.id)).slice(0, 2)]).map(o => ({ id: o.id, html: `<span class="q-opt-word">${o.name}</span>`, label: o.name })),
+        kind: 'words',
+      };
+    }) },
+  { id: 'agree', title: 'זָכָר, נְקֵבָה, רַבִּים', hint: 'מַשְׁלִימִים אֶת הַמִּשְׁפָּט',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="36" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="22" fill="${INK}">הַשֶּׁמֶשׁ</text><rect x="28" y="50" width="64" height="24" rx="6" fill="none" stroke="#97a3b6" stroke-width="3" stroke-dasharray="6 5"/></svg>`,
+    make: () => shuffle(['sun', 'strawberry', 'leaf', 'banana', 'grapes', 'orange', 'tomato', 'sky', 'frog', 'carrots']).slice(0, QUIZ_LEN).map(t => {
+      const th = THINGS[t], forms = FORMS[th.color];
+      return {
+        q: 'אֵיזוֹ מִלָּה מַתְאִימָה?',
+        prompt: `<div class="q-pic small">${thingPic(t)}</div><div class="q-sentence">${th.def} <span class="q-gap">${' '.repeat(10)}</span>.</div>`,
+        filled: `<div class="q-pic small">${thingPic(t)}</div><div class="q-sentence">${th.def} <span class="q-gap done">${forms[th.g]}</span>.</div>`,
+        answer: String(th.g),
+        options: shuffle([0, 1, 2]).map(g => ({ id: String(g), html: `<span class="q-opt-word">${forms[g]}</span>`, label: forms[g] })),
+        kind: 'words',
+        readAfter: `${th.def} ${forms[th.g]}.`,
+      };
+    }) },
+  { id: 'letter', title: 'הָאוֹת הָרִאשׁוֹנָה', hint: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${drop(C.red.hex, 'happy', 38, 80, 52)}<text x="88" y="62" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="44" fill="${INK}">א</text></svg>`,
+    make: () => shuffle(LETTER_ITEMS).slice(0, QUIZ_LEN).map(([id, right, a, b]) => ({
+      q: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+      prompt: `<div class="q-pic">${blob(C[id].hex, 120)}</div>`,
+      filled: `<div class="q-pic">${blob(C[id].hex, 120)}</div><div class="q-word"><mark>${splitFirst(C[id].name)[0]}</mark>${splitFirst(C[id].name)[1]}</div>`,
+      sayWord: true,
+      word: C[id].name,
+      answer: right,
+      options: shuffle([right, a, b]).map(l => ({ id: l, html: `<span class="q-letter">${l}</span>`, label: l })),
+      kind: 'letters',
+    })) },
+];
+// The first letter with its vowel marks, then the rest of the word.
+function splitFirst(word) {
+  const m = word.match(/^([א-ת][֑-ׇ]*)(.*)$/);
+  return m ? [m[1], m[2]] : [word, ''];
+}
+
+let quiz = null;   // { task, items, i, stars, missed, solved }
+function startQuiz(id) {
+  const task = TASKS.find(t => t.id === id);
+  quiz = { task, items: task.make(), i: 0, stars: 0, missed: new Set(), solved: false };
+  view = 'quiz'; render(); window.scrollTo(0, 0);
+  sayQuestion();
+}
+function sayQuestion() {
+  if (!quiz || view !== 'quiz') return;
+  const it = quiz.items[quiz.i];
+  read(it.sayWord ? [{ id: 'q', text: it.q }, { id: 'q', text: it.word }] : [{ id: 'q', text: it.q }]);
+}
+function quizStars(n, of) {
+  return `<span class="q-stars" aria-label="${n} מִתּוֹךְ ${of}">${Array.from({ length: of }, (_, k) => `<span class="${k < n ? 'on' : ''}">${I.star}</span>`).join('')}</span>`;
+}
+function tasksSection() {
+  return `<section class="tasks-sec">
+    <h2>נִצָּנִים בְּשָׂפָה</h2>
+    <p>מְשִׂימוֹת קְצָרוֹת לַצְּעִירִים</p>
+    <div class="task-cards">${TASKS.map(t => {
+      const best = store.tasks && store.tasks[t.id];
+      return `<button class="kind-card task-card" data-act="quiz" data-task="${t.id}" data-key="task-${t.id}">
+        ${t.icon()}<strong>${t.title}</strong><small>${t.hint}</small>
+        ${best !== undefined ? quizStars(best, QUIZ_LEN) : ''}
+      </button>`;
+    }).join('')}</div>
+  </section>`;
+}
+function quizView() {
+  const it = quiz.items[quiz.i];
+  const dots = quiz.items.map((_, k) => `<span class="q-dot${k < quiz.i ? ' done' : ''}${k === quiz.i ? ' cur' : ''}"></span>`).join('');
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <div class="q-dots" aria-label="שְׁאֵלָה ${quiz.i + 1} מִתּוֹךְ ${quiz.items.length}">${dots}</div>
+      ${soundBtn()}
+    </div>
+    <section class="quiz panel">
+      <div class="q-head">
+        ${canSpeak ? `<button class="spk" data-act="q-say" data-key="q-say" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+        <h2>${it.q}</h2>
+      </div>
+      <div class="q-prompt" id="q-prompt">${quiz.solved && it.filled ? it.filled : it.prompt}</div>
+      <div class="q-options ${it.kind}">${it.options.map(o => `<button class="q-opt${quiz.missed.has(o.id) ? ' miss' : ''}${quiz.solved && o.id === it.answer ? ' right' : ''}"
+          data-act="q-answer" data-id="${o.id}" data-key="opt-${o.id}" aria-label="${o.label}" ${quiz.missed.has(o.id) || quiz.solved ? 'disabled' : ''}>${o.html}</button>`).join('')}</div>
+      <p class="q-feedback ${quiz.solved ? 'good' : quiz.missed.size ? 'again' : ''}" role="status">${quiz.solved ? `${I.star}כָּל הַכָּבוֹד!` : quiz.missed.size ? 'נַסּוּ שׁוּב' : ''}</p>
+    </section>`;
+}
+function quizDoneView() {
+  const n = quiz.stars, of = quiz.items.length;
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <h2>${quiz.task.title}</h2>
+      ${soundBtn()}
+    </div>
+    <div class="start q-done">
+      ${quizStars(n, of)}
+      <h1>${n === of ? 'מְצֻיָּן!' : n >= of / 2 ? 'כָּל הַכָּבוֹד!' : 'יָפֶה מְאוֹד!'}</h1>
+      <p>${n === 1 ? 'כּוֹכָב אֶחָד' : `${n} כּוֹכָבִים`} מִתּוֹךְ ${of}</p>
+      <div class="actions">
+        <button class="act primary big" data-act="quiz" data-task="${quiz.task.id}" data-key="again">${I.next}עוֹד פַּעַם</button>
+        <button class="act" data-act="q-home" data-key="q-home">${I.book}לְכָל הַמְּשִׂימוֹת</button>
+      </div>
+    </div>`;
+}
+let quizTimer = null;
+function quizAnswer(id) {
+  const it = quiz.items[quiz.i];
+  if (quiz.solved) return;
+  if (id === it.answer) {
+    quiz.solved = true;
+    if (!quiz.missed.size) quiz.stars++;
+    sfx('pick');
+    render();
+    if (it.readAfter) read([{ id: 'q', text: it.readAfter }]);
+    quizTimer = setTimeout(() => {
+      if (view !== 'quiz') return;
+      if (quiz.i < quiz.items.length - 1) {
+        quiz.i++; quiz.missed = new Set(); quiz.solved = false;
+        render(); sayQuestion();
+      } else {
+        store.tasks = store.tasks || {};
+        store.tasks[quiz.task.id] = Math.max(store.tasks[quiz.task.id] || 0, quiz.stars);
+        view = 'quizDone'; sfx('done'); render(); window.scrollTo(0, 0);
+      }
+    }, it.readAfter ? 1800 : 1100);
+  } else {
+    quiz.missed.add(id);
+    sfx('back');
+    render();
+  }
+}
+// Handles the task screens' buttons; returns true when it did.
+function quizClick(b) {
+  switch (b.dataset.act) {
+    case 'quiz': clearTimeout(quizTimer); sfx('tap'); startQuiz(b.dataset.task); return true;
+    case 'q-answer': quizAnswer(b.dataset.id); return true;
+    case 'q-say': sayQuestion(); return true;
+    case 'q-home': clearTimeout(quizTimer); sfx('tap'); view = 'start'; render(); window.scrollTo(0, 0); return true;
+    case 'back':
+      if (view !== 'quiz' && view !== 'quizDone') return false;
+      clearTimeout(quizTimer); sfx('back'); view = 'start'; render(); window.scrollTo(0, 0); return true;
+  }
+  return false;
+}
+
 /* ================= rendering ================= */
 const app = document.getElementById('story-app');
 let lastSeen = new Set();   // sentences already shown, so only new ones animate
@@ -1358,7 +1610,7 @@ function render() {
   stopReading();
   clearTimeout(advanceTimer);
   const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
-  app.innerHTML = ({ start: startView, step: stepView, final: finalView, book: bookView })[view]();
+  app.innerHTML = ({ start: startView, step: stepView, final: finalView, book: bookView, quiz: quizView, quizDone: quizDoneView })[view]();
   if (focusKey) {
     const el = app.querySelector(`[data-key="${focusKey}"]`);
     if (el && !el.disabled) el.focus();
@@ -1388,6 +1640,7 @@ function startView() {
       <h1>מַעְבֶּדֶת סִפּוּרִים</h1>
       <p>אֵיזֶה סִפּוּר נִכְתֹּב הַיּוֹם?</p>
       <div class="kinds">${kinds}</div>
+      ${tasksSection()}
     </div>`;
 }
 
@@ -1581,6 +1834,7 @@ app.addEventListener('click', e => {
   const b = e.target.closest('[data-act]');
   if (!b || b.disabled || spinning) return;
   clearTimeout(advanceTimer);
+  if (quizClick(b)) return;
   switch (b.dataset.act) {
     case 'new': st = newStory(b.dataset.mode); lastSeen = new Set(); sfx('tap'); go('step', 0); break;
     case 'resume': {
