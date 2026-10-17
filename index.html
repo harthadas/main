@@ -63,7 +63,7 @@ svg { display: block; }
 .home { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 36px; padding-block: 24px; }
 .home h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
 .logo { display: flex; gap: 10px; align-items: flex-end; }
-.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; width: 100%; max-width: 560px; }
+.modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; width: 100%; max-width: 720px; }
 .mode {
   border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
   padding: 28px 20px; display: flex; flex-direction: column; align-items: center; gap: 14px;
@@ -216,6 +216,12 @@ svg { display: block; }
 .act svg { width: 24px; height: 24px; }
 .act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
 
+@media (max-width: 520px) {
+  .home { gap: 24px; justify-content: flex-start; padding-top: 32px; }
+  .modes { gap: 12px; }
+  .mode { flex-direction: row; justify-content: flex-start; padding: 14px 20px; gap: 18px; }
+  .mode svg { width: 56px; height: 56px; }
+}
 @media (max-width: 420px) {
   body { font-size: 17px; }
   .bank { gap: 8px 4px; }
@@ -316,7 +322,22 @@ PAINTS.forEach(p => { p.rgb = mixRGB([{ id: p.id, n: 1 }]); });
 
 /* ================= missions =================
    Each target is defined by a recipe, so it is always reachable
-   and its sample is exactly what the model paints. */
+   and its sample is exactly what the model paints.
+   נִצָּנִים: for the youngest players. Tubes have 3 notches, targets need
+   2–3 paints, and the margin accepts any sensible ratio of the right paints. */
+const BUDS = [
+  { name: 'כָּתֹם',          recipe: { red: 1, yellow: 2 } },
+  { name: 'יָרֹק',           recipe: { blue: 1, yellow: 2 } },
+  { name: 'סָגֹל',           recipe: { red: 1, blue: 1 } },
+  { name: 'וָרֹד',           recipe: { red: 1, white: 1 } },
+  { name: 'אָפֹר',           recipe: { black: 1, white: 1 } },
+  { name: 'תְּכֵלֶת',         recipe: { blue: 1, white: 2 } },
+  { name: 'צָהֹב בָּהִיר',     recipe: { yellow: 1, white: 2 } },
+  { name: 'אָדֹם כֵּהֶה',      recipe: { red: 3, black: 1 } },
+  { name: 'כָּחֹל כֵּהֶה',      recipe: { blue: 2, black: 1 } },
+  { name: 'סָגֹל בָּהִיר',     recipe: { red: 1, blue: 1, white: 1 } },
+  { name: 'חוּם',            recipe: { red: 2, yellow: 2, blue: 1 } },
+];
 const MISSIONS = [
   { name: 'כָּתֹם',               recipe: { red: 1, yellow: 2 } },
   { name: 'יָרֹק',                recipe: { blue: 1, yellow: 2 } },
@@ -339,20 +360,29 @@ const MISSIONS = [
   { name: 'בֶּז׳',                 recipe: { red: 1, yellow: 1, black: 1, white: 5 } },
   { name: 'יָרֹק כֵּהֶה',           recipe: { blue: 2, yellow: 2, black: 1 } },
 ];
-MISSIONS.forEach(m => {
+[...BUDS, ...MISSIONS].forEach(m => {
   m.rgb = mixRGB(Object.entries(m.recipe).map(([id, n]) => ({ id, n })));
   m.lab = lab(m.rgb);
 });
 
-// Error margins for elementary-school eyes (CIEDE2000 units).
-const MATCH = 6, CLOSE = 12;
+// match / close: error margins in CIEDE2000 units, wider for younger children.
+const TRACKS = {
+  buds: { name: 'נִצָּנִים',  missions: BUDS,     maxN: 3, match: 9, close: 16 },
+  big:  { name: 'מְשִׂימוֹת', missions: MISSIONS, maxN: 6, match: 6, close: 12 },
+};
+const MATCH = 6;            // free play: how close a mix must be to get a name
 const MAX_N = 6, MAX_TUBES = 4;
 
 /* ================= state ================= */
-const state = { view: 'home', mode: 'free', mission: null, tubes: [] };
+const state = { view: 'home', mode: 'free', track: 'big', mission: null, tubes: [] };
+const track = () => TRACKS[state.track];
+const mission = () => track().missions[state.mission];
+const maxN = () => state.mode === 'mission' ? track().maxN : MAX_N;
 const DONE_KEY = 'color-lab-done';
 let done = new Set();
-try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]')); } catch (e) {}
+// keys look like "buds:3"; plain numbers come from the first version, which had one track
+try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || '[]').map(k => typeof k === 'number' ? 'big:' + k : k)); } catch (e) {}
+const doneKey = i => state.track + ':' + i;
 const saveDone = () => { try { localStorage.setItem(DONE_KEY, JSON.stringify([...done])); } catch (e) {} };
 
 /* ================= icons ================= */
@@ -373,16 +403,17 @@ const I = {
    One drawing used everywhere: while choosing amounts and in the recipe,
    so the notches a child counts are the same in both places. */
 const TUBE = { w: 64, h: 204, top: 22, bottom: 196, inX: 12, inW: 40 };
-const STEP = (TUBE.bottom - 26) / MAX_N;          // height of one notch
+const stepFor = max => (TUBE.bottom - 26) / max;   // height of one notch
 let uid = 0;
-function tubeSVG(color, n, height) {
+function tubeSVG(color, n, height, max = MAX_N) {
+  const STEP = stepFor(max);
   const id = 'tc' + (++uid);
   const { w, h, top, bottom, inX, inW } = TUBE;
   const r = inW / 2;
   const inner = `M${inX} ${top} V${bottom - r} A${r} ${r} 0 0 0 ${inX + inW} ${bottom - r} V${top} Z`;
   const fillY = bottom - n * STEP;
   let ticks = '';
-  for (let i = 1; i <= MAX_N; i++) {
+  for (let i = 1; i <= max; i++) {
     const y = bottom - i * STEP;
     ticks += `<path d="M${inX} ${y}h${i % 2 ? 14 : 22}" stroke="#1d2431" stroke-opacity=".55" stroke-width="3" stroke-linecap="round"/>`;
   }
@@ -430,7 +461,16 @@ function homeView() {
         </svg>
         מִשְׂחָק חָפְשִׁי
       </button>
-      <button class="mode" data-act="missions" data-key="missions">
+      <button class="mode" data-act="track" data-track="buds" data-key="buds">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+          <path d="M32 60V30" stroke="${css(BUDS[1].rgb)}" stroke-width="5" stroke-linecap="round"/>
+          <path d="M32 46c-4-10-14-12-20-10 2 8 10 13 20 10z" fill="${css(BUDS[1].rgb)}"/>
+          <path d="M32 40c4-9 13-11 19-9-2 7-9 11-19 9z" fill="${css(BUDS[1].rgb)}" fill-opacity=".8"/>
+          <path d="M32 32c-8-2-10-12-6-22 3 4 6 6 6 6s3-2 6-6c4 10 2 20-6 22z" fill="${css(BUDS[3].rgb)}"/>
+        </svg>
+        נִצָּנִים
+      </button>
+      <button class="mode" data-act="track" data-track="big" data-key="big">
         <svg viewBox="0 0 64 64" aria-hidden="true">
           <circle cx="32" cy="32" r="26" fill="none" stroke="#1d2431" stroke-width="4"/>
           <circle cx="32" cy="32" r="16" fill="${css(MISSIONS[2].rgb)}"/>
@@ -445,11 +485,11 @@ function homeView() {
 function missionsView() {
   return `<div class="bar">
       <button class="icon-btn" data-act="home" data-key="home" aria-label="הַבַּיְתָה">${I.back}</button>
-      <h2>מְשִׂימוֹת</h2>
+      <h2>${track().name}</h2>
     </div>
     <div class="missions">
-      ${MISSIONS.map((m, i) => `<button class="mission" data-act="pick" data-i="${i}" data-key="m${i}">
-        ${done.has(i) ? `<span class="done" style="color:var(--good)" aria-label="הַצְלָחָה">${I.star}</span>` : ''}
+      ${track().missions.map((m, i) => `<button class="mission" data-act="pick" data-i="${i}" data-key="m${i}">
+        ${done.has(doneKey(i)) ? `<span class="done" style="color:var(--good)" aria-label="הַצְלָחָה">${I.star}</span>` : ''}
         <span class="dot" style="background:${css(m.rgb)}"></span>
         <span>${m.name}</span>
       </button>`).join('')}
@@ -457,7 +497,7 @@ function missionsView() {
 }
 
 function targetCard() {
-  const m = MISSIONS[state.mission];
+  const m = mission();
   return `<div class="target">
     <span class="dot" style="background:${css(m.rgb)}"></span>
     <div><small>נַסּוּ לְהָכִין</small><strong>${m.name}</strong></div>
@@ -486,16 +526,16 @@ function labView() {
     }
     const p = PAINT[t.id];
     slots += `<div class="slot">
-      <button class="step" data-act="more" data-i="${i}" data-key="more-${t.id}" aria-label="עוֹד ${p.name}" ${t.n >= MAX_N ? 'disabled' : ''}>${I.plus}</button>
+      <button class="step" data-act="more" data-i="${i}" data-key="more-${t.id}" aria-label="עוֹד ${p.name}" ${t.n >= maxN() ? 'disabled' : ''}>${I.plus}</button>
       <button class="remove" data-act="remove" data-i="${i}" data-key="rm-${t.id}" aria-label="לְהוֹצִיא ${p.name}">${I.x}</button>
-      <button class="tube-btn" data-act="level" data-i="${i}" data-key="tube-${t.id}" aria-label="${p.name} ${t.n}">${tubeSVG(css(p.rgb), t.n, th)}</button>
+      <button class="tube-btn" data-act="level" data-i="${i}" data-key="tube-${t.id}" aria-label="${p.name} ${t.n}">${tubeSVG(css(p.rgb), t.n, th, maxN())}</button>
       <span class="count">${t.n}</span>
       <button class="step" data-act="less" data-i="${i}" data-key="less-${t.id}" aria-label="פָּחוֹת ${p.name}" ${t.n <= 1 ? 'disabled' : ''}>${I.minus}</button>
     </div>`;
   }
 
   return `<div class="bar">
-      <button class="icon-btn" data-act="${isMission ? 'missions' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <button class="icon-btn" data-act="${isMission ? 'list' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
       ${isMission ? targetCard() : ''}
     </div>
     <div class="lab">
@@ -508,18 +548,18 @@ function labView() {
 function nearestName(l) {
   let best = null, bd = Infinity;
   PAINTS.forEach(p => { const d = deltaE(l, lab(p.rgb)); if (d < bd) { bd = d; best = p.name; } });
-  MISSIONS.forEach(m => { const d = deltaE(l, m.lab); if (d < bd) { bd = d; best = m.name; } });
+  [...BUDS, ...MISSIONS].forEach(m => { const d = deltaE(l, m.lab); if (d < bd) { bd = d; best = m.name; } });
   return bd <= MATCH ? best : '';
 }
 
 // The single change (one notch more or less, or one paint added/removed)
 // that brings the mix closest to the target.
-function findHint(tubes, target) {
+function findHint(tubes, target, max) {
   const dist = ts => deltaE(lab(mixRGB(ts)), target);
   let best = null, bestD = dist(tubes);
   const consider = (ts, h) => { const d = dist(ts); if (d < bestD - 0.5) { bestD = d; best = h; } };
   tubes.forEach((t, i) => {
-    if (t.n < MAX_N) consider(tubes.map((u, j) => j === i ? { ...u, n: u.n + 1 } : u), { id: t.id, kind: 'more' });
+    if (t.n < max) consider(tubes.map((u, j) => j === i ? { ...u, n: u.n + 1 } : u), { id: t.id, kind: 'more' });
     if (t.n > 1) consider(tubes.map((u, j) => j === i ? { ...u, n: u.n - 1 } : u), { id: t.id, kind: 'less' });
     else if (tubes.length > 1) consider(tubes.filter((_, j) => j !== i), { id: t.id, kind: 'without' });
   });
@@ -545,27 +585,27 @@ function resultView() {
   }).join(', ');
 
   const formula = state.tubes.map((t, i) =>
-    `${i ? '<span class="op">+</span>' : ''}<div class="item">${tubeSVG(css(PAINT[t.id].rgb), t.n, th)}<span class="count">${t.n}</span></div>`
+    `${i ? '<span class="op">+</span>' : ''}<div class="item">${tubeSVG(css(PAINT[t.id].rgb), t.n, th, maxN())}<span class="count">${t.n}</span></div>`
   ).join('') + `<span class="op">=</span><div class="item"><span class="blob" style="background:${css(rgb)}"></span><span class="count">&nbsp;</span></div>`;
 
   let verdict = '', actions = '';
   if (isMission) {
-    const m = MISSIONS[state.mission];
+    const m = mission(), tr = track();
     const d = deltaE(l, m.lab);
-    if (d <= MATCH) {
+    if (d <= tr.match) {
       verdict = `<div class="verdict good"><div class="say">${I.star}כָּל הַכָּבוֹד!</div></div>`;
-      actions = (state.mission < MISSIONS.length - 1
+      actions = (state.mission < tr.missions.length - 1
         ? `<button class="act primary" data-act="nextMission" data-key="next">מְשִׂימָה הַבָּאָה${I.next}</button>` : '')
-        + `<button class="act" data-act="missions" data-key="list">${I.target}כָּל הַמְּשִׂימוֹת</button>`;
+        + `<button class="act" data-act="list" data-key="list">${I.target}כָּל הַמְּשִׂימוֹת</button>`;
     } else {
-      const h = findHint(state.tubes, m.lab);
+      const h = findHint(state.tubes, m.lab, tr.maxN);
       let hint = '';
       if (h) {
         const p = PAINT[h.id];
         const words = { more: `עוֹד קְצָת ${p.name}`, add: `לְהוֹסִיף קְצָת ${p.name}`, less: `פָּחוֹת ${p.name}`, without: `בְּלִי ${p.name}` }[h.kind];
         hint = `<div class="hint"><span class="chip" style="background:${css(p.rgb)}"></span>${words}</div>`;
       }
-      verdict = `<div class="verdict ${d <= CLOSE ? 'near' : ''}"><div class="say">${d <= CLOSE ? 'קָרוֹב מְאוֹד!' : 'נַסּוּ שׁוּב'}</div>${hint}</div>`;
+      verdict = `<div class="verdict ${d <= tr.close ? 'near' : ''}"><div class="say">${d <= tr.close ? 'קָרוֹב מְאוֹד!' : 'נַסּוּ שׁוּב'}</div>${hint}</div>`;
       actions = `<button class="act primary" data-act="edit" data-key="edit">${I.redo}לְנַסּוֹת שׁוּב</button>`;
     }
   } else {
@@ -574,10 +614,10 @@ function resultView() {
   }
 
   const target = isMission
-    ? `<div class="vs"><span class="dot" style="background:${css(MISSIONS[state.mission].rgb)}"></span>${I.target}</div>` : '';
+    ? `<div class="vs"><span class="dot" style="background:${css(mission().rgb)}"></span>${I.target}</div>` : '';
 
   return `<div class="bar">
-      <button class="icon-btn" data-act="${isMission ? 'missions' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <button class="icon-btn" data-act="${isMission ? 'list' : 'home'}" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
       ${isMission ? targetCard() : ''}
     </div>
     <div class="result">
@@ -607,9 +647,10 @@ app.addEventListener('click', e => {
   switch (b.dataset.act) {
     case 'home': go('home'); break;
     case 'free': state.mode = 'free'; state.mission = null; state.tubes = []; go('lab'); break;
-    case 'missions': state.mode = 'mission'; go('missions'); break;
+    case 'track': state.mode = 'mission'; state.track = b.dataset.track; go('missions'); break;
+    case 'list': state.mode = 'mission'; go('missions'); break;
     case 'pick': state.mode = 'mission'; state.mission = i; state.tubes = []; go('lab'); break;
-    case 'nextMission': state.mission = Math.min(MISSIONS.length - 1, state.mission + 1); state.tubes = []; go('lab'); break;
+    case 'nextMission': state.mission = Math.min(track().missions.length - 1, state.mission + 1); state.tubes = []; go('lab'); break;
     case 'toggle': {
       const at = state.tubes.findIndex(t => t.id === b.dataset.id);
       if (at >= 0) state.tubes.splice(at, 1);
@@ -617,25 +658,25 @@ app.addEventListener('click', e => {
       render(); break;
     }
     case 'remove': state.tubes.splice(i, 1); render(); break;
-    case 'more': state.tubes[i].n = Math.min(MAX_N, state.tubes[i].n + 1); render(); break;
+    case 'more': state.tubes[i].n = Math.min(maxN(), state.tubes[i].n + 1); render(); break;
     case 'less': state.tubes[i].n = Math.max(1, state.tubes[i].n - 1); render(); break;
     case 'level': {
       // tap on the tube: fill up to the notch that was touched
       const svg = b.querySelector('svg');
       const box = svg.getBoundingClientRect();
       let n;
-      if (e.detail === 0) n = state.tubes[i].n % MAX_N + 1;   // keyboard: step up, wrap around
+      if (e.detail === 0) n = state.tubes[i].n % maxN() + 1;   // keyboard: step up, wrap around
       else {
         const y = (e.clientY - box.top) / box.height * TUBE.h;
-        n = Math.ceil((TUBE.bottom - y) / STEP);
+        n = Math.ceil((TUBE.bottom - y) / stepFor(maxN()));
       }
-      state.tubes[i].n = Math.max(1, Math.min(MAX_N, n));
+      state.tubes[i].n = Math.max(1, Math.min(maxN(), n));
       render(); break;
     }
     case 'mix': {
       if (state.tubes.length < 2) return;
-      if (state.mode === 'mission' && deltaE(lab(mixRGB(state.tubes)), MISSIONS[state.mission].lab) <= MATCH) {
-        done.add(state.mission); saveDone();
+      if (state.mode === 'mission' && deltaE(lab(mixRGB(state.tubes)), mission().lab) <= track().match) {
+        done.add(doneKey(state.mission)); saveDone();
       }
       go('result'); break;
     }
