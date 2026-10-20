@@ -296,6 +296,11 @@ svg { display: block; }
 .stw-thumb.upload { justify-content: center; align-items: center; min-height: 120px; }
 .stw-thumb .plus { font-size: 2rem; line-height: 1; color: var(--accent); }
 
+.levels.boards { grid-template-columns: repeat(2, 1fr); max-width: 520px; }
+.board-art { width: 64px; height: 64px; display: grid; place-items: center; margin: 8px 0; }
+.board-art svg { width: 56px; height: 56px; color: #fff; }
+@media (max-width: 620px) { .levels.boards { grid-template-columns: 1fr; } .board-art { width: 48px; height: 48px; margin: 0; } .board-art svg { width: 40px; height: 40px; } }
+
 footer.hh-credit { position: relative; z-index: 1; text-align: center; font-size: 15px; line-height: 1.5; margin: 24px 16px 16px; opacity: .8; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -692,6 +697,40 @@ const CONNECT = {
     { name: 'מכשירים למדידת מזג אוויר', words: ['מדחום', 'ברומטר', 'אנמומטר', 'היגרומטר'] },
   ],
 };
+/* לוח שני לכיתות ג׳–ו׳: 16 מילים, 4 קבוצות של 4 */
+const CONNECT_MORE = {
+  3: [
+    { name: 'ישנים שינת חורף', words: ['דוב', 'צב', 'עטלף', 'קיפוד'] },
+    { name: 'קורה בסערה', words: ['ברק', 'רעם', 'רוח', 'ברד'] },
+    { name: 'שותים ואוכלים חם', words: ['מרק', 'תה', 'שוקו', 'סחלב'] },
+    { name: 'מגינים עלינו מהגשם', words: ['מטרייה', 'מגפיים', 'מעיל גשם', 'ברדס'] },
+  ],
+  4: [
+    { name: 'מילים מהשורש ק-ר-ר', words: ['קריר', 'מקרר', 'קרה', 'התקרר'] },
+    { name: 'משקעים', words: ['גשם', 'שלג', 'ברד', 'טל'] },
+    { name: 'ציפורים נודדות שעוברות בישראל', words: ['עגור', 'שקנאי', 'חסידה', 'ברווז'] },
+    { name: 'עוזרים לחזות את מזג האוויר', words: ['מדחום', 'מד גשם', 'שבשבת', 'לוויין'] },
+  ],
+  5: [
+    { name: '___ גשם', words: ['מעיל', 'ענן', 'טיפת', 'יער'] },
+    { name: 'אזורי אקלים', words: ['ים תיכוני', 'מדברי', 'טרופי', 'קוטבי'] },
+    { name: 'נחלים בישראל', words: ['קישון', 'ירקון', 'שורק', 'אלכסנדר'] },
+    { name: 'מילים נרדפות לקור', words: ['צינה', 'כפור', 'קרה', 'צונן'] },
+  ],
+  6: [
+    { name: 'מהשורש ס-ע-ר', words: ['סערה', 'סוער', 'הסתערות', 'מסעיר'] },
+    { name: 'תופעות אור בשמיים', words: ['קשת', 'ברק', 'הילה', 'זוהר'] },
+    { name: 'גזים באוויר', words: ['חמצן', 'חנקן', 'ארגון', 'אוזון'] },
+    { name: 'מקומות בישראל שיורד בהם שלג', words: ['חרמון', 'ירושלים', 'צפת', 'מירון'] },
+  ],
+};
+const BOARD_IDS = ['a', 'b'];
+const boardsOf = g => [CONNECT[g.n], CONNECT_MORE[g.n]].filter(Boolean);
+const boardInfo = (g, id) => {
+  const i = BOARD_IDS.indexOf(id), n = (boardsOf(g)[i] || []).reduce((t, gr) => t + gr.words.length, 0);
+  return { id, name: `לוח ${i + 1}`, nname: `לוּחַ ${i + 1}`, desc: `${n} מילים`, ndesc: `${n} מִלִּים`, color: ['#b04a78', '#7a2c55'][i] };
+};
+const boardDone = (g, id) => !!done[`${g.n}-link-${id}`] || (id === 'a' && !!done[`${g.n}-link`]);
 const GROUP_COLORS = ['#e9b949', '#6cb47a', '#5b8fd1', '#a07cd0'];
 
 /* ================================================================
@@ -811,7 +850,9 @@ const KEY = 'winter-clouds-done';
 let done = {};
 try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
-const isDone = (g, k) => k === 'math' ? MATH_LEVELS.every(l => done[`${g.n}-math-${l.id}`]) : !!done[g.n + '-' + k];
+const isDone = (g, k) => k === 'math' ? MATH_LEVELS.every(l => done[`${g.n}-math-${l.id}`])
+  : k === 'link' ? boardsOf(g).every((_, i) => boardDone(g, BOARD_IDS[i]))
+  : !!done[g.n + '-' + k];
 const doneCount = g => g.drops.filter(k => isDone(g, k)).length;
 
 /* ================================================================
@@ -874,7 +915,7 @@ function renderGrade(g) {
 }
 
 function header(g, key, level) {
-  const s = SUBJECTS[key], lv = level && levelOf(level);
+  const s = SUBJECTS[key], lv = level && (key === 'link' ? boardInfo(g, level) : levelOf(level));
   const back = lv ? `g${g.n}-${key}` : `g${g.n}`;
   const backLabel = lv ? `חזרה לרמות של ${subjectName(key, g.n)}` : `חזרה לטיפות של כיתה ${g.letter}׳`;
   return `<div class="bar">
@@ -1193,10 +1234,27 @@ function renderSTW(g, openPicker) {
   show();
 }
 
-function renderConnect(g) {
-  const groups = CONNECT[g.n] || [];
+function renderBoards(g) {
+  app.innerHTML = `<div class="view">${header(g, 'link')}
+    <p class="levels-intro">בחרו לוח.</p>
+    <div class="levels boards">
+      ${boardsOf(g).map((_, i) => {
+        const b = boardInfo(g, BOARD_IDS[i]), fin = boardDone(g, b.id);
+        return `<button class="level" data-go="g${g.n}-link-${b.id}" style="--lv:${b.color}" aria-label="${b.name}, ${b.desc}${fin ? ', הושלם' : ''}">
+          <span class="board-art" aria-hidden="true">${ICONS.link}</span>
+          <span class="lv-text"><span class="lv-name">${b.name}</span><span class="lv-desc">${b.desc}</span></span>
+          ${fin ? `<span class="done">${CHECK}</span>` : ''}
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function renderConnect(g, bid = 'a') {
+  const multi = boardsOf(g).length > 1;
+  const groups = boardsOf(g)[BOARD_IDS.indexOf(bid)] || [];
   const s = SUBJECTS.link;
-  app.innerHTML = `<div class="view">${header(g, 'link')}<section class="panel connect" style="--accent:${s.color}"></section></div>`;
+  app.innerHTML = `<div class="view">${header(g, 'link', multi ? bid : null)}<section class="panel connect" style="--accent:${s.color}"></section></div>`;
   const panel = app.querySelector('.panel');
   if (!groups.length) {
     panel.innerHTML = `<p class="question">הלוח לכיתה הזו עוד בדרך.</p>
@@ -1231,14 +1289,17 @@ function renderConnect(g) {
     checkBtn.disabled = picked.size !== size;
   }
   function finish() {
-    done[`${g.n}-link`] = true; save();
+    done[`${g.n}-link-${bid}`] = true; save();
     panel.querySelector('.connect-actions').hidden = true;
     panel.querySelector('#reveal').hidden = true;
     const line = revealed
       ? tx(g, 'אלה כל הקבוצות. נסו שוב בפעם אחרת!', 'אֵלֶּה כָּל הַקְּבוּצוֹת. נַסּוּ שׁוּב בְּפַעַם אַחֶרֶת!')
       : tx(g, `מצאתם את כל הקבוצות! טעויות בדרך: ${mistakes}.`, `מְצָאתֶם אֶת כָּל הַקְּבוּצוֹת! טָעֻיּוֹת בַּדֶּרֶךְ: ${mistakes}.`);
     fb.textContent = '';
-    panel.querySelector('.connect-end').innerHTML = finishHTML(g, 'link', line);
+    const nb = multi && BOARD_IDS.slice(0, boardsOf(g).length).find(id => id !== bid && !boardDone(g, id));
+    panel.querySelector('.connect-end').innerHTML = multi
+      ? finishHTML(g, 'link', line, nb ? { go: `g${g.n}-link-${nb}`, label: `ללוח הבא: ${boardInfo(g, nb).name}` } : undefined, { go: `g${g.n}-link`, label: 'חזרה ללוחות' })
+      : finishHTML(g, 'link', line);
   }
   board.addEventListener('click', e => {
     const b = e.target.closest('.tile');
@@ -1297,7 +1358,11 @@ function route(token, push) {
   if (!g) { renderHome(); token = ''; }
   else if (!key || !g.drops.includes(key)) { renderGrade(g); token = 'g' + g.n; }
   else if (key === 'challenge') renderChallenge(g);
-  else if (key === 'link') renderConnect(g);
+  else if (key === 'link') {
+    if (boardsOf(g).length < 2) renderConnect(g);
+    else if (BOARD_IDS.includes(level)) renderConnect(g, level);
+    else { renderBoards(g); token = `g${g.n}-link`; }
+  }
   else if (key === 'stw') renderSTW(g);
   else if (key === 'math') {
     if (levelOf(level)) renderQuiz(g, 'math', level);
