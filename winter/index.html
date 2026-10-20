@@ -122,7 +122,7 @@ svg { display: block; }
 .hint-line { text-align: center; color: var(--ink-soft); margin: 4px 0 0; }
 .drops {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 20px 20px;
-  padding-block: 26px 20px; max-width: 600px; margin: 0 auto;
+  padding-block: 26px 20px; max-width: 680px; margin: 0 auto;
 }
 .drop {
   position: relative; width: 116px; aspect-ratio: 100 / 124; max-width: 100%;
@@ -267,6 +267,8 @@ svg { display: block; }
 .stw-step { display: flex; flex-direction: column; gap: 12px; }
 .stw-step h3 { font-size: 1.5rem; color: var(--accent); }
 .stw-ask { margin: 0; font-size: 1.15rem; }
+.hint-btn { align-self: flex-start; border: 2px solid var(--accent); background: none; color: var(--accent); border-radius: 999px; padding: 4px 14px; font: inherit; font-size: .95rem; }
+.hint-btn[aria-expanded="true"] { background: var(--accent); color: #fff; }
 .stw-prompts { margin: 0; padding-inline-start: 1.2em; color: var(--ink-soft); display: grid; gap: 4px; }
 .stw-step textarea {
   width: 100%; min-height: 110px; resize: vertical; padding: 12px 14px; border-radius: 14px;
@@ -301,6 +303,90 @@ svg { display: block; }
 .board-art svg { width: 56px; height: 56px; color: #fff; }
 @media (max-width: 620px) { .levels.boards { grid-template-columns: 1fr; } .board-art { width: 48px; height: 48px; margin: 0; } .board-art svg { width: 40px; height: 40px; } }
 
+/* ---------- TOFI true / false slides ---------- */
+.tofi-title { margin: 0; text-align: center; font-family: var(--display); color: var(--accent); font-size: 1.15rem; }
+.slide {
+  position: relative; min-height: 190px; display: grid; place-items: center; padding: 28px 22px;
+  border-radius: 18px; background: linear-gradient(160deg, var(--sky-top), var(--sky-bottom)); border: 2px solid var(--line);
+  animation: slidein .35s ease both;
+}
+@keyframes slidein { from { transform: translateX(-24px); opacity: .3; } to { transform: none; opacity: 1; } }
+.slide-text { margin: 0; text-align: center; font-family: var(--display); font-size: clamp(1.3rem, 4.6vw, 1.75rem); line-height: 1.5; text-wrap: balance; }
+.stamp {
+  position: absolute; top: 10px; inset-inline-start: 12px; transform: rotate(-8deg);
+  padding: 4px 12px; border: 3px solid currentColor; border-radius: 10px;
+  font-family: var(--display); font-size: 1.05rem; background: var(--card);
+}
+.stamp.is-true { color: var(--good); }
+.stamp.is-false { color: #c4513a; }
+.tf-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tf {
+  border: 0; border-radius: 18px; padding: 14px 10px; min-height: 76px; color: #fff;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  font-family: var(--display); font-size: 1.5rem; transition: opacity .2s, transform .15s;
+}
+.tf small { font-family: var(--body); font-size: .85rem; letter-spacing: .12em; opacity: .9; }
+.tf.true { background: #2f8a55; }
+.tf.false { background: #c4513a; }
+.tf:hover:not(:disabled) { transform: translateY(-2px); }
+.tf:disabled:not(.picked) { opacity: .35; }
+.tf.picked { box-shadow: 0 0 0 4px var(--card), 0 0 0 7px var(--ink-soft); }
+.tf-explain { border-radius: 16px; padding: 14px 18px; background: var(--sky-bottom); border: 2px dashed var(--line); display: grid; gap: 8px; }
+.tf-explain p { margin: 0; }
+.tf-explain strong { font-family: var(--display); font-weight: 400; display: block; color: var(--accent); }
+
+/* ---------- concept map ---------- */
+.cmap-panel { max-width: 1000px; }
+.cmap-tip { margin: 0; color: var(--ink-soft); }
+.bank { display: flex; flex-direction: column; gap: 8px; }
+.bank-title { font-family: var(--display); font-size: 1.05rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { border: 2px solid var(--line); background: var(--sky-bottom); color: var(--ink); border-radius: 999px; padding: 4px 14px; font: inherit; font-size: .95rem; }
+.chip:hover { border-color: var(--accent); }
+.chip.used { opacity: .4; text-decoration: line-through; }
+.cmap {
+  position: relative; display: grid; gap: 34px 46px; padding: 10px 4px;
+  grid-template-columns: 1fr minmax(170px, 210px) 1fr;
+  grid-template-areas: "b1 . b2" "b3 c b4" "b5 . b6";
+}
+.cmap.wide { grid-template-areas: "b1 b7 b2" "b3 c b4" "b5 b8 b6"; }
+.cmap-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: visible; }
+.cmap-center {
+  grid-area: c; align-self: center; justify-self: center; position: relative; z-index: 1;
+  width: 170px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
+  background: radial-gradient(circle at 50% 35%, #ffffff, #cfe0f3 70%, #a9c6ea); border: 4px solid #2f6fb0;
+  box-shadow: 0 10px 24px rgba(20, 40, 70, .18);
+}
+.cmap-center span { font-family: var(--display); font-size: 2.8rem; color: #1f3a66; }
+.branch {
+  position: relative; z-index: 1; align-self: start;
+  background: var(--card); border: 2px solid var(--bc); border-radius: 18px; padding: 12px;
+  display: flex; flex-direction: column; gap: 8px; box-shadow: 0 6px 14px rgba(20, 40, 70, .08);
+}
+.branch h4, .branch .b-title { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.2rem; text-align: center; color: var(--bc); }
+.branch .b-title { border: 2px dashed var(--bc); border-radius: 12px; padding: 6px 10px; background: var(--card); width: 100%; }
+.leaves { display: grid; gap: 6px; }
+.leaf { width: 100%; border: 2px dashed var(--line); border-radius: 10px; padding: 7px 10px; background: var(--sky-bottom); color: var(--ink); font: inherit; font-size: 1rem; }
+.leaf:focus-visible, .b-title:focus-visible { outline: 3px solid var(--bc); outline-offset: 1px; }
+.add-leaf { border: 0; background: none; color: var(--bc); font: inherit; font-size: .95rem; align-self: flex-start; padding: 2px 4px; }
+.links { display: flex; flex-direction: column; gap: 10px; border-top: 2px solid var(--line); padding-top: 14px; }
+.links h4 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 1.25rem; }
+.link-row { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) minmax(0, 2fr) auto; gap: 8px; align-items: center; }
+.link-row select, .link-row input { min-width: 0; border: 2px solid var(--line); border-radius: 10px; padding: 7px 8px; background: var(--sky-bottom); color: var(--ink); font: inherit; font-size: .95rem; }
+.link-x { border: 0; background: none; color: var(--ink-soft); font-size: 1.1rem; padding: 4px 8px; }
+#add-link { align-self: flex-start; }
+.cmap-end:empty { display: none; }
+.cmap-end { display: flex; flex-direction: column; gap: 18px; }
+@media (max-width: 760px) {
+  .cmap, .cmap.wide { display: flex; flex-direction: column; gap: 14px; }
+  .cmap-lines { display: none; }
+  .cmap-center { width: 130px; }
+  .cmap-center span { font-size: 2.1rem; }
+  .branch { border-inline-start-width: 8px; align-self: stretch; }
+  .link-row { grid-template-columns: 1fr auto 1fr; }
+  .link-row input { grid-column: 1 / 3; }
+}
+
 footer.hh-credit { position: relative; z-index: 1; text-align: center; font-size: 15px; line-height: 1.5; margin: 24px 16px 16px; opacity: .8; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -329,17 +415,19 @@ const SUBJECTS = {
   geo:       { name: () => 'גאוגרפיה',  color: '#1b7896' },
   art:       { name: g => g <= 2 ? 'אָמָּנוּת' : 'אומנות',    color: '#8a4bb0' },
   stw:       { name: g => g <= 2 ? 'רוֹאִים, חוֹשְׁבִים, שׁוֹאֲלִים' : 'רואים, חושבים, שואלים', color: '#b8682a' },
+  cmap:      { name: () => 'מפת מושגים', color: '#8a5a2b' },
+  tofi:      { name: () => 'טופ״י', color: '#c4513a' },
   link:      { name: g => g <= 2 ? 'לוּחַ מָה הַקֶּשֶׁר' : 'לוח מה הקשר', color: '#b04a78' },
   challenge: { name: g => g <= 2 ? 'אֶתְגָּר' : 'אתגר',      color: '#f2b705' },
 };
 
 const GRADES = [
-  { n: 1, letter: 'א', color: '#e4572e', drops: ['math', 'lang', 'sci', 'home', 'art', 'stw', 'link', 'challenge'] },
-  { n: 2, letter: 'ב', color: '#f08a24', drops: ['math', 'lang', 'sci', 'home', 'art', 'stw', 'link', 'challenge'] },
-  { n: 3, letter: 'ג', color: '#e8b81a', drops: ['math', 'lang', 'sci', 'eng', 'home', 'stw', 'link', 'challenge'] },
-  { n: 4, letter: 'ד', color: '#3a9a6e', drops: ['math', 'lang', 'sci', 'eng', 'home', 'stw', 'link', 'challenge'] },
-  { n: 5, letter: 'ה', color: '#3f73c4', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'stw', 'link', 'challenge'] },
-  { n: 6, letter: 'ו', color: '#8a62c2', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'stw', 'link', 'challenge'] },
+  { n: 1, letter: 'א', color: '#e4572e', drops: ['math', 'lang', 'sci', 'home', 'art', 'stw', 'link', 'tofi', 'challenge'] },
+  { n: 2, letter: 'ב', color: '#f08a24', drops: ['math', 'lang', 'sci', 'home', 'art', 'stw', 'link', 'tofi', 'challenge'] },
+  { n: 3, letter: 'ג', color: '#e8b81a', drops: ['math', 'lang', 'sci', 'eng', 'home', 'stw', 'link', 'tofi', 'challenge'] },
+  { n: 4, letter: 'ד', color: '#3a9a6e', drops: ['math', 'lang', 'sci', 'eng', 'home', 'cmap', 'stw', 'link', 'tofi', 'challenge'] },
+  { n: 5, letter: 'ה', color: '#3f73c4', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'cmap', 'stw', 'link', 'tofi', 'challenge'] },
+  { n: 6, letter: 'ו', color: '#8a62c2', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'cmap', 'stw', 'link', 'tofi', 'challenge'] },
 ];
 
 const CONTENT = {
@@ -734,6 +822,94 @@ const boardDone = (g, id) => !!done[`${g.n}-link-${id}`] || (id === 'a' && !!don
 const GROUP_COLORS = ['#e9b949', '#6cb47a', '#5b8fd1', '#a07cd0'];
 
 /* ================================================================
+   מפת מושגים (כיתות ד׳–ו׳). ענף עם t ריק הוא ענף שהתלמידים נותנים לו שם.
+   n = כמה תיבות ריקות למושגים. bank = מחסן מילים (לא חובה).
+   links: true = מוסיפים קשרים בין ענפים עם הסבר.
+   ================================================================ */
+const CMAP = {
+  4: {
+    tip: 'כתבו בכל ענף מושגים שקשורים אליו. אפשר להיעזר במחסן המילים. לשני הענפים הריקים תנו שם משלכם.',
+    branches: [
+      { t: 'חורף בישראל', n: 3 }, { t: 'הטבע בחורף', n: 3 }, { t: 'מזג האוויר בחורף', n: 3 },
+      { t: 'שומרים על עצמנו בחורף', n: 3 }, { t: '', n: 3 }, { t: '', n: 3 },
+    ],
+    bank: ['שלג בחרמון', 'שלוליות', 'עגורים', 'כלניות', 'ברק ורעם', 'רוח', 'מטרייה', 'מגפיים', 'הצפה', 'כנרת', 'מדחום', 'שינת חורף'],
+  },
+  5: {
+    tip: 'השלימו מושגים בכל ענף ותנו שם לשני הענפים הריקים. אפשר להוסיף מושגים וענפים חדשים.',
+    branches: [
+      { t: 'חורף בישראל', n: 4 }, { t: 'תופעות חורף מיוחדות', n: 4 }, { t: 'הטבע בחורף', n: 4 },
+      { t: 'חורף בעולם', n: 4 }, { t: '', n: 3 }, { t: '', n: 3 },
+    ],
+    bank: ['אקלים ים תיכוני', 'שיטפון במדבר', 'נדידת ציפורים', 'ברד', 'קשת', 'מחזור המים', 'קיץ באוסטרליה', 'קוטב צפוני'],
+  },
+  6: {
+    tip: 'בנו מפה מלאה: השלימו מושגים, תנו שם לשלושת הענפים הריקים, והוסיפו למטה קשרים בין ענפים עם הסבר.',
+    branches: [
+      { t: 'תופעות חורף מיוחדות', n: 4 }, { t: 'חורף בעולם', n: 4 }, { t: 'מים ומשקעים', n: 4 },
+      { t: '', n: 4 }, { t: '', n: 4 }, { t: '', n: 4 },
+    ],
+    links: true,
+  },
+};
+const CMAP_COLORS = ['#2f6fb0', '#7a4bb8', '#12817a', '#3b8541', '#1b7896', '#b8682a', '#b04a78', '#4a4fb3'];
+
+/* ================================================================
+   טופ״י (TRUE OR FALSE): שש עובדות לכל כיתה. t: true = אמת.
+   בעובדה שהיא שקר יש גם fact (העובדה הנכונה) ו-why (הסבר).
+   ================================================================ */
+const TOFI = {
+  1: { title: 'מְגַלִּים אֶת הַחֹרֶף', items: [
+    { s: 'כָּל עָנָן מוֹרִיד גֶּשֶׁם.', t: false, fact: 'לֹא כָּל עָנָן מוֹרִיד גֶּשֶׁם.', why: 'כְּדֵי שֶׁיֵּרֵד גֶּשֶׁם, טִפּוֹת הַמַּיִם בֶּעָנָן צְרִיכוֹת לִגְדֹּל וְלִהְיוֹת כְּבֵדוֹת דַּיָּן כְּדֵי לִפֹּל.' },
+    { s: 'גַּם בַּחֹרֶף יֵשׁ יָמִים שִׁמְשִׁיִּים.', t: true },
+    { s: 'מִטְרִיָּה מְחַמֶּמֶת אוֹתָנוּ כְּמוֹ מְעִיל.', t: false, fact: 'מִטְרִיָּה מְגִנָּה מִפְּנֵי הַגֶּשֶׁם, וּמְעִיל חַם עוֹזֵר לָנוּ לִשְׁמֹר עַל חֹם הַגּוּף.', why: 'לְמִטְרִיָּה וְלִמְעִיל יֵשׁ תַּפְקִידִים שׁוֹנִים. הַמִּטְרִיָּה עוֹזֶרֶת לָנוּ לְהִשָּׁאֵר יְבֵשִׁים, וְהַמְּעִיל עוֹזֵר לְהָגֵן מִפְּנֵי הַקֹּר.' },
+    { s: 'מַגָּפַיִם אֲטוּמִים עוֹזְרִים לִשְׁמֹר עַל רַגְלַיִם יְבֵשׁוֹת.', t: true },
+    { s: 'גֶּשֶׁם יוֹרֵד רַק בַּלַּיְלָה.', t: false, fact: 'גֶּשֶׁם יָכוֹל לָרֶדֶת בַּיּוֹם וּבַלַּיְלָה.', why: 'גֶּשֶׁם יָכוֹל לָרֶדֶת בַּבֹּקֶר, בַּצָּהֳרַיִם וְגַם בַּלַּיְלָה. יְרִידַת הַגֶּשֶׁם אֵינָהּ תְּלוּיָה בְּשָׁעָה מְסֻיֶּמֶת.' },
+    { s: 'לִפְעָמִים רוֹאִים קֶשֶׁת כְּשֶׁיֵּשׁ שֶׁמֶשׁ וְטִפּוֹת גֶּשֶׁם בָּאֲוִיר.', t: true },
+  ] },
+  2: { title: 'הַאִם זֶה תָּמִיד כָּךְ?', items: [
+    { s: 'כְּשֶׁהַשֶּׁמֶשׁ יוֹצֵאת אַחֲרֵי הַגֶּשֶׁם, כָּל הַשְּׁלוּלִיּוֹת נֶעֱלָמוֹת מִיָּד.', t: false, fact: 'שְׁלוּלִיּוֹת נֶעֱלָמוֹת בְּהַדְרָגָה, וְלֹא תָּמִיד מִיָּד.', why: 'חֵלֶק מֵהַמַּיִם מִתְאַדֶּה לָאֲוִיר, חֵלֶק חוֹדֵר לָאֲדָמָה וְחֵלֶק זוֹרֵם לְמָקוֹם אַחֵר. לָכֵן יֵשׁ שְׁלוּלִיּוֹת שֶׁנִּשְׁאָרוֹת זְמַן רַב יוֹתֵר.' },
+    { s: 'אֶפְשָׁר לְהַרְגִּישׁ קֹר גַּם כְּשֶׁאֵין גֶּשֶׁם.', t: true },
+    { s: 'מַיִם מִשְּׁלוּלִית יְכוֹלִים לְהִתְאַדּוֹת גַּם בְּיוֹם קַר.', t: true },
+    { s: 'בְּכָל מָקוֹם בְּיִשְׂרָאֵל יוֹרֶדֶת אוֹתָהּ כַּמּוּת גֶּשֶׁם.', t: false, fact: 'בִּמְקוֹמוֹת שׁוֹנִים בְּיִשְׂרָאֵל יוֹרְדוֹת כַּמֻּיּוֹת שׁוֹנוֹת שֶׁל גֶּשֶׁם.', why: 'בְּדֶרֶךְ כְּלָל יוֹרֵד יוֹתֵר גֶּשֶׁם בִּצְפוֹן יִשְׂרָאֵל מֵאֲשֶׁר בַּדָּרוֹם. הַמָּקוֹם וּתְנָאֵי מֶזֶג הָאֲוִיר מַשְׁפִּיעִים עַל כַּמּוּת הַגֶּשֶׁם.' },
+    { s: 'כְּשֶׁגֶּשֶׁם יוֹרֵד, הוּא תָּמִיד מְלֻוֶּה בְּרַעַם.', t: false, fact: 'גֶּשֶׁם יָכוֹל לָרֶדֶת גַּם בְּלִי רַעַם.', why: 'הָרַעַם נוֹצָר בִּגְלַל בָּרָק, וְלֹא בִּגְלַל טִפּוֹת הַגֶּשֶׁם. לָכֵן אֶפְשָׁר לִשְׁמֹעַ רַעַם בִּסְעָרַת בְּרָקִים, אֲבָל לֹא בְּכָל יוֹם גָּשׁוּם.' },
+    { s: 'בְּיוֹם גָּשׁוּם מִדְרָכָה רְטֻבָּה עֲשׂוּיָה לִהְיוֹת חֲלַקְלַקָּה.', t: true },
+  ] },
+  3: { title: 'מָה בֶּאֱמֶת גּוֹרֵם לַתּוֹפָעָה?', items: [
+    { s: 'בְּיוֹם גָּשׁוּם, נְסִיעָה בִּמְכוֹנִית תָּמִיד מְהִירָה יוֹתֵר מֵהֲלִיכָה בָּרֶגֶל.', t: false, fact: 'לִפְעָמִים הֲלִיכָה לְמָקוֹם קָרוֹב מְהִירָה יוֹתֵר מִנְּסִיעָה בִּמְכוֹנִית.', why: 'בִּימֵי גֶּשֶׁם עֲלוּלִים לְהִוָּצֵר פְּקָקִים בַּכְּבִישׁ. אִם הַמָּקוֹם קָרוֹב וְדֶרֶךְ הַהֲלִיכָה בְּטוּחָה, יִתָּכֵן שֶׁהַהֲלִיכָה תִּהְיֶה מְהִירָה יוֹתֵר.' },
+    { s: 'גַּם כְּשֶׁהַשֶּׁמֶשׁ מִסְתַּתֶּרֶת מֵאֲחוֹרֵי עֲנָנִים, הָאוֹר שֶׁלָּהּ עֲדַיִן מַגִּיעַ אֵלֵינוּ.', t: true },
+    { s: 'אִם שְׁתֵּי עָרִים קְרוֹבוֹת זוֹ לָזוֹ, בָּטוּחַ שֶׁיֵּרֵד בָּהֶן בְּדִיּוּק אוֹתוֹ גֶּשֶׁם.', t: false, fact: 'גַּם בֵּין עָרִים קְרוֹבוֹת יְכוֹלִים לִהְיוֹת הֶבְדֵּלִים בְּכַמּוּת הַגֶּשֶׁם.', why: 'עַנְנֵי גֶּשֶׁם אֵינָם מְפַזְּרִים תָּמִיד אֶת הַגֶּשֶׁם בְּצוּרָה שָׁוָה. יִתָּכֵן שֶׁבְּעִיר אַחַת יֵרֵד גֶּשֶׁם חָזָק, וּבְעִיר סְמוּכָה יֵרֵד גֶּשֶׁם חַלָּשׁ אוֹ שֶׁלֹּא יֵרֵד גֶּשֶׁם כְּלָל.' },
+    { s: 'בַּחֹרֶף, מַיִם יְכוֹלִים לַחְדֹּר לָאֲדָמָה וְלֹא רַק לִזְרֹם עַל פְּנֵי הַקַּרְקַע.', t: true },
+    { s: 'אֶפְשָׁר לִרְאוֹת בָּרָק לִפְנֵי שֶׁשּׁוֹמְעִים אֶת הָרַעַם.', t: true },
+    { s: 'אִם יֵשׁ הֲצָפָה בָּרְחוֹב, זֶה מוֹכִיחַ שֶׁיָּרְדָה כַּמּוּת גֶּשֶׁם גְּדוֹלָה מְאֹד.', t: false, fact: 'הֲצָפָה בָּרְחוֹב אֵינָהּ מוֹכִיחָה שֶׁיָּרְדָה כַּמּוּת גֶּשֶׁם גְּדוֹלָה מְאֹד.', why: 'גַּם פֶּתַח נִקּוּז שֶׁסָּתוּם בְּעָלִים אוֹ בְּלִכְלוּךְ יָכוֹל לִגְרֹם לְהִצְטַבְּרוּת מַיִם. לָכֵן הֲצָפָה לֹא תָּמִיד מְעִידָה עַל גֶּשֶׁם חָזָק בִּמְיֻחָד.' },
+  ] },
+  4: { title: 'החורף לא תמיד הגיוני', items: [
+    { s: 'לילה מעונן עשוי להיות חם יותר מלילה בהיר בתנאים דומים, משום שעננים מפחיתים את איבוד החום.', t: true },
+    { s: 'ככל שמעיל כבד יותר, כך הוא תמיד מחמם יותר.', t: false, fact: 'מעיל כבד אינו בהכרח מחמם יותר ממעיל קל.', why: 'יכולת הבידוד של המעיל אינה תלויה רק במשקלו. יש חומרים קלים שמבודדים היטב ושומרים על חום הגוף. למשל, מעיל פוך קל עשוי לחמם יותר ממעיל כבד שאינו מבודד היטב. גם הרטיבות והרוח משפיעות.' },
+    { s: 'גשם חזק במשך עשר דקות תמיד יגרום להצפה גדולה יותר מגשם מתון במשך כמה שעות.', t: false, fact: 'הסיכון להצפה תלוי לא רק בעוצמת הגשם, אלא גם במשכו ובתנאי השטח והניקוז.', why: 'גם גשם מתון שנמשך שעות עלול לגרום להצפה כאשר הקרקע רוויה במים או שמערכת הניקוז אינה מצליחה לפנות אותם. יש משמעות לכמות המים הכוללת, לעוצמת הגשם וליכולת החלחול.' },
+    { s: 'כביש רטוב עלול להאריך את מרחק העצירה של מכונית.', t: true },
+    { s: 'אם שלולית נעלמה, פירוש הדבר שכל המים שהיו בה התאדו.', t: false, fact: 'מי שלולית עשויים להתאדות, לחלחל לקרקע או לזרום למקום אחר.', why: 'היעלמות שלולית אינה מוכיחה שכל המים התאדו. סוג הקרקע, השיפוע ומזג האוויר משפיעים על הדרך שבה המים מתפנים.' },
+    { s: 'אוויר חם נוטה לעלות מעל אוויר קר ממנו.', t: true },
+  ] },
+  5: { title: 'כשהחורף פוגש את הסביבה', items: [
+    { s: 'ריצוף רוב חצר בית הספר במשטח אטום עלול להגדיל את כמות מי הגשמים הזורמים על פני הקרקע.', t: true },
+    { s: 'שני ימים שבהם ירדו 30 מ״מ גשם חייבים לגרום להצפות באותה מידה.', t: false, fact: 'אותה כמות גשם אינה מחייבת אותה עוצמת הצפה.', why: 'כאשר 30 מ״מ יורדים בתוך חצי שעה, המים מצטברים במהירות והניקוז עלול להתקשות לפנותם. אם אותה כמות יורדת לאורך שעות, ייתכן שיש למים יותר זמן לחלחל ולהתנקז. גם מצב הקרקע משפיע.' },
+    { s: 'כל מי הגשמים היורדים על גגות הבתים מחלחלים ישירות אל מי התהום.', t: false, fact: 'רוב הגגות אטומים למים, ומי הגשם זורמים מהם למרזבים ולניקוז.', why: 'חלק מהמים עשוי לחלחל בהמשך לקרקע, אך לא כל המים מגיעים ישירות למי התהום. במקומות מסוימים אפשר לאסוף חלק ממי הגשמים לשימושים מתאימים, כגון השקיה.' },
+    { s: 'השיפוע של הקרקע משפיע על הכיוון שבו מי הגשמים זורמים.', t: true },
+    { s: 'גינות סופגות מים ושטחים מחלחלים עשויים להפחית את העומס על מערכות הניקוז בעיר.', t: true },
+    { s: 'בשנה שבה ירדה כמות גשם גבוהה מהממוצע לא יכולים להיות שבועות ארוכים ללא גשם.', t: false, fact: 'גם בשנה גשומה במיוחד ייתכנו שבועות ארוכים ללא גשם.', why: 'כמות הגשם השנתית אינה מספרת כיצד הגשם התחלק על פני השנה. ייתכן שבימים מעטים ירדו כמויות גדולות במיוחד ואחריהם היו שבועות יבשים.' },
+  ] },
+  6: { title: 'האם הנתונים מספרים את כל האמת?', items: [
+    { s: 'אם בבית ספר גדול יש יותר תלמידים מאחרים מאשר בבית ספר קטן, פירוש הדבר שהאיחורים נפוצים בו יותר.', t: false, fact: 'בהשוואת בתי ספר בגדלים שונים יש לבדוק את שיעור המאחרים מכלל התלמידים, ולא רק את מספרם.', why: 'למשל: בבית ספר של 400 תלמידים, 40 מאחרים הם 10%. בבית ספר של 100 תלמידים, 15 מאחרים הם 15%. למרות שבבית הספר הראשון יש יותר מאחרים במספרם, בשני שיעור האיחורים גבוה יותר.' },
+    { s: 'בשנה שבה ירדה כמות משקעים גדולה יותר, ייתכן שהיו דווקא פחות ימי גשם.', t: true },
+    { s: 'שיפור הבידוד של בניין עשוי להפחית את צריכת האנרגיה לחימום בחורף, גם אם מזג האוויר בחוץ לא השתנה.', t: true },
+    { s: 'אם בימים גשומים יש יותר מכוניות וגם יותר פקקי תנועה, הנתונים מוכיחים שמספר המכוניות הוא הגורם היחיד לעיכובים.', t: false, fact: 'שני נתונים שמופיעים יחד אינם מוכיחים שאחד מהם הוא הגורם היחיד לאחר.', why: 'ייתכן שריבוי המכוניות מוסיף עומס, אך העיכובים יכולים להיות מושפעים גם מראות מוגבלת, ממהירות נסיעה נמוכה וממצב הכביש. צריך לבדוק גורמים נוספים כדי לקבוע מה גרם לעיכוב.' },
+    { s: 'גם כאשר כמות הגשם הכוללת זהה, גשם היורד בפרק זמן קצר יותר עלול ליצור הצפות חמורות יותר.', t: true },
+    { s: 'תחזית של 70% סיכוי לגשם פירושה שיירד גשם במשך 70% משעות היום.', t: false, fact: '70% סיכוי לגשם מתארים הסתברות לירידת משקעים במקום ובפרק הזמן של התחזית, ולא את משך הגשם.', why: 'תחזית של 70% בין 8:00 ל-14:00 אינה מבטיחה גשם במשך 70% משש השעות האלה. הגשם עשוי להימשך זמן קצר, וייתכן גם שלא יירד כלל.' },
+  ] },
+};
+
+/* ================================================================
    רואים, חושבים, שואלים: תמונה אחת לכל כיתה, שאלות מנחות לכל שלב,
    ו"מה כדאי לדעת" לסיום. המורה יכולה לבחור לכל כיתה תמונה אחרת מהרשימה או להעלות תמונה משלה.
    ================================================================ */
@@ -792,6 +968,8 @@ const ICONS = {
   geo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/></svg>',
   art: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-1.4-1.2-1.6-1.2-2.8 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10.2" cy="7" r="1.1" fill="currentColor"/><circle cx="14.8" cy="7" r="1.1" fill="currentColor"/></svg>',
   stw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>',
+  cmap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3.2" fill="currentColor"/><circle cx="4.5" cy="5" r="2.2"/><circle cx="19.5" cy="5" r="2.2"/><circle cx="4.5" cy="19" r="2.2"/><circle cx="19.5" cy="19" r="2.2"/><path d="M6.2 6.6l3.5 3.3M17.8 6.6l-3.5 3.3M6.2 17.4l3.5-3.3M17.8 17.4l-3.5-3.3"/></svg>',
+  tofi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.5l3.5 3.5L13 8.5"/><path d="M15 9l6 6M21 9l-6 6"/></svg>',
   link: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" opacity=".6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2" opacity=".6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
   challenge: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>',
 };
@@ -1207,7 +1385,8 @@ function renderSTW(g, openPicker) {
     stepBox.innerHTML = `
       <h3>${st.name}</h3>
       <p class="stw-ask">${st.ask}</p>
-      <ul class="stw-prompts">${d[st.id].map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+      <button class="hint-btn" type="button" aria-expanded="false">${tx(g, 'צריכים הכוונה?', 'צְרִיכִים הַכְוָנָה?')}</button>
+      <ul class="stw-prompts" hidden>${d[st.id].map(q => `<li>${esc(q)}</li>`).join('')}</ul>
       <label class="sr" for="stw-${key}">${st.name}</label>
       <textarea id="stw-${key}" rows="4" placeholder="${st.hint}"></textarea>
       <div class="actions">
@@ -1217,6 +1396,10 @@ function renderSTW(g, openPicker) {
           : `<button class="btn" data-move="1">${tx(g, 'הלאה', 'הָלְאָה')}: ${steps[at + 1].name}</button>`}
       </div>
       ${d.learn ? `<p class="reveal" id="learn-text" hidden><strong>${tx(g, 'מה כדאי לדעת', 'מָה כְּדַאי לָדַעַת')}</strong>${esc(d.learn)}</p>` : ''}`;
+    stepBox.querySelector('.hint-btn').addEventListener('click', e => {
+      const ul = stepBox.querySelector('.stw-prompts');
+      ul.hidden = !ul.hidden; e.currentTarget.setAttribute('aria-expanded', !ul.hidden);
+    });
     const ta = stepBox.querySelector('textarea');
     ta.value = notes[key] || '';
     ta.addEventListener('input', () => { notes[key] = ta.value; saveNotes(); });
@@ -1230,6 +1413,191 @@ function renderSTW(g, openPicker) {
         panel.querySelector('.stw-end').innerHTML = finishHTML(g, 'stw', tx(g, 'התבוננתם, חשבתם ושאלתם. אפשר לשתף את השאלות שלכם עם הכיתה.', 'הִתְבּוֹנַנְתֶּם, חֲשַׁבְתֶּם וּשְׁאַלְתֶּם. אֶפְשָׁר לְשַׁתֵּף אֶת הַשְּׁאֵלוֹת שֶׁלָּכֶם עִם הַכִּתָּה.'));
       });
     }
+  }
+  show();
+}
+
+const CMAP_KEY = 'winter-cmap';
+let cmapState = {};
+try { cmapState = JSON.parse(localStorage.getItem(CMAP_KEY) || '{}') || {}; } catch (e) {}
+const saveCmap = () => { try { localStorage.setItem(CMAP_KEY, JSON.stringify(cmapState)); } catch (e) {} };
+
+function renderCmap(g) {
+  const cfg = CMAP[g.n], s = SUBJECTS.cmap;
+  const fresh = () => ({ branches: cfg.branches.map(b => ({ t: b.t, fixed: !!b.t, leaves: Array(b.n).fill('') })), links: [] });
+  const st = cmapState[g.n] = cmapState[g.n] || fresh();
+  let lastLeaf = null, clearArmed = false;
+  app.innerHTML = `<div class="view">${header(g, 'cmap')}
+    <section class="panel cmap-panel" style="--accent:${s.color}">
+      <p class="cmap-tip">${cfg.tip}</p>
+      ${cfg.bank ? `<div class="bank"><span class="bank-title">מחסן מילים</span><div class="chips"></div></div>` : ''}
+      <div class="cmap"></div>
+      <div class="actions"><button class="btn ghost" id="add-branch">+ ענף חדש</button></div>
+      ${cfg.links ? `<div class="links"><h4>קשרים בין ענפים</h4><p class="cmap-tip">בחרו שני ענפים וכתבו מה הקשר ביניהם.</p><div class="link-rows"></div><button class="btn ghost" id="add-link">+ קשר חדש</button></div>` : ''}
+      <div class="actions cmap-actions"><button class="btn ghost" id="clear-map">ניקוי המפה</button><button class="btn" id="map-done">סיימתי</button></div>
+      <div class="cmap-end"></div>
+    </section></div>`;
+  const panel = app.querySelector('.panel'), map = panel.querySelector('.cmap');
+  const label = i => st.branches[i].t.trim() || `ענף ${i + 1}`;
+
+  function drawMap() {
+    map.innerHTML = `<svg class="cmap-lines" aria-hidden="true"></svg>
+      <div class="cmap-center"><span>חורף</span></div>
+      ${st.branches.map((b, i) => `<div class="branch" data-b="${i}" style="grid-area:b${i + 1};--bc:${CMAP_COLORS[i % CMAP_COLORS.length]}">
+        ${b.fixed ? `<h4>${esc(b.t)}</h4>` : `<input class="b-title" id="cm-${g.n}-t${i}" value="${esc(b.t)}" placeholder="שם הענף" aria-label="שם ענף ${i + 1}">`}
+        <div class="leaves">${b.leaves.map((v, j) => `<input class="leaf" id="cm-${g.n}-${i}-${j}" data-l="${j}" value="${esc(v)}" placeholder="מושג" aria-label="מושג ${j + 1} בענף ${esc(label(i))}">`).join('')}</div>
+        <button class="add-leaf" type="button">+ מושג</button>
+      </div>`).join('')}`;
+    map.classList.toggle('wide', st.branches.length > 6);
+    panel.querySelector('#add-branch').hidden = st.branches.length >= 8;
+    drawChips(); requestAnimationFrame(drawLines);
+  }
+  function drawChips() {
+    if (!cfg.bank) return;
+    const used = new Set(st.branches.flatMap(b => b.leaves.map(v => v.trim())));
+    panel.querySelector('.chips').innerHTML = cfg.bank.map(w => `<button class="chip${used.has(w) ? ' used' : ''}" type="button">${esc(w)}</button>`).join('');
+  }
+  function drawLines() {
+    const svg = map.querySelector('.cmap-lines');
+    if (!svg || getComputedStyle(svg).display === 'none') return;
+    const box = map.getBoundingClientRect(), c = map.querySelector('.cmap-center').getBoundingClientRect();
+    const mid = r => [r.left + r.width / 2 - box.left, r.top + r.height / 2 - box.top];
+    const [cx, cy] = mid(c);
+    const cards = [...map.querySelectorAll('.branch')].map(el => mid(el.getBoundingClientRect()));
+    svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    svg.innerHTML = cards.map(([x, y], i) => `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="${CMAP_COLORS[i % CMAP_COLORS.length]}" stroke-width="3"/>`).join('')
+      + st.links.filter(l => l.a !== l.b && cards[l.a] && cards[l.b]).map(l => {
+        const [x1, y1] = cards[l.a], [x2, y2] = cards[l.b];
+        const mx = (x1 + x2) / 2 + (cy - (y1 + y2) / 2) * .25, my = (y1 + y2) / 2 + ((x1 + x2) / 2 - cx) * .25;
+        return `<path d="M${x1} ${y1}Q${mx} ${my} ${x2} ${y2}" fill="none" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="7 6"/>`;
+      }).join('');
+  }
+  function drawLinks() {
+    if (!cfg.links) return;
+    const opts = sel => st.branches.map((_, i) => `<option value="${i}"${i === sel ? ' selected' : ''}>${esc(label(i))}</option>`).join('');
+    panel.querySelector('.link-rows').innerHTML = st.links.map((l, k) => `<div class="link-row" data-k="${k}">
+      <select data-f="a" aria-label="ענף ראשון">${opts(l.a)}</select><span aria-hidden="true">⟷</span>
+      <select data-f="b" aria-label="ענף שני">${opts(l.b)}</select>
+      <input data-f="why" id="cm-${g.n}-link${k}" value="${esc(l.why)}" placeholder="מה הקשר ביניהם?">
+      <button class="link-x" type="button" aria-label="מחיקת הקשר">✕</button></div>`).join('');
+    requestAnimationFrame(drawLines);
+  }
+
+  map.addEventListener('focusin', e => { if (e.target.classList.contains('leaf')) lastLeaf = e.target; });
+  map.addEventListener('input', e => {
+    const card = e.target.closest('.branch'); if (!card) return;
+    const b = st.branches[+card.dataset.b];
+    if (e.target.classList.contains('leaf')) b.leaves[+e.target.dataset.l] = e.target.value;
+    else if (e.target.classList.contains('b-title')) b.t = e.target.value;
+    saveCmap(); drawChips();
+  });
+  map.addEventListener('change', e => { if (e.target.classList.contains('b-title')) drawLinks(); });
+  map.addEventListener('click', e => {
+    const add = e.target.closest('.add-leaf'); if (!add) return;
+    const i = +add.closest('.branch').dataset.b;
+    st.branches[i].leaves.push(''); saveCmap(); drawMap();
+    const leaves = map.querySelectorAll(`.branch[data-b="${i}"] .leaf`); leaves[leaves.length - 1].focus();
+  });
+  if (cfg.bank) panel.querySelector('.chips').addEventListener('click', e => {
+    const chip = e.target.closest('.chip'); if (!chip) return;
+    const target = (lastLeaf && !lastLeaf.value.trim() && map.contains(lastLeaf)) ? lastLeaf : [...map.querySelectorAll('.leaf')].find(x => !x.value.trim());
+    if (!target) return;
+    target.value = chip.textContent;
+    st.branches[+target.closest('.branch').dataset.b].leaves[+target.dataset.l] = target.value;
+    saveCmap(); drawChips(); target.focus();
+  });
+  panel.querySelector('#add-branch').addEventListener('click', () => {
+    if (st.branches.length >= 8) return;
+    st.branches.push({ t: '', fixed: false, leaves: ['', '', ''] }); saveCmap(); drawMap(); drawLinks();
+    map.querySelector(`.branch[data-b="${st.branches.length - 1}"] .b-title`).focus();
+  });
+  if (cfg.links) {
+    const rows = panel.querySelector('.link-rows');
+    panel.querySelector('#add-link').addEventListener('click', () => {
+      st.links.push({ a: 0, b: 1, why: '' }); saveCmap(); drawLinks();
+      rows.querySelector(`.link-row[data-k="${st.links.length - 1}"] input`).focus();
+    });
+    rows.addEventListener('input', e => {
+      const row = e.target.closest('.link-row'); if (!row) return;
+      const l = st.links[+row.dataset.k], f = e.target.dataset.f;
+      l[f] = f === 'why' ? e.target.value : +e.target.value;
+      saveCmap(); if (f !== 'why') drawLines();
+    });
+    rows.addEventListener('click', e => {
+      const x = e.target.closest('.link-x'); if (!x) return;
+      st.links.splice(+x.closest('.link-row').dataset.k, 1); saveCmap(); drawLinks();
+    });
+  }
+  const clearBtn = panel.querySelector('#clear-map');
+  clearBtn.addEventListener('click', () => {
+    if (!clearArmed) {
+      clearArmed = true; clearBtn.textContent = 'בטוחים? לחצו שוב כדי לנקות';
+      setTimeout(() => { clearArmed = false; clearBtn.textContent = 'ניקוי המפה'; }, 4000);
+      return;
+    }
+    clearArmed = false; clearBtn.textContent = 'ניקוי המפה';
+    Object.assign(st, fresh()); saveCmap(); drawMap(); drawLinks();
+  });
+  panel.querySelector('#map-done').addEventListener('click', () => {
+    done[`${g.n}-cmap`] = true; save();
+    const n = st.branches.reduce((t, b) => t + b.leaves.filter(v => v.trim()).length, 0);
+    panel.querySelector('.cmap-end').innerHTML = finishHTML(g, 'cmap', `כתבתם ${n} מושגים במפה. אפשר להציג אותה לכיתה ולהסביר את הקשרים.`);
+    panel.querySelector('.cmap-end').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+  const onResize = () => { if (map.isConnected) drawLines(); else window.removeEventListener('resize', onResize); };
+  window.addEventListener('resize', onResize);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => map.isConnected && drawLines());
+  drawMap(); drawLinks();
+}
+
+function renderTofi(g) {
+  const set = TOFI[g.n], s = SUBJECTS.tofi;
+  app.innerHTML = `<div class="view">${header(g, 'tofi')}<section class="panel tofi" style="--accent:${s.color}"></section></div>`;
+  const panel = app.querySelector('.panel');
+  if (!set) {
+    panel.innerHTML = `<p class="question">השקופיות לכיתה הזו עוד בדרך.</p><div class="actions"><button class="btn ghost" data-go="g${g.n}">חזרה לענן</button></div>`;
+    return;
+  }
+  const items = set.items;
+  let i = 0, right = 0;
+  function show() {
+    const it = items[i];
+    panel.innerHTML = `
+      <p class="tofi-title">${esc(set.title)}</p>
+      <div class="steps" aria-hidden="true">${items.map((_, j) => miniDrop(j < i ? s.color : 'none', j <= i ? s.color : 'var(--line)')).join('')}</div>
+      <p class="qnum">${tx(g, 'שקופית', 'שְׁקוֹפִית')} ${i + 1} ${tx(g, 'מתוך', 'מִתּוֹךְ')} ${items.length}</p>
+      <div class="slide"><p class="slide-text">${esc(it.s)}</p><span class="stamp" hidden></span></div>
+      <div class="tf-buttons">
+        <button class="tf true" data-a="1"><span>${tx(g, 'אמת', 'אֱמֶת')}</span><small dir="ltr" lang="en">TRUE</small></button>
+        <button class="tf false" data-a="0"><span>${tx(g, 'שקר', 'שֶׁקֶר')}</span><small dir="ltr" lang="en">FALSE</small></button>
+      </div>
+      <p class="feedback" aria-live="polite"></p>
+      <div class="tf-explain" hidden>
+        <p><strong>${tx(g, 'העובדה הנכונה', 'הָעֻבְדָּה הַנְּכוֹנָה')}</strong>${esc(it.fact || '')}</p>
+        <p><strong>${tx(g, 'למה?', 'לָמָּה?')}</strong>${esc(it.why || '')}</p>
+      </div>
+      <div class="actions next-row" hidden><button class="btn next">${i + 1 < items.length ? tx(g, 'לשקופית הבאה', 'לַשְּׁקוֹפִית הַבָּאָה') : tx(g, 'סיום', 'סִיּוּם')}</button></div>`;
+    panel.querySelectorAll('.tf').forEach(b => b.addEventListener('click', () => {
+      const said = b.dataset.a === '1', ok = said === it.t;
+      if (ok) right++;
+      panel.querySelectorAll('.tf').forEach(x => { x.disabled = true; x.classList.toggle('picked', x === b); });
+      const stamp = panel.querySelector('.stamp');
+      stamp.hidden = false;
+      stamp.className = 'stamp ' + (it.t ? 'is-true' : 'is-false');
+      stamp.innerHTML = it.t ? `${tx(g, 'אמת', 'אֱמֶת')} <span dir="ltr">TRUE</span>` : `${tx(g, 'שקר', 'שֶׁקֶר')} <span dir="ltr">FALSE</span>`;
+      const fb = panel.querySelector('.feedback');
+      fb.textContent = ok ? tx(g, 'צדקתם!', 'צְדַקְתֶּם!') : tx(g, 'לא הפעם.', 'לֹא הַפַּעַם.');
+      fb.classList.toggle('soft', !ok);
+      if (!it.t) panel.querySelector('.tf-explain').hidden = false;
+      const row = panel.querySelector('.next-row');
+      row.hidden = false; row.querySelector('.next').focus();
+    }));
+    panel.querySelector('.next').addEventListener('click', () => {
+      i++;
+      if (i < items.length) return show();
+      done[`${g.n}-tofi`] = true; save();
+      panel.innerHTML = finishHTML(g, 'tofi', tx(g, `צדקתם ב-${right} מתוך ${items.length} שקופיות.`, `צְדַקְתֶּם בְּ-${right} מִתּוֹךְ ${items.length} שְׁקוֹפִיּוֹת.`));
+    });
   }
   show();
 }
@@ -1364,6 +1732,8 @@ function route(token, push) {
     else { renderBoards(g); token = `g${g.n}-link`; }
   }
   else if (key === 'stw') renderSTW(g);
+  else if (key === 'tofi') renderTofi(g);
+  else if (key === 'cmap') renderCmap(g);
   else if (key === 'math') {
     if (levelOf(level)) renderQuiz(g, 'math', level);
     else { renderMathLevels(g); token = `g${g.n}-math`; }
