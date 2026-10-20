@@ -356,27 +356,28 @@ svg { display: block; }
   background: radial-gradient(circle at 50% 35%, #ffffff, #cfe0f3 70%, #a9c6ea); border: 4px solid #2f6fb0;
   box-shadow: 0 10px 24px rgba(20, 40, 70, .18);
 }
-.cmap-center span { font-family: var(--display); font-size: 2.5rem; color: #1f3a66; }
+.cmap-center span { font-family: var(--display); font-size: 2.2rem; color: #1f3a66; }
 .cnode { position: absolute; direction: rtl; }
 .cnode .cn-label, .cnode .cn-input {
   width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; text-align: center;
   border-radius: 12px; font: inherit; color: var(--ink); padding: 0 10px; line-height: 1.15;
 }
 .cnode.d1 .cn-label, .cnode.d1 .cn-input {
-  font-family: var(--display); font-size: 1.12rem; border: 2.5px solid var(--bc); color: var(--bc);
+  font-family: var(--display); font-size: 1.02rem; border: 2.5px solid var(--bc); color: var(--bc);
   background: color-mix(in srgb, var(--bc) 10%, var(--card));
 }
 .cnode.d1 .cn-input { border-style: dashed; }
-.cnode:not(.d1) .cn-input { border: 2px dashed color-mix(in srgb, var(--bc) 55%, var(--line)); background: var(--card); font-size: .98rem; }
+.cnode:not(.d1) .cn-input { border: 2px dashed color-mix(in srgb, var(--bc) 55%, var(--line)); background: var(--card); font-size: .9rem; padding: 0 6px; }
+.cnode.d3 .cn-input, .cnode.d4 .cn-input { font-size: .85rem; }
 .cnode .cn-input:focus-visible { outline: 3px solid var(--bc); outline-offset: 1px; border-style: solid; }
 .cn-add, .cn-del {
-  position: absolute; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%;
+  position: absolute; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%;
   display: grid; place-items: center; padding: 0; font-size: 1rem; line-height: 1; border: 2px solid var(--bc);
   background: var(--card); color: var(--bc); opacity: .55; transition: opacity .15s;
 }
 .cnode:hover .cn-add, .cnode:focus-within .cn-add, .cnode:hover .cn-del, .cnode:focus-within .cn-del, .cn-add:focus-visible { opacity: 1; }
-.out-r .cn-add { right: -14px; }
-.out-l .cn-add { left: -14px; }
+.out-r .cn-add { right: -12px; }
+.out-l .cn-add { left: -12px; }
 .cn-del { top: -9px; transform: none; width: 20px; height: 20px; font-size: .85rem; border-color: var(--line); color: var(--ink-soft); }
 .out-r .cn-del { left: -8px; }
 .out-l .cn-del { right: -8px; }
@@ -1400,7 +1401,7 @@ function renderCmap(g) {
   const nodeAt = path => path.reduce((n, k, d) => d ? n.kids[k] : st.branches[k], null);
 
   /* layout: two-sided tree, each level one column further from the centre */
-  const W = [0, 180, 158, 146, 138], H = [0, 52, 42, 40, 38], ROW = 54, GAP = 58, CR = 74, MAXD = 4;
+  const W = [0, 150, 114, 108, 104], H = [0, 48, 36, 34, 34], ROW = 44, GAP = 26, CR = 62, MAXD = 4;
   const w = d => W[Math.min(d, 4)], h = d => H[Math.min(d, 4)];
   const rows = n => n.kids.length ? n.kids.reduce((t, k) => t + rows(k), 0) : 1;
   const depth = n => n.kids.length ? 1 + Math.max(...n.kids.map(depth)) : 1;
@@ -1411,7 +1412,7 @@ function renderCmap(g) {
     const sides = [st.branches.slice(0, half).map((b, i) => [b, i]), st.branches.slice(half).map((b, i) => [b, i + half])];
     const maxD = Math.max(1, ...st.branches.map(depth));
     const sideRows = list => list.reduce((t, [b]) => t + rows(b), 0) + Math.max(0, list.length - 1) * .6;
-    const width = 2 * (inner(maxD) + w(maxD)) + 40;
+    const width = 2 * (inner(maxD) + w(maxD)) + 24;
     const height = Math.max(sideRows(sides[0]), sideRows(sides[1]), 3.4) * ROW + 40;
     const cx = width / 2, cy = height / 2, boxes = [];
     sides.forEach((list, si) => {
