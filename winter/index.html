@@ -25,6 +25,9 @@
   --rain: rgba(60, 100, 150, .28);
   --gold: #f2b705;
   --gold-ink: #3b2a00;
+  --near: #a8641a;
+  --tile-top: #172640;
+  --tile-bottom: #3a5682;
   --display: "Secular One", "Arial Hebrew", Arial, sans-serif;
   --body: "Varela Round", "Arial Hebrew", Arial, sans-serif;
   --radius: 22px;
@@ -33,17 +36,18 @@
   :root:not([data-theme="light"]) {
     --sky-top: #0d1828; --sky-bottom: #1a2a41; --ink: #e8eef6; --ink-soft: #a7b5c8;
     --cloud: #dfe7f1; --cloud-shade: #a9b9cc; --cloud-ink: #1c2b3d; --card: #1f3049; --line: #354a64;
-    --good: #5cc485; --good-soft: #1d3b2c; --rain: rgba(180, 205, 235, .22); --gold: #f5c22e; --gold-ink: #3b2a00;
+    --good: #5cc485; --good-soft: #1d3b2c; --rain: rgba(180, 205, 235, .22); --gold: #f5c22e; --gold-ink: #3b2a00; --near: #e7a85a;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --sky-top: #0d1828; --sky-bottom: #1a2a41; --ink: #e8eef6; --ink-soft: #a7b5c8;
   --cloud: #dfe7f1; --cloud-shade: #a9b9cc; --cloud-ink: #1c2b3d; --card: #1f3049; --line: #354a64;
-  --good: #5cc485; --good-soft: #1d3b2c; --rain: rgba(180, 205, 235, .22); --gold: #f5c22e; --gold-ink: #3b2a00;
+  --good: #5cc485; --good-soft: #1d3b2c; --rain: rgba(180, 205, 235, .22); --gold: #f5c22e; --gold-ink: #3b2a00; --near: #e7a85a;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { min-height: 100%; }
 body {
   margin: 0;
@@ -86,21 +90,41 @@ svg { display: block; }
 .home-head p { margin: 0; color: var(--ink-soft); font-size: 1.1rem; }
 .grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 18px; padding-block: 28px 8px; }
 @media (max-width: 620px) { .grades { grid-template-columns: repeat(2, 1fr); gap: 22px 12px; } }
-.grade {
-  border: 0; background: none; padding: 6px;
-  display: flex; flex-direction: column; align-items: center; gap: 4px;
+.grade, .sky-hero {
+  position: relative; overflow: hidden; isolation: isolate;
+  background: linear-gradient(172deg, var(--tile-top), var(--tile-bottom));
+  border: 1px solid rgba(255, 255, 255, .08);
+  color: #fff;
+  box-shadow: 0 12px 28px rgba(14, 28, 52, .22);
 }
-.grade .umb { width: 62%; margin-bottom: -14%; transform-origin: 50% 95%; transition: transform .3s ease; }
-.grade .cld { width: 100%; filter: drop-shadow(0 6px 10px rgba(20, 40, 70, .12)); }
+.grade::before, .sky-hero::before { /* fine snow drifting over the night sky */
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, .55) 1px, transparent 1.6px), radial-gradient(circle, rgba(255, 255, 255, .3) 1px, transparent 1.6px);
+  background-size: 34px 34px, 21px 21px; background-position: 0 0, 9px 13px;
+  animation: snow 14s linear infinite;
+}
+@keyframes snow { to { background-position: 0 340px, 9px 223px; } }
+.grade {
+  border-radius: 26px; padding: 16px 10px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.grade:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgba(14, 28, 52, .3); }
+.grade .umb { width: 56%; margin-bottom: -11%; transform-origin: 50% 95%; transition: transform .3s ease; position: relative; z-index: 1; }
+.grade .cld { width: 92%; position: relative; z-index: 2; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .25)); }
 .grade:hover .umb, .grade:focus-visible .umb { transform: rotate(-6deg) translateY(-4px); }
 .grade .name { font-family: var(--display); font-size: 1.35rem; }
-.grade .count { font-size: .95rem; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.grade .count { font-size: .95rem; color: rgba(255, 255, 255, .8); display: flex; align-items: center; gap: 6px; }
 .grade .count svg { width: 14px; height: 17px; }
+.rainfall line { stroke-dasharray: 9 13; animation: drip 1s linear infinite; }
+.rainfall line:nth-child(even) { animation-duration: 1.35s; }
+@keyframes drip { to { stroke-dashoffset: -22; } }
 
 /* ---------- grade screen ---------- */
-.sky-hero { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-top: 4px; }
-.sky-hero .umb { width: min(210px, 52vw); margin-bottom: -38px; animation: sway 4s ease-in-out infinite; transform-origin: 50% 95%; }
-.sky-hero .cld { width: min(330px, 82vw); }
+.sky-hero { display: flex; flex-direction: column; align-items: center; gap: 2px; max-width: 760px; margin: 8px auto 0; padding: 22px 16px 20px; border-radius: 30px; }
+.sky-hero .umb { width: min(190px, 46vw); margin-bottom: -34px; animation: sway 4s ease-in-out infinite; transform-origin: 50% 95%; position: relative; z-index: 1; }
+.sky-hero .cld { width: min(320px, 78vw); position: relative; z-index: 2; filter: drop-shadow(0 12px 14px rgba(0, 0, 0, .28)); }
+.sky-hero .hint-line { color: rgba(255, 255, 255, .8); }
 @keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
 .hint-line { text-align: center; color: var(--ink-soft); margin: 4px 0 0; }
 .drops {
@@ -126,7 +150,7 @@ svg { display: block; }
 .drop .ic svg { width: 30px; height: 30px; }
 .drop .lbl { font-family: var(--display); font-size: 1.15rem; line-height: 1.2; }
 .drop.challenge .in { color: var(--gold-ink); }
-.drop .done {
+.drop .done, .level .done {
   position: absolute; top: 18%; inset-inline-end: -4px; width: 32px; height: 32px; border-radius: 50%;
   background: var(--good); display: grid; place-items: center; box-shadow: 0 0 0 3px var(--sky-bottom);
 }
@@ -176,6 +200,40 @@ svg { display: block; }
 .finish h2 { font-size: 2rem; }
 .finish p { margin: 0; color: var(--ink-soft); font-size: 1.15rem; }
 
+/* ---------- math levels ---------- */
+.levels-intro { text-align: center; color: var(--ink-soft); margin: 14px 0 0; }
+.levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; max-width: 760px; margin: 18px auto 0; }
+.level {
+  position: relative; border: 0; border-radius: var(--radius); padding: 14px 14px 20px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .16), rgba(0, 0, 0, .1)), var(--lv);
+  color: #fff; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center;
+  box-shadow: 0 10px 22px rgba(14, 28, 52, .2); transition: transform .2s ease;
+}
+.level:hover { transform: translateY(-4px); }
+.level .lv-art { width: 124px; }
+.lv-text { display: flex; flex-direction: column; }
+.lv-name { font-family: var(--display); font-size: 1.6rem; line-height: 1.3; }
+.lv-desc { font-size: .95rem; opacity: .88; }
+.level .done { top: 12px; inset-inline-end: 12px; box-shadow: 0 0 0 3px rgba(255, 255, 255, .5); }
+@media (max-width: 620px) {
+  .levels { grid-template-columns: 1fr; }
+  .level { flex-direction: row; text-align: start; padding: 10px 18px; gap: 14px; }
+  .level .lv-art { width: 92px; flex: none; }
+}
+
+/* ---------- typed answers ---------- */
+.answer-row { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 0; }
+.ans {
+  width: min(220px, 100%); min-height: 56px; padding: 6px 14px;
+  border: 2px solid var(--line); border-radius: 16px; background: var(--card); color: var(--ink);
+  font: inherit; font-size: 1.5rem; text-align: center;
+}
+.ans:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.ans.wrong { border-color: var(--near); animation: shake .35s; }
+.ans.right { border-color: var(--good); background: var(--good-soft); }
+.feedback.soft { color: var(--ink-soft); }
+.actions:has(> [hidden]:only-child) { display: none; }
+
 footer.hh-credit { position: relative; z-index: 1; text-align: center; font-size: 15px; line-height: 1.5; margin: 24px 16px 16px; opacity: .8; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -217,11 +275,6 @@ const GRADES = [
 
 const CONTENT = {
   1: {
-    math: [
-      { q: 'על החלון יש 3 טיפות גשם. נפלו עוד 2 טיפות. כמה טיפות יש עכשיו?', o: ['5', '4', '6'] },
-      { q: 'לדני יש 6 כפפות. 2 כפפות נרטבו בגשם. כמה כפפות יבשות נשארו?', o: ['4', '3', '8'] },
-      { q: 'איזה מספר בא אחרי 9?', o: ['10', '8', '11'] },
-    ],
     lang: [
       { q: 'באיזו אות מתחילה המילה "גשם"?', o: ['ג', 'ש', 'מ'] },
       { q: 'איזו מילה מתחרזת עם "ענן"?', o: ['גנן', 'רוח', 'מטרייה'] },
@@ -249,11 +302,6 @@ const CONTENT = {
     },
   },
   2: {
-    math: [
-      { q: 'בכל מטרייה יש 8 צלעות. כמה צלעות יש ב-2 מטריות?', o: ['16', '10', '18'] },
-      { q: 'בבוקר היו 12 מעלות. בצהריים היה חם יותר ב-5 מעלות. כמה מעלות היו בצהריים?', o: ['17', '7', '15'] },
-      { q: 'בכניסה לכיתה עומדים 20 מגפיים. כמה זוגות מגפיים יש?', o: ['10', '20', '40'] },
-    ],
     lang: [
       { q: 'מה ההפך של "רטוב"?', o: ['יבש', 'קר', 'נקי'] },
       { q: 'מה הרבים של "ענן"?', o: ['עננים', 'ענות', 'ענניות'] },
@@ -281,11 +329,6 @@ const CONTENT = {
     },
   },
   3: {
-    math: [
-      { q: 'בכל שבוע ירד גשם 3 ימים. כמה ימי גשם היו ב-4 שבועות כאלה?', o: ['12', '7', '16'] },
-      { q: 'בחנות היו 45 זוגות מגפיים. נמכרו 18 זוגות. כמה זוגות נשארו?', o: ['27', '33', '63'] },
-      { q: 'איזה מספר הוא הגדול ביותר?', o: ['370', '307', '337'] },
-    ],
     lang: [
       { q: 'מה פירוש המילה "סגריר"?', o: ['מזג אוויר קר וגשום', 'יום חם מאוד', 'רוח חמה במדבר'] },
       { q: 'מהו שם התואר במשפט "הרוח הקרה נשבה בחוזקה"?', o: ['קרה', 'רוח', 'נשבה'] },
@@ -313,11 +356,6 @@ const CONTENT = {
     },
   },
   4: {
-    math: [
-      { q: 'בינואר ירדו 120 מ״מ גשם ובפברואר 85 מ״מ. כמה גשם ירד בשני החודשים יחד?', o: ['205 מ״מ', '195 מ״מ', '215 מ״מ'] },
-      { q: 'בחנות 6 ארגזים, ובכל ארגז 24 מטריות. כמה מטריות יש בחנות?', o: ['144', '124', '164'] },
-      { q: 'איזה שבר הוא הגדול ביותר?', o: ['1/2', '1/3', '1/4'] },
-    ],
     lang: [
       { q: 'מה השורש של המילה "גשום"?', o: ['ג-ש-ם', 'ג-ו-ש', 'ש-ו-ם'] },
       { q: 'איזו מילה שייכת למשפחה של המילה "קור"?', o: ['קריר', 'קורא', 'קריאה'] },
@@ -345,11 +383,6 @@ const CONTENT = {
     },
   },
   5: {
-    math: [
-      { q: 'בארבעה ימים ירדו 12, 8, 20 ו-0 מ״מ גשם. מהו הממוצע היומי?', o: ['10 מ״מ', '8 מ״מ', '12 מ״מ'] },
-      { q: 'הטמפרטורה ירדה מ-6 מעלות ל-2 מעלות מתחת לאפס. בכמה מעלות היא ירדה?', o: ['8', '4', '6'] },
-      { q: 'איזה מספר עשרוני שווה ל-3/4?', o: ['0.75', '0.34', '0.4'] },
-    ],
     lang: [
       { q: 'מה תפקיד המילה "בגלל" במשפט "נשארנו בבית בגלל הסערה"?', o: ['מילת סיבה', 'מילת ניגוד', 'מילת זמן'] },
       { q: 'מה פירוש הצירוף "מזג אוויר הפכפך"?', o: ['מזג אוויר שמשתנה הרבה', 'מזג אוויר יציב', 'מזג אוויר חם'] },
@@ -377,11 +410,6 @@ const CONTENT = {
     },
   },
   6: {
-    math: [
-      { q: 'בינואר ירדו 150 מ״מ גשם, שהם 30% מכמות הגשם של כל השנה. כמה גשם ירד בכל השנה?', o: ['500 מ״מ', '450 מ״מ', '180 מ״מ'] },
-      { q: 'היחס בין ימי גשם לימים יבשים בחודש הוא 1:2. כמה ימי גשם היו בחודש של 30 יום?', o: ['10', '15', '20'] },
-      { q: 'מטרייה פתוחה היא בערך עיגול ברדיוס 50 ס״מ. מה בערך השטח שלה? (π ≈ 3.14)', o: ['7,850 סמ״ר', '314 סמ״ר', '157 סמ״ר'] },
-    ],
     lang: [
       { q: 'מה פירוש הביטוי "אחרי הגשם בא הקשת"?', o: ['אחרי תקופה קשה באים ימים טובים', 'אחרי הגשם תמיד חם', 'צריך לחכות לקשת'] },
       { q: 'איזה משפט הוא משפט מורכב?', o: ['כשהתחיל לרדת גשם, פתחנו את המטריות.', 'ירד גשם.', 'הגשם חזק מאוד.'] },
@@ -411,6 +439,158 @@ const CONTENT = {
 };
 
 /* ================================================================
+   משימות מתמטיקה לפי רמות: טפטוף (קל), גשם (בינוני), סערה (מאתגר).
+   משימה עם o היא שאלת בחירה (התשובה הנכונה ראשונה).
+   משימה עם a היא משימה שכותבים בה את התשובה (מספר).
+   ================================================================ */
+const MATH_LEVELS = [
+  { id: 'easy', name: 'טפטוף', desc: 'קל',     color: '#3f82c4' },
+  { id: 'mid',  name: 'גשם',   desc: 'בינוני', color: '#2a5d9f' },
+  { id: 'hard', name: 'סערה',  desc: 'מאתגר',  color: '#2b2e63' },
+];
+
+const MATH = {
+  1: {
+    easy: [
+      { q: 'על הגדר יושבות 2 ציפורים. הגיעו עוד 3 ציפורים. כמה ציפורים יש עכשיו?', o: ['5', '4', '6'] },
+      { q: 'בשלולית קפצו 4 ילדים. ילד אחד יצא. כמה ילדים נשארו בשלולית?', o: ['3', '5', '2'] },
+      { q: 'כמה מגפיים יש ל-2 ילדים?', o: ['4', '2', '3'] },
+      { q: 'איזה מספר הוא הגדול ביותר?', o: ['8', '6', '3'] },
+      { q: 'סופרים טיפות: 1, 2, 3, ?, 5. איזה מספר חסר?', a: '4' },
+    ],
+    mid: [
+      { q: 'לנועה 5 כפתורים על המעיל, ולאח שלה 4. כמה כפתורים יש לשניהם יחד?', a: '9' },
+      { q: 'על החלון היו 10 טיפות. 3 טיפות החליקו למטה. כמה טיפות נשארו?', a: '7' },
+      { q: 'מה חסר? 6 + ? = 8', o: ['2', '3', '14'] },
+      { q: 'בכל כפפה 5 אצבעות. כמה אצבעות יש בזוג כפפות?', o: ['10', '5', '15'] },
+      { q: 'סופרים בקפיצות של 2: 2, 4, 6, ?', a: '8' },
+    ],
+    hard: [
+      { q: 'לשלושה ילדים מטרייה אדומה, לארבעה מטרייה כחולה ולשניים מטרייה צהובה. כמה מטריות יש?', a: '9' },
+      { q: 'תמר הכינה 12 כדורי שלג מנייר. היא נתנה 5 לחבר. כמה כדורים נשארו לה?', a: '7' },
+      { q: 'לרוני 4 מטריות. לדן יש 3 מטריות יותר מלרוני. כמה מטריות יש לדן?', a: '7' },
+      { q: 'איזה תרגיל שווה ל-10?', o: ['6 + 4', '5 + 4', '7 + 2'] },
+      { q: 'בתחנה עומדים 3 ילדים, ולכל ילד 2 מגפיים. כמה מגפיים יש בתחנה?', o: ['6', '5', '3'] },
+    ],
+  },
+  2: {
+    easy: [
+      { q: 'על הקולבים תלויים 15 מעילים. הגיעו עוד 4 ילדים עם מעילים. כמה מעילים יש עכשיו?', a: '19' },
+      { q: 'במדחום היו 14 מעלות. הטמפרטורה ירדה ב-3 מעלות. כמה מעלות יש עכשיו?', a: '11' },
+      { q: 'בכל כפפה 5 אצבעות. כמה אצבעות יש ב-3 כפפות?', o: ['15', '10', '20'] },
+      { q: 'איזה מספר בא לפני 40?', o: ['39', '41', '30'] },
+      { q: 'כמה עשרות יש במספר 36?', o: ['3', '6', '36'] },
+    ],
+    mid: [
+      { q: 'ביום ראשון ירד גשם 23 דקות, וביום שני 15 דקות. כמה דקות ירד גשם בשני הימים יחד?', a: '38' },
+      { q: 'בחנות היו 50 מטריות. נמכרו 20. כמה מטריות נשארו?', a: '30' },
+      { q: 'בכל מגף 4 חורים לשרוך. כמה חורים יש ב-3 מגפיים?', o: ['12', '7', '10'] },
+      { q: '8 ילדים מתחלקים שווה בשווה מתחת ל-2 מטריות גדולות. כמה ילדים עומדים מתחת לכל מטרייה?', o: ['4', '6', '2'] },
+      { q: 'מה חסר? 30 + ? = 45', a: '15' },
+    ],
+    hard: [
+      { q: 'בשבוע הראשון היו 3 ימי גשם, ובשבוע השני פי 2. כמה ימי גשם היו בשני השבועות יחד?', a: '9' },
+      { q: 'לרון 25 שקלים. מטרייה עולה 18 שקלים. כמה עודף יקבל?', a: '7' },
+      { q: 'בסל 5 זוגות כפפות ועוד כפפה אחת. כמה כפפות יש בסל?', a: '11' },
+      { q: 'על החלון 5 שורות של טיפות, ובכל שורה 6 טיפות. כמה טיפות יש?', o: ['30', '11', '25'] },
+      { q: 'המספר שלי גדול מ-40 וקטן מ-50, וספרת האחדות שלו היא 7. מה המספר?', a: '47' },
+    ],
+  },
+  3: {
+    easy: [
+      { q: 'בכל קופסה 6 שקיות שוקו. כמה שקיות יש ב-4 קופסאות?', a: '24' },
+      { q: 'בחנות היו 120 מעילים. נמכרו 40. כמה מעילים נשארו?', a: '80' },
+      { q: 'כמה דקות יש בחצי שעה?', o: ['30', '50', '15'] },
+      { q: '36 טיפות מתחלקות שווה בשווה בין 4 עננים. כמה טיפות בכל ענן?', o: ['9', '8', '32'] },
+      { q: 'איזה מספר מעוגל לעשרת הקרובה הוא 50?', o: ['48', '43', '55'] },
+    ],
+    mid: [
+      { q: 'בינואר היו 14 ימי גשם, בפברואר 11 ובמרץ 8. כמה ימי גשם היו בשלושת החודשים?', a: '33' },
+      { q: 'מטרייה עולה 35 ש״ח. כמה עולות 3 מטריות?', a: '105' },
+      { q: 'הגשם התחיל ב-8:15 ונמשך 45 דקות. מתי הוא הפסיק?', o: ['9:00', '8:45', '9:15'] },
+      { q: 'בכיתה 28 תלמידים. רבע מהם הגיעו עם מגפיים. כמה תלמידים הגיעו עם מגפיים?', o: ['7', '4', '14'] },
+      { q: 'החורף נמשך 8 שבועות, ובכל שבוע 7 ימים. כמה ימים נמשך החורף?', a: '56' },
+    ],
+    hard: [
+      { q: 'בבוקר היו 3 מעלות. עד הצהריים עלתה הטמפרטורה ב-9 מעלות, ובערב ירדה ב-5. כמה מעלות היו בערב?', a: '7' },
+      { q: 'לאבא 100 ש״ח. הוא קנה 2 מטריות ב-30 ש״ח כל אחת ומעיל ב-35 ש״ח. כמה כסף נשאר לו?', a: '5' },
+      { q: 'סבתא סורגת צעיף, 15 ס״מ בכל יום. אחרי כמה ימים יהיה אורך הצעיף 90 ס״מ?', a: '6' },
+      { q: 'לגדי 3 כובעים ו-2 צעיפים. בכמה דרכים שונות הוא יכול לבחור כובע אחד וצעיף אחד?', o: ['6', '5', '9'] },
+      { q: 'חשבתי על מספר. הכפלתי אותו ב-4 והוספתי 3, וקיבלתי 31. על איזה מספר חשבתי?', a: '7' },
+    ],
+  },
+  4: {
+    easy: [
+      { q: 'בנובמבר ירדו 65 מ״מ גשם ובדצמבר 128 מ״מ. כמה גשם ירד בשני החודשים? (במ״מ)', a: '193' },
+      { q: 'בבית הספר 9 כיתות, ובכל כיתה 32 תלמידים. כמה תלמידים יש בבית הספר?', a: '288' },
+      { q: 'על החלון 4 טיפות, ו-3 מהן כחולות. איזה שבר מהטיפות כחול?', o: ['3/4', '1/4', '4/3'] },
+      { q: 'מה ההיקף של חלון מלבני שאורכו 80 ס״מ ורוחבו 50 ס״מ?', o: ['260 ס״מ', '130 ס״מ', '4,000 ס״מ'] },
+      { q: 'במכל היו 1,000 ליטר מים. השתמשו ב-275 ליטר. כמה ליטר נשארו?', a: '725' },
+    ],
+    mid: [
+      { q: 'מד הגשם הראה 12 מ״מ בכל יום במשך שבוע. כמה גשם ירד בכל השבוע? (במ״מ)', a: '84' },
+      { q: 'בחנות 156 זוגות כפפות, מסודרים שווה בשווה על 6 מדפים. כמה זוגות יש על כל מדף?', a: '26' },
+      { q: 'איזה שבר שווה ל-1/2?', o: ['4/8', '3/8', '2/6'] },
+      { q: 'סערה התחילה ב-21:40 ונגמרה ב-23:15. כמה זמן נמשכה?', o: ['שעה ו-35 דקות', 'שעתיים ו-15 דקות', 'שעה ו-25 דקות'] },
+      { q: 'מה השטח של שטיח שאורכו 9 מטרים ורוחבו 4 מטרים? (במ״ר)', a: '36' },
+    ],
+    hard: [
+      { q: 'בשנה שעברה ירדו 540 מ״מ גשם. השנה ירד שליש יותר. כמה גשם ירד השנה? (במ״מ)', a: '720' },
+      { q: 'מטרייה עולה 24 ש״ח. בית הספר קנה מטריות ב-600 ש״ח. כמה מטריות נקנו?', a: '25' },
+      { q: 'הקול עובר באוויר כ-340 מטר בשנייה. שמעתם רעם 3 שניות אחרי שראיתם ברק. כמה מטרים בערך הברק היה רחוק מכם?', a: '1020' },
+      { q: 'מספר בין 30 ל-40 מתחלק גם ב-4 וגם ב-6. מהו המספר?', a: '36' },
+      { q: 'איזה שבר הוא הגדול ביותר?', o: ['5/6', '3/4', '2/3'] },
+    ],
+  },
+  5: {
+    easy: [
+      { q: 'בארבעה ימים ירדו 6, 10, 14 ו-2 מ״מ גשם. מהו הממוצע היומי? (במ״מ)', a: '8' },
+      { q: 'בבוקר היו 4 מעלות מתחת לאפס, ובצהריים 5 מעלות. בכמה מעלות עלתה הטמפרטורה?', o: ['9', '1', '5'] },
+      { q: 'בכל ספל חצי ליטר שוקו חם. כמה ליטר שוקו יש ב-6 ספלים?', a: '3' },
+      { q: 'איזה שבר שווה ל-0.25?', o: ['1/4', '2/5', '1/25'] },
+      { q: 'במחסן 125 ארגזים, ובכל ארגז 8 מעילים. כמה מעילים יש במחסן?', a: '1000' },
+    ],
+    mid: [
+      { q: 'ב-30% מתוך 40 ימים ירד גשם. כמה ימי גשם היו?', a: '12' },
+      { q: 'בכל ספל שוקו יש 3/4 כוס חלב. כמה כוסות חלב צריך ל-8 ספלים?', a: '6' },
+      { q: 'גובה השלג בחרמון היה 1.35 מטר. בלילה נוספו 0.4 מטר. מה הגובה עכשיו?', o: ['1.75 מטר', '1.39 מטר', '5.35 מטר'] },
+      { q: 'מה הממוצע של הטמפרטורות 3-, 1, 5 ו-7 מעלות?', o: ['2.5', '4', '3'] },
+      { q: 'שטחו של חלון הוא 1.2 מ״ר. כמה מ״ר זכוכית צריך ל-15 חלונות כאלה?', a: '18' },
+    ],
+    hard: [
+      { q: 'מכל מים של 2,400 ליטר התמלא בגשם עד 3/8. כמה ליטרים של מי גשם נכנסו אליו?', a: '900' },
+      { q: 'הרכבל בחרמון עובר 1.2 ק״מ ב-6 דקות. מה המהירות שלו בקמ״ש?', a: '12' },
+      { q: 'בכל עלייה של 1,000 מטר הטמפרטורה יורדת בערך ב-6 מעלות. בגובה פני הים יש 14 מעלות. כמה מעלות יש בגובה 2,000 מטר?', a: '2' },
+      { q: 'מעיל עלה 120 ש״ח, ובמבצע חורף קיבלו עליו 25% הנחה. כמה שילמו?', a: '90' },
+      { q: 'לפתית שלג 6 זרועות זהות. בכמה מעלות לפחות צריך לסובב אותו כדי שייראה בדיוק אותו דבר?', o: ['60', '90', '45'] },
+    ],
+  },
+  6: {
+    easy: [
+      { q: 'בינואר ירדו 200 מ״מ גשם, שהם 40% מכמות הגשם של כל השנה. כמה גשם ירד בכל השנה? (במ״מ)', a: '500' },
+      { q: 'היחס בין ימי גשם לימים בהירים הוא 2:3. כמה ימי גשם יש בחודש של 30 יום?', a: '12' },
+      { q: 'מה ההפרש בין 7 מעלות ל-3 מעלות מתחת לאפס?', o: ['10 מעלות', '4 מעלות', '3 מעלות'] },
+      { q: 'איזה מספר הוא הגדול ביותר?', o: ['0.6', '0.58', '0.509'] },
+      { q: 'מה ההיקף של עיגול ברדיוס 10 ס״מ? (π ≈ 3.14)', o: ['62.8 ס״מ', '31.4 ס״מ', '314 ס״מ'] },
+    ],
+    mid: [
+      { q: 'כמות הגשם השנתית עלתה מ-400 מ״מ ל-500 מ״מ. בכמה אחוזים היא עלתה?', a: '25' },
+      { q: 'לחבית איסוף מי גשם יש בסיס עגול ברדיוס 1 מטר, וגובהה 2 מטר. מה הנפח שלה בערך? (π ≈ 3.14)', o: ['6.28 מ״ק', '3.14 מ״ק', '12.56 מ״ק'] },
+      { q: 'במפה בקנה מידה 1:100,000 המרחק בין שתי תחנות מטאורולוגיות הוא 7 ס״מ. מה המרחק ביניהן במציאות? (בק״מ)', a: '7' },
+      { q: 'בעונה היו 60 ימי גשם. ב-3/5 מהם ירד גשם רק בלילה. בכמה ימים ירד גשם גם ביום?', a: '24' },
+      { q: 'מה הממוצע של 2-, 4-, 3 ו-7?', o: ['1', '4', '2-'] },
+    ],
+    hard: [
+      { q: 'בריכה של 50 מ״ק מתמלאת במי גשם בקצב של 2.5 מ״ק לשעה. אחרי כמה שעות היא תתמלא?', a: '20' },
+      { q: 'מחיר מעיל היה 200 ש״ח. המחיר עלה ב-20%, ואחר כך ירד ב-20%. מה המחיר עכשיו? (בש״ח)', a: '192' },
+      { q: 'הסיכוי לגשם בכל אחד משני ימים הוא 1/2, והימים לא תלויים זה בזה. מה הסיכוי שירד גשם בשני הימים?', o: ['1/4', '1/2', '1'] },
+      { q: 'מפלס הכנרת עלה ב-1.5 ס״מ בכל יום במשך 3 שבועות. בכמה ס״מ עלה בסך הכול?', a: '31.5' },
+      { q: 'מספר הטיפות על חלון מוכפל כל 5 דקות. אחרי 20 דקות יש עליו 160 טיפות. כמה טיפות היו בהתחלה?', a: '10' },
+    ],
+  },
+};
+
+/* ================================================================
    Drawing
    ================================================================ */
 const ICONS = {
@@ -428,24 +608,36 @@ const BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-
 const DROP_PATH = 'M50 4C50 4 10 54 10 80a40 40 0 0 0 80 0C90 54 50 4 50 4Z';
 
 let uid = 0;
+const tint = (hex, t) => {
+  const n = parseInt(hex.slice(1), 16);
+  return '#' + [n >> 16, n >> 8 & 255, n & 255].map(v => Math.round(v + (255 - v) * t).toString(16).padStart(2, '0')).join('');
+};
 function umbrellaSVG(color) {
-  return `<svg class="umb" viewBox="0 0 120 84" aria-hidden="true">
-    <path d="M60 10V3" stroke="#3d4a5c" stroke-width="3" stroke-linecap="round"/>
-    <path d="M60 46V70a6 6 0 0 1-12 0" fill="none" stroke="#3d4a5c" stroke-width="4" stroke-linecap="round"/>
-    <path d="M8 50C8 22 33 9 60 9s52 13 52 41q-10.4-9-20.8 0q-10.4-9-20.8 0q-10.4-9-20.8 0q-10.4-9-20.8 0q-10.4-9-20.8 0Z" fill="${color}"/>
-    <path d="M60 9C48 18 42 34 39.2 50M60 9c12 9 18 25 20.8 41M60 9v41" fill="none" stroke="rgba(0,0,0,.16)" stroke-width="2"/>
-    <path d="M24 30c6-10 16-15 26-17" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="4" stroke-linecap="round"/>
+  const id = 'ug' + (++uid);
+  const ribs = [111.33, 90.67, 70, 49.33, 28.67].map(x => `M70 12Q${(70 + (x - 70) * .55).toFixed(1)} 28 ${x} 56`).join('');
+  return `<svg class="umb" viewBox="0 0 140 92" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${tint(color, .38)}"/><stop offset="1" stop-color="${color}"/></linearGradient></defs>
+    <path d="M70 50V88M70 12V5" stroke="#243042" stroke-width="2.6" stroke-linecap="round"/>
+    <circle cx="70" cy="4" r="2.4" fill="#243042"/>
+    <path d="M8 56C12 27 40 12 70 12s58 15 62 44${'q-10.33-6-20.67 0'.repeat(6)}Z" fill="url(#${id})"/>
+    <path d="${ribs}" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="1.2"/>
+    <path d="M28 36C36 24 48 17 61 15" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="3" stroke-linecap="round"/>
   </svg>`;
 }
 function cloudSVG(letter) {
-  return `<svg class="cld" viewBox="0 0 160 96" aria-hidden="true">
-    <g fill="var(--cloud-shade)" transform="translate(0 5)">
-      <circle cx="46" cy="56" r="26"/><circle cx="80" cy="42" r="34"/><circle cx="116" cy="56" r="26"/><rect x="20" y="52" width="122" height="34" rx="17"/>
+  const id = 'cg' + (++uid);
+  const rain = [54, 72, 90, 108, 126, 144].map((x, i) => `<line x1="${x}" y1="${100 + (i % 2) * 5}" x2="${x - 7}" y2="${128 + (i % 2) * 4}"/>`).join('');
+  return `<svg class="cld" viewBox="0 0 200 134" aria-hidden="true">
+    <defs><linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="0" y1="8" x2="0" y2="100">
+      <stop offset="0" stop-color="#fbfcfe"/><stop offset=".5" stop-color="#d4dde9"/><stop offset="1" stop-color="#7f90a8"/>
+    </linearGradient></defs>
+    <g class="rainfall" stroke="#a9c6ea" stroke-width="2.2" stroke-linecap="round">${rain}</g>
+    <g fill="url(#${id})">
+      <circle cx="54" cy="70" r="26"/><circle cx="84" cy="50" r="33"/><circle cx="122" cy="44" r="38"/><circle cx="154" cy="68" r="27"/>
+      <rect x="28" y="62" width="152" height="38" rx="19"/>
     </g>
-    <g fill="var(--cloud)">
-      <circle cx="46" cy="56" r="26"/><circle cx="80" cy="42" r="34"/><circle cx="116" cy="56" r="26"/><rect x="20" y="52" width="122" height="34" rx="17"/>
-    </g>
-    <text x="80" y="70" text-anchor="middle" font-family="Secular One, Arial Hebrew, Arial, sans-serif" font-size="40" fill="var(--cloud-ink)">${letter}׳</text>
+    <path d="M60 52a27 27 0 0 1 22-24M100 20a38 38 0 0 1 36-4" fill="none" stroke="rgba(255,255,255,.95)" stroke-width="3" stroke-linecap="round"/>
+    <text x="104" y="86" text-anchor="middle" font-family="Secular One, Arial Hebrew, Arial, sans-serif" font-size="32" fill="#1f2e45">${letter}׳</text>
   </svg>`;
 }
 function dropSVG(color, key) {
@@ -456,11 +648,20 @@ function dropSVG(color, key) {
       <stop offset="0" stop-color="${color}" stop-opacity="${gold ? 1 : .78}"/><stop offset="1" stop-color="${color}"/>
     </linearGradient></defs>
     <path d="${DROP_PATH}" fill="url(#${id})"/>
-    ${gold ? '<path d="M50 4C50 4 10 54 10 80a40 40 0 0 0 80 0C90 54 50 4 50 4Z" fill="none" stroke="#fff6d2" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>' : ''}
+    ${gold ? `<path d="${DROP_PATH}" fill="none" stroke="#fff6d2" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>` : ''}
     <ellipse cx="33" cy="66" rx="7" ry="13" fill="rgba(255,255,255,.4)" transform="rotate(20 33 66)"/>
   </svg>`;
 }
 const miniDrop = (fill, stroke) => `<svg viewBox="0 0 100 124" aria-hidden="true"><path d="${DROP_PATH}" fill="${fill}" stroke="${stroke}" stroke-width="8"/></svg>`;
+function levelArt(id) {
+  const drops = { easy: [[62, 80]], mid: [[42, 78], [62, 88], [82, 78]], hard: [[34, 78], [50, 90], [90, 82]] }[id];
+  const d = ([x, y]) => `<path d="M${x} ${y - 10}c0 0-6 7-6 11a6 6 0 0 0 12 0c0-4-6-11-6-11z" fill="rgba(255,255,255,.85)"/>`;
+  return `<svg class="lv-art" viewBox="0 0 124 100" aria-hidden="true">
+    <g fill="#fff"><circle cx="44" cy="46" r="16"/><circle cx="64" cy="36" r="22"/><circle cx="84" cy="46" r="16"/><rect x="28" y="42" width="72" height="20" rx="10"/></g>
+    ${drops.map(d).join('')}
+    ${id === 'hard' ? '<path d="M68 60l-9 17h9l-5 17 15-22h-9l5-12z" fill="#ffd23f"/>' : ''}
+  </svg>`;
+}
 
 /* ================================================================
    Progress (only in this browser)
@@ -469,16 +670,19 @@ const KEY = 'winter-clouds-done';
 let done = {};
 try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
-const doneCount = g => g.drops.filter(k => done[g.n + '-' + k]).length;
+const isDone = (g, k) => k === 'math' ? MATH_LEVELS.every(l => done[`${g.n}-math-${l.id}`]) : !!done[g.n + '-' + k];
+const doneCount = g => g.drops.filter(k => isDone(g, k)).length;
 
 /* ================================================================
    Views
    ================================================================ */
 const app = document.getElementById('app');
 const gradeOf = n => GRADES.find(g => g.n === n);
+const levelOf = id => MATH_LEVELS.find(l => l.id === id);
 const subjectName = (key, n) => SUBJECTS[key].name(n);
 const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const norm = s => String(s).replace(/[\s,]/g, '').replace(/[−–]/g, '-');
 
 function renderHome() {
   app.innerHTML = `<div class="view">
@@ -492,7 +696,7 @@ function renderHome() {
         return `<button class="grade" data-go="g${g.n}" aria-label="כיתה ${g.letter}׳, ${c} מתוך ${g.drops.length} טיפות הושלמו">
           ${umbrellaSVG(g.color)}${cloudSVG(g.letter)}
           <span class="name">כיתה ${g.letter}׳</span>
-          <span class="count">${miniDrop(c ? 'var(--good)' : 'none', c ? 'var(--good)' : 'var(--ink-soft)')}${c} מתוך ${g.drops.length} טיפות</span>
+          <span class="count">${miniDrop(c ? '#7fd3a0' : 'none', c ? '#7fd3a0' : '#cfe0f5')}${c} מתוך ${g.drops.length} טיפות</span>
         </button>`;
       }).join('')}
     </div>
@@ -508,11 +712,11 @@ function renderGrade(g) {
     </div>
     <div class="drops">
       ${g.drops.map((k, i) => {
-        const s = SUBJECTS[k], name = subjectName(k, g.n), isDone = done[g.n + '-' + k];
-        return `<button class="drop${k === 'challenge' ? ' challenge' : ''}" data-go="g${g.n}-${k}" style="animation-delay:${(i * .12).toFixed(2)}s" aria-label="${name}${isDone ? ', הושלם' : ''}">
+        const s = SUBJECTS[k], name = subjectName(k, g.n), fin = isDone(g, k);
+        return `<button class="drop${k === 'challenge' ? ' challenge' : ''}" data-go="g${g.n}-${k}" style="animation-delay:${(i * .12).toFixed(2)}s" aria-label="${name}${fin ? ', הושלם' : ''}">
           ${dropSVG(s.color, k)}
           <span class="in"><span class="ic">${ICONS[k]}</span><span class="lbl">${name}</span></span>
-          ${isDone ? `<span class="done">${CHECK}</span>` : ''}
+          ${fin ? `<span class="done">${CHECK}</span>` : ''}
         </button>`;
       }).join('')}
     </div>
@@ -520,73 +724,141 @@ function renderGrade(g) {
   </div>`;
 }
 
-function header(g, key) {
-  const s = SUBJECTS[key];
+function header(g, key, level) {
+  const s = SUBJECTS[key], lv = level && levelOf(level);
+  const back = lv ? `g${g.n}-${key}` : `g${g.n}`;
+  const backLabel = lv ? `חזרה לרמות של ${subjectName(key, g.n)}` : `חזרה לטיפות של כיתה ${g.letter}׳`;
   return `<div class="bar">
-    <button class="back" data-go="g${g.n}" aria-label="חזרה לטיפות של כיתה ${g.letter}׳">${BACK}</button>
-    <span class="chip" style="background:${s.color};${key === 'challenge' ? 'color:var(--gold-ink)' : ''}">${subjectName(key, g.n)}</span>
+    <button class="back" data-go="${back}" aria-label="${backLabel}">${BACK}</button>
+    <span class="chip" style="background:${lv ? lv.color : s.color};${key === 'challenge' ? 'color:var(--gold-ink)' : ''}">${subjectName(key, g.n)}${lv ? ' · ' + lv.name : ''}</span>
     <h2>כיתה ${g.letter}׳</h2>
   </div>`;
 }
 
 function nextDrop(g, key) {
   const i = g.drops.indexOf(key);
-  return g.drops.slice(i + 1).concat(g.drops.slice(0, i)).find(k => !done[g.n + '-' + k]);
+  return g.drops.slice(i + 1).concat(g.drops.slice(0, i)).find(k => !isDone(g, k));
 }
-function finishHTML(g, key, line) {
-  const nxt = nextDrop(g, key);
+function finishHTML(g, key, line, next, back) {
+  if (next === undefined) {
+    const k = nextDrop(g, key);
+    next = k && { go: `g${g.n}-${k}`, label: `לטיפה הבאה: ${subjectName(k, g.n)}` };
+  }
+  back = back || { go: `g${g.n}`, label: 'חזרה לענן' };
   return `<div class="finish">
     <svg class="star-big" viewBox="0 0 24 24" fill="var(--gold)" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
     <h2>כל הכבוד!</h2>
     <p>${line}</p>
   </div>
   <div class="actions">
-    ${nxt ? `<button class="btn" data-go="g${g.n}-${nxt}">לטיפה הבאה: ${subjectName(nxt, g.n)}</button>` : ''}
-    <button class="btn ghost" data-go="g${g.n}">חזרה לענן</button>
+    ${next ? `<button class="btn" data-go="${next.go}">${next.label}</button>` : ''}
+    <button class="btn ghost" data-go="${back.go}">${back.label}</button>
   </div>`;
 }
 
-function renderQuiz(g, key) {
-  const s = SUBJECTS[key];
-  const items = (CONTENT[g.n] && CONTENT[g.n][key]) || [];
+function renderMathLevels(g) {
+  const sets = MATH[g.n] || {};
+  app.innerHTML = `<div class="view">${header(g, 'math')}
+    <p class="levels-intro">בחרו רמה. אפשר להתחיל בטפטוף ולהתקדם עד הסערה.</p>
+    <div class="levels">
+      ${MATH_LEVELS.map(l => {
+        const n = (sets[l.id] || []).length, fin = done[`${g.n}-math-${l.id}`];
+        return `<button class="level" data-go="g${g.n}-math-${l.id}" style="--lv:${l.color}" aria-label="${l.name}, ${l.desc}, ${n} משימות${fin ? ', הושלם' : ''}">
+          ${levelArt(l.id)}
+          <span class="lv-text"><span class="lv-name">${l.name}</span><span class="lv-desc">${l.desc} · ${n} משימות</span></span>
+          ${fin ? `<span class="done">${CHECK}</span>` : ''}
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function renderQuiz(g, key, level) {
+  const s = SUBJECTS[key], lv = level && levelOf(level);
+  const items = lv ? ((MATH[g.n] || {})[level] || []) : ((CONTENT[g.n] && CONTENT[g.n][key]) || []);
+  const doneKey = lv ? `${g.n}-${key}-${level}` : `${g.n}-${key}`;
+  const noun = lv ? 'משימה' : 'שאלה';
+  const accent = lv ? lv.color : s.color;
   const dir = s.ltr ? ' dir="ltr" lang="en"' : '';
   let i = 0, firstTry = 0;
-  app.innerHTML = `<div class="view">${header(g, key)}<section class="panel" style="--accent:${s.color}"></section></div>`;
+  app.innerHTML = `<div class="view">${header(g, key, level)}<section class="panel" style="--accent:${accent}"></section></div>`;
   const panel = app.querySelector('.panel');
 
   if (!items.length) {
-    panel.innerHTML = `<p class="question">השאלות לטיפה הזו עוד בדרך.</p>
-      <div class="actions"><button class="btn ghost" data-go="g${g.n}">חזרה לענן</button></div>`;
+    panel.innerHTML = `<p class="question">המשימות כאן עוד בדרך.</p>
+      <div class="actions"><button class="btn ghost" data-go="${lv ? `g${g.n}-${key}` : `g${g.n}`}">חזרה</button></div>`;
     return;
   }
 
   function show() {
     const item = items[i];
-    const opts = shuffle(item.o.map((t, j) => ({ t, right: j === 0 })));
-    let missed = false;
+    const typed = item.o === undefined;
+    const opts = typed ? [] : shuffle(item.o.map((t, j) => ({ t, right: j === 0 })));
+    let missed = false, tries = 0;
     panel.innerHTML = `
-      <div class="steps" aria-hidden="true">${items.map((_, j) => miniDrop(j < i ? s.color : 'none', j <= i ? s.color : 'var(--line)')).join('')}</div>
-      <p class="qnum">שאלה ${i + 1} מתוך ${items.length}</p>
+      <div class="steps" aria-hidden="true">${items.map((_, j) => miniDrop(j < i ? accent : 'none', j <= i ? accent : 'var(--line)')).join('')}</div>
+      <p class="qnum">${noun} ${i + 1} מתוך ${items.length}</p>
       <p class="question"${dir}>${esc(item.q)}</p>
-      <div class="options">${opts.map((o, j) => `<button class="opt" data-i="${j}"${dir}>${esc(o.t)}</button>`).join('')}</div>
+      ${typed
+        ? `<form class="answer-row" autocomplete="off">
+             <input id="ans-${g.n}-${key}-${i}" class="ans" type="text" inputmode="decimal" dir="ltr" placeholder="?" aria-label="התשובה שלכם">
+             <button class="btn" type="submit">בדיקה</button>
+           </form>
+           <div class="actions"><button class="btn ghost reveal-btn" type="button" hidden>הצגת התשובה</button></div>`
+        : `<div class="options">${opts.map((o, j) => `<button class="opt" data-i="${j}"${dir}>${esc(o.t)}</button>`).join('')}</div>`}
       <p class="feedback" aria-live="polite"></p>
-      <div class="actions" hidden><button class="btn next">${i + 1 < items.length ? 'הלאה' : 'סיום'}</button></div>`;
-    panel.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => {
-      const o = opts[+b.dataset.i];
-      if (!o.right) { b.classList.add('wrong'); b.disabled = true; missed = true; return; }
+      <div class="actions next-row" hidden><button class="btn next">${i + 1 < items.length ? 'הלאה' : 'סיום'}</button></div>`;
+    const fb = panel.querySelector('.feedback');
+    const succeed = text => {
       if (!missed) firstTry++;
-      b.classList.add('right');
-      panel.querySelectorAll('.opt').forEach(x => { x.disabled = true; });
-      panel.querySelector('.feedback').textContent = missed ? 'נכון! הצלחתם.' : 'נכון מאוד!';
-      const act = panel.querySelector('.actions');
-      act.hidden = false;
-      act.querySelector('.next').focus();
-    }));
+      fb.textContent = text; fb.classList.toggle('soft', text.startsWith('התשובה'));
+      const row = panel.querySelector('.next-row');
+      row.hidden = false;
+      row.querySelector('.next').focus();
+    };
+    if (typed) {
+      const form = panel.querySelector('form'), input = form.querySelector('.ans'), reveal = panel.querySelector('.reveal-btn');
+      const lock = () => { input.disabled = true; form.querySelector('button').disabled = true; reveal.hidden = true; input.classList.remove('wrong'); input.classList.add('right'); };
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const v = norm(input.value);
+        if (!v) return;
+        if ([].concat(item.a).some(a => norm(a) === v)) { lock(); succeed(missed ? 'נכון! הצלחתם.' : 'נכון מאוד!'); return; }
+        missed = true; tries++;
+        input.classList.remove('wrong'); void input.offsetWidth; input.classList.add('wrong');
+        fb.textContent = 'עוד לא. נסו שוב.'; fb.classList.add('soft');
+        if (tries >= 2) reveal.hidden = false;
+        input.select();
+      });
+      reveal.addEventListener('click', () => {
+        const a = [].concat(item.a)[0];
+        input.value = a; lock();
+        succeed('התשובה היא ' + a + '.');
+      });
+      input.focus({ preventScroll: true });
+    } else {
+      panel.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => {
+        const o = opts[+b.dataset.i];
+        if (!o.right) { b.classList.add('wrong'); b.disabled = true; missed = true; return; }
+        b.classList.add('right');
+        panel.querySelectorAll('.opt').forEach(x => { x.disabled = true; });
+        succeed(missed ? 'נכון! הצלחתם.' : 'נכון מאוד!');
+      }));
+    }
     panel.querySelector('.next').addEventListener('click', () => {
       i++;
       if (i < items.length) return show();
-      done[g.n + '-' + key] = true; save();
-      panel.innerHTML = finishHTML(g, key, `סיימתם את טיפת ה${subjectName(key, g.n)}. עניתם נכון בניסיון הראשון על ${firstTry} מתוך ${items.length} שאלות.`);
+      done[doneKey] = true; save();
+      const score = `${noun === 'משימה' ? 'פתרתם' : 'עניתם'} נכון בניסיון הראשון על ${firstTry} מתוך ${items.length} ${noun === 'משימה' ? 'משימות' : 'שאלות'}.`;
+      if (lv) {
+        const at = MATH_LEVELS.indexOf(lv);
+        const nl = MATH_LEVELS.slice(at + 1).find(l => !done[`${g.n}-math-${l.id}`]);
+        panel.innerHTML = finishHTML(g, key, `סיימתם את רמת ה${lv.name}. ${score}`,
+          nl ? { go: `g${g.n}-math-${nl.id}`, label: `לרמה הבאה: ${nl.name}` } : undefined,
+          { go: `g${g.n}-math`, label: 'חזרה לרמות' });
+      } else {
+        panel.innerHTML = finishHTML(g, key, `סיימתם את טיפת ה${subjectName(key, g.n)}. ${score}`);
+      }
     });
   }
   show();
@@ -620,15 +892,19 @@ function renderChallenge(g) {
 }
 
 /* ================================================================
-   Routing: #g3 is a grade, #g3-math is a drop inside it.
+   Routing: #g3 is a grade, #g3-lang is a drop, #g3-math-easy is a math level.
    ================================================================ */
 function route(token, push) {
-  const m = /^g([1-6])(?:-([a-z]+))?$/.exec(token || '');
+  const m = /^g([1-6])(?:-([a-z]+))?(?:-([a-z]+))?$/.exec(token || '');
   const g = m && gradeOf(+m[1]);
-  const key = m && m[2];
+  const key = m && m[2], level = m && m[3];
   if (!g) { renderHome(); token = ''; }
   else if (!key || !g.drops.includes(key)) { renderGrade(g); token = 'g' + g.n; }
   else if (key === 'challenge') renderChallenge(g);
+  else if (key === 'math') {
+    if (levelOf(level)) renderQuiz(g, 'math', level);
+    else { renderMathLevels(g); token = `g${g.n}-math`; }
+  }
   else renderQuiz(g, key);
   if (push) {
     try { history.pushState(null, '', token ? '#' + token : location.pathname + location.search); } catch (e) {}
