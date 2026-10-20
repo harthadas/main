@@ -280,6 +280,22 @@ svg { display: block; }
 .zoom img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; }
 .zoom-close { position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); inset-inline-start: 16px; font-size: 1.3rem; }
 
+.stw-photo-bar { display: flex; justify-content: flex-end; margin-top: -8px; }
+.change-photo { border: 0; background: none; color: var(--ink-soft); font: inherit; font-size: .95rem; text-decoration: underline; text-underline-offset: 3px; padding: 4px; }
+.stw-picker { border: 2px dashed var(--line); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.stw-picker-title { margin: 0; font-family: var(--display); font-size: 1.1rem; }
+.stw-picker-note { margin: 0; color: var(--ink-soft); font-size: .9rem; }
+.stw-thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.stw-thumb {
+  border: 2px solid var(--line); background: var(--card); border-radius: 12px; padding: 0; overflow: hidden;
+  display: flex; flex-direction: column; cursor: pointer; font-size: .9rem; color: var(--ink); text-align: center;
+}
+.stw-thumb img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.stw-thumb span { padding: 4px 6px; line-height: 1.3; }
+.stw-thumb.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.stw-thumb.upload { justify-content: center; align-items: center; min-height: 120px; }
+.stw-thumb .plus { font-size: 2rem; line-height: 1; color: var(--accent); }
+
 footer.hh-credit { position: relative; z-index: 1; text-align: center; font-size: 15px; line-height: 1.5; margin: 24px 16px 16px; opacity: .8; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -680,11 +696,11 @@ const GROUP_COLORS = ['#e9b949', '#6cb47a', '#5b8fd1', '#a07cd0'];
 
 /* ================================================================
    רואים, חושבים, שואלים: תמונה אחת לכל כיתה, שאלות מנחות לכל שלב,
-   ו"מה כדאי לדעת" לסיום. כיתה בלי תמונה לא מקבלת את הטיפה הזו.
+   ו"מה כדאי לדעת" לסיום. המורה יכולה לבחור לכל כיתה תמונה אחרת מהרשימה או להעלות תמונה משלה.
    ================================================================ */
 const STW = {
   1: {
-    img: 'images/stw-g1.webp', w: 1176, h: 662,
+    title: 'ילדים במים', img: 'images/stw-g1.webp', w: 1176, h: 662,
     alt: 'שני ילדים במעילים ובמגפיים עומדים במים חומים בין עצי אקליפטוס',
     see: ['מָה לוֹבְשִׁים הַיְּלָדִים?', 'אֵיפֹה הֵם עוֹמְדִים?', 'אֵיזֶה צֶבַע יֵשׁ לַמַּיִם?'],
     think: ['לָמָּה יֵשׁ כָּל כָּךְ הַרְבֵּה מַיִם בֵּין הָעֵצִים?', 'מָה הַיְּלָדִים מַרְגִּישִׁים, לְדַעְתְּכֶם?', 'לָמָּה הֵם נוֹעֲלִים מַגָּפַיִם?'],
@@ -692,7 +708,7 @@ const STW = {
     learn: 'אַחֲרֵי גֶּשֶׁם חָזָק הָאֲדָמָה מְלֵאָה בְּמַיִם, וְהַמַּיִם נֶאֱסָפִים בַּמְּקוֹמוֹת הַנְּמוּכִים. הַמַּיִם חוּמִים כִּי הֵם סוֹחֲפִים אִתָּם אֲדָמָה. מַגָּפַיִם שׁוֹמְרִים עַל הָרַגְלַיִם יְבֵשׁוֹת. נִכְנָסִים לְמַיִם רַק עִם מְבֻגָּר, כִּי לֹא תָּמִיד רוֹאִים כַּמָּה הֵם עֲמֻקִּים.',
   },
   2: {
-    img: 'images/stw-g2.webp', w: 435, h: 329,
+    title: 'מכונית ושלולית', img: 'images/stw-g2.webp', w: 435, h: 329,
     alt: 'מכונית נוסעת בשלולית ומתיזה גל גדול של מים על אדם שעומד בצד הכביש',
     see: ['מָה עוֹשָׂה הַמְּכוֹנִית?', 'מָה קוֹרֶה לָאִישׁ שֶׁעוֹמֵד בַּצַּד?', 'אֵיךְ נִרְאֶה הַכְּבִישׁ?'],
     think: ['מָה גָּרַם לַמַּיִם לָעוּף כָּל כָּךְ גָּבוֹהַּ?', 'אֵיךְ מַרְגִּישׁ הָאִישׁ? וְאֵיךְ מַרְגִּישׁ הַנַּהָג?', 'הַאִם הַנַּהָג שָׂם לֵב לָאִישׁ?'],
@@ -700,7 +716,7 @@ const STW = {
     learn: 'כְּשֶׁמְּכוֹנִית נוֹסַעַת מַהֵר בְּתוֹךְ שְׁלוּלִית, הַגַּלְגַּלִּים דּוֹחֲפִים אֶת הַמַּיִם הַצִּדָּה בְּכֹחַ. כְּכָל שֶׁהַמְּכוֹנִית מְהִירָה יוֹתֵר, הַמַּיִם עָפִים גָּבוֹהַּ יוֹתֵר. נַהָג זָהִיר מְאַט לְיַד שְׁלוּלִיּוֹת וּלְיַד אֲנָשִׁים. וּבְיוֹם גֶּשֶׁם כְּדַאי לָלֶכֶת רָחוֹק מִשְּׂפַת הַכְּבִישׁ.',
   },
   3: {
-    img: 'images/stw-g3.webp', w: 1280, h: 960,
+    title: 'עגורים בחולה', img: 'images/stw-g3.webp', w: 1280, h: 960,
     alt: 'להקה גדולה של עגורים בשדה, כמה עגורים עפים, וברקע הרים ועננים',
     see: ['כמה ציפורים יש בתמונה, בערך? איך הן נראות?', 'מה רואים ברקע?', 'מה עושות הציפורים שבאוויר?'],
     think: ['למה כל כך הרבה ציפורים התאספו במקום אחד?', 'באיזו עונה צולמה התמונה? מה בתמונה רומז על כך?', 'מה הציפורים מחפשות בשדה?'],
@@ -708,7 +724,7 @@ const STW = {
     learn: 'אלה עגורים בעמק החולה. בכל סתיו עוברים בישראל מאות אלפי עגורים בדרכם מאירופה לאפריקה, ועשרות אלפים מהם נשארים בעמק החולה כל החורף. הם בוחרים במקום הזה כי בחורף יש בו מים רדודים לשינה בטוחה ומזון בשדות. העננים הכבדים ברקע הם עננים של חורף.',
   },
   4: {
-    img: 'images/stw-g4.webp', w: 1280, h: 960,
+    title: 'רחוב מוצף', img: 'images/stw-g4.webp', w: 1280, h: 960,
     alt: 'רחוב בעיר מוצף במים חומים, שתי מכוניות עומדות בתוך המים, ומעקה לבן בחזית',
     see: ['מה קורה ברחוב?', 'איפה עומדות המכוניות, ועד כמה הן בתוך המים?', 'מה רואים מסביב: חנויות, מעקות, עצים, שלטים?'],
     think: ['מאיפה הגיעו כל המים? למה הם לא נעלמים?', 'למה המים חומים?', 'למה יש ליד המים מעקה לבן ושלט?'],
@@ -716,7 +732,7 @@ const STW = {
     learn: 'כשיורד הרבה גשם בזמן קצר, מערכת הניקוז של העיר לא מספיקה להעביר את כל המים, והרחוב מוצף. בעיר יש הרבה אספלט ובטון, ולכן המים לא נבלעים באדמה. המים חומים כי הם סוחפים איתם בוץ ואדמה. אסור לנסוע או ללכת במים זורמים, גם כשהם נראים רדודים: הם יכולים להיות עמוקים וחזקים יותר ממה שנראה.',
   },
   6: {
-    img: 'images/stw-g6.webp', w: 310, h: 310,
+    title: 'דובי קוטב', img: 'images/stw-g6.webp', w: 310, h: 310,
     alt: 'דובת קוטב עם גורים עומדת על משטח קרח, וברקע הרים מושלגים ושמש',
     see: ['אילו בעלי חיים רואים, וכמה הם?', 'מה יש סביבם: קרקע, הרים, עצים, שמש?', 'מה מוזר או מפתיע בתמונה?'],
     think: ['איפה לדעתכם צולמה התמונה? מה בתמונה תומך ברעיון שלכם, ומה סותר אותו?', 'האם זו תמונה אמיתית, או תמונה ששולבה במחשב? איך אפשר לבדוק?', 'מה הקשר בין הדובים לבין הקרח שהם עומדים עליו?'],
@@ -724,7 +740,6 @@ const STW = {
     learn: 'דובי קוטב חיים באזור הקוטב הצפוני וצדים כלבי ים מעל הקרח שצף על הים. בגלל ההתחממות של כדור הארץ, הקרח נמס מוקדם יותר באביב ונוצר מאוחר יותר בסתיו, ולדובים נשאר פחות זמן לצוד. הרקע בתמונה הזו לא מתאים לאזור הקוטב: יש בו יערות ובתים על ההרים, ולכן ייתכן שהיא שולבה מכמה תמונות. בכל תמונה כדאי לשאול מאיפה היא הגיעה ומי צילם אותה.',
   },
 };
-GRADES.forEach(g => { if (!STW[g.n]) g.drops = g.drops.filter(k => k !== 'stw'); });
 
 /* ================================================================
    Drawing
@@ -830,7 +845,6 @@ function renderHome() {
         const c = doneCount(g);
         return `<button class="grade" data-go="g${g.n}" aria-label="כיתה ${g.letter}׳, ${c} מתוך ${g.drops.length} טיפות הושלמו">
           ${umbrellaSVG(g.color)}${cloudSVG(g.letter)}
-          <span class="name">כיתה ${g.letter}׳</span>
           <span class="count">${miniDrop(c ? 'var(--good)' : 'none', c ? 'var(--good)' : 'var(--ink-soft)')}${c} מתוך ${g.drops.length} טיפות</span>
         </button>`;
       }).join('')}
@@ -842,7 +856,7 @@ function renderGrade(g) {
   app.innerHTML = `<div class="view">
     <div class="bar"><button class="back" data-go="home" aria-label="חזרה לכל הכיתות">${BACK}</button></div>
     <div class="sky-hero">${umbrellaSVG(g.color)}${cloudSVG(g.letter)}
-      <h2>${tx(g, 'כיתה', 'כִּתָּה')} ${g.letter}׳</h2>
+      <h2 class="sr">${tx(g, 'כיתה', 'כִּתָּה')} ${g.letter}׳</h2>
       <p class="hint-line">${tx(g, 'בחרו טיפה כדי להתחיל', 'בַּחֲרוּ טִפָּה כְּדֵי לְהַתְחִיל')}</p>
     </div>
     <div class="drops">
@@ -1030,13 +1044,60 @@ function renderChallenge(g) {
   });
 }
 
-const NOTES_KEY = 'winter-stw-notes';
-let notes = {};
+const NOTES_KEY = 'winter-stw-notes', PICK_KEY = 'winter-stw-photo', CUSTOM_KEY = 'winter-stw-custom-';
+let notes = {}, photoPick = {};
+const customMem = {};
 try { notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}') || {}; } catch (e) {}
+try { photoPick = JSON.parse(localStorage.getItem(PICK_KEY) || '{}') || {}; } catch (e) {}
 const saveNotes = () => { try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch (e) {} };
+const savePick = () => { try { localStorage.setItem(PICK_KEY, JSON.stringify(photoPick)); } catch (e) {} };
+const loadCustom = n => { try { return localStorage.getItem(CUSTOM_KEY + n) || customMem[n]; } catch (e) { return customMem[n]; } };
+const storeCustom = (n, url) => { customMem[n] = url; try { localStorage.setItem(CUSTOM_KEY + n, url); } catch (e) {} };
 
-function renderSTW(g) {
-  const d = STW[g.n], s = SUBJECTS.stw;
+/* שאלות מנחות כלליות לתמונה שהמורה מעלה */
+const GENERIC = {
+  plain: {
+    see: ['מה רואים בתמונה? מה נמצא בחזית ומה ברקע?', 'אילו פרטים קטנים מגלים כשמסתכלים מקרוב?'],
+    think: ['מה לדעתכם קורה כאן? מה בתמונה גורם לכם לחשוב כך?', 'מה קרה רגע לפני שצולמה התמונה, ומה יקרה אחריה?'],
+    wonder: ['אילו שאלות הייתם שואלים את מי שצילם את התמונה?', 'מה עוד הייתם רוצים לדעת על המקום הזה?'],
+  },
+  nik: {
+    see: ['מָה רוֹאִים בַּתְּמוּנָה?', 'אֵילוּ פְּרָטִים קְטַנִּים מְגַלִּים כְּשֶׁמִּסְתַּכְּלִים מִקָּרוֹב?'],
+    think: ['מָה קוֹרֶה כָּאן, לְדַעְתְּכֶם? לָמָּה?', 'מָה קָרָה רֶגַע לִפְנֵי שֶׁצֻּלְּמָה הַתְּמוּנָה?'],
+    wonder: ['מָה הֲיִיתֶם שׁוֹאֲלִים אֶת מִי שֶׁצִּלֵּם אֶת הַתְּמוּנָה?', 'מָה עוֹד הֲיִיתֶם רוֹצִים לָדַעַת?'],
+  },
+};
+function photoFor(g) {
+  const id = photoPick[g.n] || (STW[g.n] ? 'g' + g.n : null);
+  if (id === 'custom') {
+    const url = loadCustom(g.n);
+    if (url) return { id, img: url, alt: tx(g, 'תמונה שהמורה בחרה', 'תְּמוּנָה שֶׁהַמּוֹרָה בָּחֲרָה'), ...GENERIC[young(g) ? 'nik' : 'plain'] };
+  }
+  const p = id && STW[id.slice(1)];
+  return p ? { id, ...p } : null;
+}
+function shrinkImage(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onerror = reject;
+    r.onload = () => {
+      const im = new Image();
+      im.onerror = reject;
+      im.onload = () => {
+        const k = Math.min(1, 1100 / Math.max(im.width, im.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        resolve(c.toDataURL('image/jpeg', .82));
+      };
+      im.src = r.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+
+function renderSTW(g, openPicker) {
+  const d = photoFor(g), s = SUBJECTS.stw;
   const steps = [
     { id: 'see', name: tx(g, 'רואים', 'רוֹאִים'),
       ask: tx(g, 'מה אתם רואים בתמונה? כתבו רק את מה שרואים בעיניים, בלי לנחש.', 'מָה אַתֶּם רוֹאִים בַּתְּמוּנָה? כִּתְבוּ רַק מָה שֶׁרוֹאִים בָּעֵינַיִם.'),
@@ -1048,24 +1109,59 @@ function renderSTW(g) {
       ask: tx(g, 'אילו שאלות עולות לכם כשאתם מסתכלים על התמונה?', 'אֵילוּ שְׁאֵלוֹת עוֹלוֹת לָכֶם כְּשֶׁאַתֶּם מִסְתַּכְּלִים עַל הַתְּמוּנָה?'),
       hint: tx(g, 'כתבו כאן את השאלות שלכם...', 'כִּתְבוּ כָּאן אֶת הַשְּׁאֵלוֹת שֶׁלָּכֶם...') },
   ];
-  let at = 0;
+  const custom = loadCustom(g.n);
+  const library = Object.entries(STW).map(([n, p]) => ({ id: 'g' + n, img: p.img, title: p.title }));
+  const picker = `<div class="stw-picker"${d && !openPicker ? ' hidden' : ''}>
+      <p class="stw-picker-title">${d ? 'למורה: בחרו תמונה לכיתה' : 'למורה: בחרו תמונה כדי להתחיל'}</p>
+      <div class="stw-thumbs">
+        ${library.map(p => `<button class="stw-thumb${d && d.id === p.id ? ' on' : ''}" data-pick="${p.id}"><img src="${p.img}" alt=""><span>${p.title}</span></button>`).join('')}
+        ${custom ? `<button class="stw-thumb${d && d.id === 'custom' ? ' on' : ''}" data-pick="custom"><img src="${custom}" alt=""><span>התמונה שהעליתם</span></button>` : ''}
+        <label class="stw-thumb upload" for="stw-upload-${g.n}"><span class="plus" aria-hidden="true">+</span><span>העלאת תמונה מהמחשב</span></label>
+      </div>
+      <input id="stw-upload-${g.n}" type="file" accept="image/*" hidden>
+      <p class="stw-picker-note">תמונה שמעלים נשמרת רק בדפדפן הזה.</p>
+    </div>`;
   app.innerHTML = `<div class="view">${header(g, 'stw')}
     <section class="panel stw" style="--accent:${s.color}">
-      <button class="stw-photo" type="button" aria-label="${tx(g, 'הגדלת התמונה', 'הַגְדָּלַת הַתְּמוּנָה')}">
-        <img src="${d.img}" alt="${esc(d.alt)}" width="${d.w}" height="${d.h}">
+      ${d ? `<button class="stw-photo" type="button" aria-label="${tx(g, 'הגדלת התמונה', 'הַגְדָּלַת הַתְּמוּנָה')}">
+        <img src="${d.img}" alt="${esc(d.alt)}"${d.w ? ` width="${d.w}" height="${d.h}"` : ''}>
       </button>
-      <div class="stw-tabs" role="tablist">${steps.map((st, i) => `<button class="stw-tab" role="tab" data-step="${i}"><span class="n">${i + 1}</span>${st.name}</button>`).join('')}</div>
+      <div class="stw-photo-bar"><button class="change-photo" type="button" aria-expanded="${!!openPicker}">למורה: החלפת תמונה</button></div>` : ''}
+      ${picker}
+      ${d ? `<div class="stw-tabs" role="tablist">${steps.map((st, i) => `<button class="stw-tab" role="tab" data-step="${i}"><span class="n">${i + 1}</span>${st.name}</button>`).join('')}</div>
       <div class="stw-step"></div>
-      <div class="stw-end"></div>
+      <div class="stw-end"></div>` : ''}
     </section></div>
-    <div class="zoom" hidden><img src="${d.img}" alt="${esc(d.alt)}"><button class="back zoom-close" type="button" aria-label="${tx(g, 'סגירה', 'סְגִירָה')}">✕</button></div>`;
-  const panel = app.querySelector('.panel'), stepBox = panel.querySelector('.stw-step'), zoom = app.querySelector('.zoom');
+    ${d ? `<div class="zoom" hidden><img src="${d.img}" alt="${esc(d.alt)}"><button class="back zoom-close" type="button" aria-label="${tx(g, 'סגירה', 'סְגִירָה')}">✕</button></div>` : ''}`;
+  const panel = app.querySelector('.panel');
+
+  panel.querySelectorAll('[data-pick]').forEach(b => b.addEventListener('click', () => {
+    photoPick[g.n] = b.dataset.pick; savePick(); renderSTW(g);
+  }));
+  panel.querySelector(`#stw-upload-${g.n}`).addEventListener('change', async e => {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    try {
+      storeCustom(g.n, await shrinkImage(f));
+      photoPick[g.n] = 'custom'; savePick(); renderSTW(g);
+    } catch (err) {
+      panel.querySelector('.stw-picker-note').textContent = 'לא הצלחנו לפתוח את הקובץ. נסו תמונה אחרת (JPG או PNG).';
+    }
+  });
+  if (!d) return;
+
+  const stepBox = panel.querySelector('.stw-step'), zoom = app.querySelector('.zoom');
+  panel.querySelector('.change-photo').addEventListener('click', e => {
+    const pk = panel.querySelector('.stw-picker');
+    pk.hidden = !pk.hidden; e.currentTarget.setAttribute('aria-expanded', !pk.hidden);
+  });
   panel.querySelector('.stw-photo').addEventListener('click', () => { zoom.hidden = false; zoom.querySelector('.zoom-close').focus(); });
   zoom.addEventListener('click', () => { zoom.hidden = true; panel.querySelector('.stw-photo').focus(); });
+  let at = 0;
   panel.querySelector('.stw-tabs').addEventListener('click', e => { const b = e.target.closest('.stw-tab'); if (b) { at = +b.dataset.step; show(); } });
 
   function show() {
-    const st = steps[at], key = `${g.n}-${st.id}`, last = at === steps.length - 1;
+    const st = steps[at], key = `${g.n}-${d.id}-${st.id}`, last = at === steps.length - 1;
     panel.querySelectorAll('.stw-tab').forEach((b, i) => { b.classList.toggle('on', i === at); b.setAttribute('aria-selected', i === at); });
     stepBox.innerHTML = `
       <h3>${st.name}</h3>
@@ -1076,16 +1172,17 @@ function renderSTW(g) {
       <div class="actions">
         ${at ? `<button class="btn ghost" data-move="-1">${tx(g, 'חזרה', 'חֲזָרָה')}: ${steps[at - 1].name}</button>` : ''}
         ${last
-          ? `<button class="btn ghost" id="learn">${tx(g, 'מה כדאי לדעת', 'מָה כְּדַאי לָדַעַת')}</button><button class="btn" id="stw-done">${tx(g, 'סיימנו', 'סִיַּמְנוּ')}</button>`
+          ? `${d.learn ? `<button class="btn ghost" id="learn">${tx(g, 'מה כדאי לדעת', 'מָה כְּדַאי לָדַעַת')}</button>` : ''}<button class="btn" id="stw-done">${tx(g, 'סיימנו', 'סִיַּמְנוּ')}</button>`
           : `<button class="btn" data-move="1">${tx(g, 'הלאה', 'הָלְאָה')}: ${steps[at + 1].name}</button>`}
       </div>
-      <p class="reveal" id="learn-text" hidden><strong>${tx(g, 'מה כדאי לדעת', 'מָה כְּדַאי לָדַעַת')}</strong>${esc(d.learn)}</p>`;
+      ${d.learn ? `<p class="reveal" id="learn-text" hidden><strong>${tx(g, 'מה כדאי לדעת', 'מָה כְּדַאי לָדַעַת')}</strong>${esc(d.learn)}</p>` : ''}`;
     const ta = stepBox.querySelector('textarea');
     ta.value = notes[key] || '';
     ta.addEventListener('input', () => { notes[key] = ta.value; saveNotes(); });
     stepBox.querySelectorAll('[data-move]').forEach(b => b.addEventListener('click', () => { at += +b.dataset.move; show(); }));
     if (last) {
-      stepBox.querySelector('#learn').addEventListener('click', e => { stepBox.querySelector('#learn-text').hidden = false; e.currentTarget.hidden = true; });
+      const lb = stepBox.querySelector('#learn');
+      if (lb) lb.addEventListener('click', e => { stepBox.querySelector('#learn-text').hidden = false; e.currentTarget.hidden = true; });
       stepBox.querySelector('#stw-done').addEventListener('click', () => {
         done[`${g.n}-stw`] = true; save();
         stepBox.querySelector('.actions').hidden = true;
