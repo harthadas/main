@@ -1,0 +1,688 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ענני החורף</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Secular+One&family=Varela+Round&display=swap">
+<style>
+/* Layout: a winter sky. Home = a row of six clouds, each under its own umbrella (one rainbow color per grade); a grade = its cloud on top and subject drops that fall from it and land on the ground below. */
+:root {
+  --sky-top: #c9d9ea;
+  --sky-bottom: #eef3f8;
+  --ink: #1c2b3d;
+  --ink-soft: #4f6178;
+  --cloud: #ffffff;
+  --cloud-shade: #d6e0eb;
+  --cloud-ink: #1c2b3d;
+  --card: #ffffff;
+  --line: #c6d4e3;
+  --good: #2b8a52;
+  --good-soft: #e1f2e8;
+  --rain: rgba(60, 100, 150, .28);
+  --gold: #f2b705;
+  --gold-ink: #3b2a00;
+  --display: "Secular One", "Arial Hebrew", Arial, sans-serif;
+  --body: "Varela Round", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --sky-top: #0d1828; --sky-bottom: #1a2a41; --ink: #e8eef6; --ink-soft: #a7b5c8;
+    --cloud: #dfe7f1; --cloud-shade: #a9b9cc; --cloud-ink: #1c2b3d; --card: #1f3049; --line: #354a64;
+    --good: #5cc485; --good-soft: #1d3b2c; --rain: rgba(180, 205, 235, .22); --gold: #f5c22e; --gold-ink: #3b2a00;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --sky-top: #0d1828; --sky-bottom: #1a2a41; --ink: #e8eef6; --ink-soft: #a7b5c8;
+  --cloud: #dfe7f1; --cloud-shade: #a9b9cc; --cloud-ink: #1c2b3d; --card: #1f3049; --line: #354a64;
+  --good: #5cc485; --good-soft: #1d3b2c; --rain: rgba(180, 205, 235, .22); --gold: #f5c22e; --gold-ink: #3b2a00;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { min-height: 100%; }
+body {
+  margin: 0;
+  background: linear-gradient(180deg, var(--sky-top), var(--sky-bottom) 70%) fixed, var(--sky-bottom);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#rain { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+#app {
+  position: relative; z-index: 1;
+  max-width: 980px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 24px;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 12px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 400; margin: 0; line-height: 1.35; text-wrap: balance; }
+svg { display: block; }
+.view { animation: fade .35s ease both; }
+@keyframes fade { from { opacity: .4; } to { opacity: 1; } }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.back {
+  width: 52px; height: 52px; border-radius: 50%; flex: none;
+  border: 2px solid var(--line); background: var(--card);
+  display: grid; place-items: center;
+}
+.back svg { width: 26px; height: 26px; }
+.bar h2 { font-size: 1.4rem; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 4px 14px; border-radius: 999px; color: #fff; font-family: var(--display); font-size: 1.05rem; }
+
+/* ---------- home ---------- */
+.home-head { text-align: center; padding-block: 18px 8px; display: grid; gap: 6px; }
+.home-head h1 { font-size: clamp(2.2rem, 8vw, 3.4rem); letter-spacing: .01em; }
+.home-head p { margin: 0; color: var(--ink-soft); font-size: 1.1rem; }
+.grades { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 18px; padding-block: 28px 8px; }
+@media (max-width: 620px) { .grades { grid-template-columns: repeat(2, 1fr); gap: 22px 12px; } }
+.grade {
+  border: 0; background: none; padding: 6px;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.grade .umb { width: 62%; margin-bottom: -14%; transform-origin: 50% 95%; transition: transform .3s ease; }
+.grade .cld { width: 100%; filter: drop-shadow(0 6px 10px rgba(20, 40, 70, .12)); }
+.grade:hover .umb, .grade:focus-visible .umb { transform: rotate(-6deg) translateY(-4px); }
+.grade .name { font-family: var(--display); font-size: 1.35rem; }
+.grade .count { font-size: .95rem; color: var(--ink-soft); display: flex; align-items: center; gap: 6px; }
+.grade .count svg { width: 14px; height: 17px; }
+
+/* ---------- grade screen ---------- */
+.sky-hero { display: flex; flex-direction: column; align-items: center; gap: 2px; padding-top: 4px; }
+.sky-hero .umb { width: min(210px, 52vw); margin-bottom: -38px; animation: sway 4s ease-in-out infinite; transform-origin: 50% 95%; }
+.sky-hero .cld { width: min(330px, 82vw); }
+@keyframes sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.hint-line { text-align: center; color: var(--ink-soft); margin: 4px 0 0; }
+.drops {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 22px 26px;
+  padding-block: 26px 20px; max-width: 940px; margin: 0 auto;
+}
+.drop {
+  position: relative; width: 128px; aspect-ratio: 100 / 124; max-width: 100%;
+  border: 0; background: none; padding: 0;
+  animation: fall .9s cubic-bezier(.45, 0, .7, 1.2) backwards;
+  transition: transform .2s ease;
+}
+.drop:nth-child(even) { margin-top: 30px; }
+.drop:hover { transform: translateY(-6px) scale(1.04); }
+.drop:active { transform: scale(.97); }
+.drop > svg { position: absolute; inset: 0; width: 100%; height: 100%; filter: drop-shadow(0 8px 10px rgba(20, 40, 70, .18)); }
+.drop .in {
+  position: absolute; inset: 44% 8% 9%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  color: #fff; text-align: center;
+}
+.drop .ic { width: 30px; height: 30px; display: grid; place-items: center; font-family: var(--display); font-size: 1.15rem; line-height: 1; }
+.drop .ic svg { width: 30px; height: 30px; }
+.drop .lbl { font-family: var(--display); font-size: 1.15rem; line-height: 1.2; }
+.drop.challenge .in { color: var(--gold-ink); }
+.drop .done {
+  position: absolute; top: 18%; inset-inline-end: -4px; width: 32px; height: 32px; border-radius: 50%;
+  background: var(--good); display: grid; place-items: center; box-shadow: 0 0 0 3px var(--sky-bottom);
+}
+.drop .done svg { width: 18px; height: 18px; }
+@keyframes fall {
+  0% { transform: translateY(-260px) scale(.5); opacity: .2; }
+  80% { transform: translateY(6px) scale(1.02, .96); opacity: 1; }
+  100% { transform: none; }
+}
+.ground { height: 14px; max-width: 940px; margin: 0 auto; border-radius: 999px; background: linear-gradient(90deg, transparent, var(--line), transparent); }
+
+/* ---------- activity ---------- */
+.panel {
+  max-width: 680px; margin: 18px auto 0;
+  background: var(--card); border: 2px solid var(--line); border-radius: var(--radius);
+  padding: 22px clamp(16px, 4vw, 30px) 26px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+.steps { display: flex; gap: 8px; align-items: center; justify-content: center; }
+.steps svg { width: 22px; height: 27px; }
+.qnum { text-align: center; color: var(--ink-soft); font-size: .95rem; margin: -8px 0 0; }
+.question { font-family: var(--display); font-size: clamp(1.3rem, 4.4vw, 1.65rem); line-height: 1.5; text-align: center; margin: 0; }
+.options { display: grid; gap: 12px; }
+.opt {
+  border: 2px solid var(--line); background: var(--card); border-radius: 16px;
+  padding: 14px 18px; font-size: 1.2rem; text-align: center; min-height: 60px;
+  transition: opacity .2s, border-color .2s, background .2s;
+}
+.opt:hover:not(:disabled) { border-color: var(--accent, var(--ink-soft)); }
+.opt.right { border-color: var(--good); background: var(--good-soft); }
+.opt.wrong { opacity: .35; animation: shake .35s; }
+.opt:disabled { cursor: default; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+[dir="ltr"] { text-align: center; }
+.feedback { min-height: 1.6em; text-align: center; font-family: var(--display); font-size: 1.2rem; color: var(--good); margin: 0; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.btn {
+  border: 0; border-radius: 999px; padding: 12px 28px; min-height: 52px;
+  background: var(--accent, var(--ink)); color: #fff; font-family: var(--display); font-size: 1.15rem;
+}
+.btn.ghost { background: none; border: 2px solid var(--line); color: var(--ink); }
+.reveal { border-radius: 16px; padding: 14px 18px; background: var(--sky-bottom); border: 2px dashed var(--line); margin: 0; }
+.reveal strong { font-family: var(--display); font-weight: 400; display: block; }
+.challenge-panel { border-color: var(--gold); }
+.star-big { width: 64px; height: 64px; margin: 0 auto; }
+.finish { text-align: center; display: grid; gap: 10px; justify-items: center; }
+.finish h2 { font-size: 2rem; }
+.finish p { margin: 0; color: var(--ink-soft); font-size: 1.15rem; }
+
+footer.hh-credit { position: relative; z-index: 1; text-align: center; font-size: 15px; line-height: 1.5; margin: 24px 16px 16px; opacity: .8; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<main id="app" dir="rtl" lang="he"></main>
+<script>
+(() => {
+document.documentElement.lang = 'he';
+document.documentElement.dir = 'rtl';
+
+/* ================================================================
+   תוכן: כאן מוסיפים ומשנים שאלות.
+   בכל שאלה התשובה הנכונה היא הראשונה ברשימה (o). האתר מערבב את הסדר בעצמו.
+   ================================================================ */
+const SUBJECTS = {
+  math:      { name: g => g <= 3 ? 'חשבון' : 'מתמטיקה', color: '#2f6fb0' },
+  lang:      { name: () => 'שפה',       color: '#12817a' },
+  sci:       { name: () => 'מדעים',     color: '#3b8541' },
+  eng:       { name: () => 'אנגלית',    color: '#4a4fb3', ltr: true },
+  home:      { name: () => 'מולדת',     color: '#1b7896' },
+  geo:       { name: () => 'גאוגרפיה',  color: '#1b7896' },
+  art:       { name: () => 'אומנות',    color: '#8a4bb0' },
+  challenge: { name: () => 'אתגר',      color: '#f2b705' },
+};
+
+const GRADES = [
+  { n: 1, letter: 'א', color: '#e4572e', drops: ['math', 'lang', 'sci', 'home', 'art', 'challenge'] },
+  { n: 2, letter: 'ב', color: '#f08a24', drops: ['math', 'lang', 'sci', 'home', 'art', 'challenge'] },
+  { n: 3, letter: 'ג', color: '#e8b81a', drops: ['math', 'lang', 'sci', 'eng', 'home', 'challenge'] },
+  { n: 4, letter: 'ד', color: '#3a9a6e', drops: ['math', 'lang', 'sci', 'eng', 'home', 'challenge'] },
+  { n: 5, letter: 'ה', color: '#3f73c4', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'challenge'] },
+  { n: 6, letter: 'ו', color: '#8a62c2', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'challenge'] },
+];
+
+const CONTENT = {
+  1: {
+    math: [
+      { q: 'על החלון יש 3 טיפות גשם. נפלו עוד 2 טיפות. כמה טיפות יש עכשיו?', o: ['5', '4', '6'] },
+      { q: 'לדני יש 6 כפפות. 2 כפפות נרטבו בגשם. כמה כפפות יבשות נשארו?', o: ['4', '3', '8'] },
+      { q: 'איזה מספר בא אחרי 9?', o: ['10', '8', '11'] },
+    ],
+    lang: [
+      { q: 'באיזו אות מתחילה המילה "גשם"?', o: ['ג', 'ש', 'מ'] },
+      { q: 'איזו מילה מתחרזת עם "ענן"?', o: ['גנן', 'רוח', 'מטרייה'] },
+      { q: 'כמה הברות יש במילה "מט-רי-יה"?', o: ['3', '2', '4'] },
+    ],
+    sci: [
+      { q: 'מאיפה יורד הגשם?', o: ['מהעננים', 'מהשמש', 'מהעצים'] },
+      { q: 'מה קורה לשלולית כשהשמש זורחת?', o: ['היא מתייבשת', 'היא גדלה', 'היא הופכת לשלג'] },
+      { q: 'מה עוזר לנו להישאר יבשים בגשם?', o: ['מטרייה', 'משקפי שמש', 'מניפה'] },
+    ],
+    home: [
+      { q: 'איזה חג חוגגים בחורף?', o: ['חנוכה', 'פסח', 'שבועות'] },
+      { q: 'מה מדליקים בחנוכה?', o: ['חנוכייה', 'מדורה', 'זיקוקים'] },
+      { q: 'חבר נרטב בגשם בדרך לבית הספר. מה נעשה?', o: ['נביא לו מגבת', 'נצחק עליו', 'נתעלם'] },
+    ],
+    art: [
+      { q: 'איזה צבע מקבלים כשמערבבים כחול ולבן, כמו שמי חורף?', o: ['תכלת', 'ירוק', 'כתום'] },
+      { q: 'כמה צבעים יש בקשת בענן?', o: ['7', '5', '10'] },
+      { q: 'איך נראית טיפת גשם?', o: ['עיגול עם חוד למעלה', 'ריבוע', 'כוכב'] },
+    ],
+    challenge: {
+      q: 'ענן אחד הוריד 2 טיפות. ענן שני הוריד 3 טיפות. ענן שלישי הוריד כמו שני העננים יחד. כמה טיפות ירדו בסך הכול?',
+      hint: 'קודם בדקו: כמה טיפות הוריד הענן השלישי?',
+      answer: '10 טיפות: 2 + 3 + 5 = 10.',
+    },
+  },
+  2: {
+    math: [
+      { q: 'בכל מטרייה יש 8 צלעות. כמה צלעות יש ב-2 מטריות?', o: ['16', '10', '18'] },
+      { q: 'בבוקר היו 12 מעלות. בצהריים היה חם יותר ב-5 מעלות. כמה מעלות היו בצהריים?', o: ['17', '7', '15'] },
+      { q: 'בכניסה לכיתה עומדים 20 מגפיים. כמה זוגות מגפיים יש?', o: ['10', '20', '40'] },
+    ],
+    lang: [
+      { q: 'מה ההפך של "רטוב"?', o: ['יבש', 'קר', 'נקי'] },
+      { q: 'מה הרבים של "ענן"?', o: ['עננים', 'ענות', 'ענניות'] },
+      { q: 'איזה משפט כתוב נכון?', o: ['הגשם ירד כל הלילה.', 'הגשם ירדה כל הלילה.', 'הגשם יורדים כל הלילה.'] },
+    ],
+    sci: [
+      { q: 'מה קורה למים כשהם קופאים?', o: ['הם הופכים לקרח', 'הם הופכים לאדים', 'הם נעלמים'] },
+      { q: 'איזה בעל חיים ישן שינת חורף?', o: ['דוב', 'חתול', 'תרנגולת'] },
+      { q: 'למה לובשים בגדים חמים בחורף?', o: ['כדי לשמור על חום הגוף', 'כדי שיהיה צבעוני', 'כדי לרוץ מהר יותר'] },
+    ],
+    home: [
+      { q: 'באיזה חג מדליקים נרות שמונה ימים?', o: ['חנוכה', 'פורים', 'ט״ו בשבט'] },
+      { q: 'איזה חג נקרא "ראש השנה לאילנות"?', o: ['ט״ו בשבט', 'סוכות', 'ל״ג בעומר'] },
+      { q: 'באיזה מקום בארץ יורד לפעמים שלג?', o: ['בחרמון', 'באילת', 'בים המלח'] },
+    ],
+    art: [
+      { q: 'אילו צבעים נקראים "צבעים קרים"?', o: ['כחול וסגול', 'אדום וכתום', 'צהוב וחום'] },
+      { q: 'לכמה זרועות יש פתית שלג?', o: ['6', '4', '8'] },
+      { q: 'איזה כלי עוזר לצייר קו ישר כמו חוט של גשם?', o: ['סרגל', 'מחק', 'מספריים'] },
+    ],
+    challenge: {
+      q: 'בתחנת האוטובוס עומדים ילדים, 2 ילדים מתחת לכל מטרייה. ספרתי 16 רגליים. כמה מטריות יש בתחנה?',
+      hint: 'לכל ילד יש 2 רגליים. כמה ילדים עומדים בתחנה?',
+      answer: '4 מטריות: 16 רגליים הן 8 ילדים, ו-8 ילדים בזוגות הם 4 מטריות.',
+    },
+  },
+  3: {
+    math: [
+      { q: 'בכל שבוע ירד גשם 3 ימים. כמה ימי גשם היו ב-4 שבועות כאלה?', o: ['12', '7', '16'] },
+      { q: 'בחנות היו 45 זוגות מגפיים. נמכרו 18 זוגות. כמה זוגות נשארו?', o: ['27', '33', '63'] },
+      { q: 'איזה מספר הוא הגדול ביותר?', o: ['370', '307', '337'] },
+    ],
+    lang: [
+      { q: 'מה פירוש המילה "סגריר"?', o: ['מזג אוויר קר וגשום', 'יום חם מאוד', 'רוח חמה במדבר'] },
+      { q: 'מהו שם התואר במשפט "הרוח הקרה נשבה בחוזקה"?', o: ['קרה', 'רוח', 'נשבה'] },
+      { q: 'מה פירוש הביטוי "ירד גשם כמו מבול"?', o: ['ירד גשם חזק מאוד', 'ירד מעט גשם', 'ירד שלג'] },
+    ],
+    sci: [
+      { q: 'מה קורה במחזור המים?', o: ['מים מתאדים, הופכים לענן ויורדים כגשם', 'מים יורדים מהשמש', 'העננים עשויים מצמר'] },
+      { q: 'בכמה מעלות מים קופאים?', o: ['0 מעלות', '10 מעלות', '100 מעלות'] },
+      { q: 'באיזה מכשיר מודדים כמה גשם ירד?', o: ['מד גשם', 'מדחום', 'משקל'] },
+    ],
+    eng: [
+      { q: 'How do you say גשם in English?', o: ['rain', 'sun', 'snow'] },
+      { q: 'Which word means מטרייה?', o: ['umbrella', 'cloud', 'coat'] },
+      { q: 'It is cold. I wear a ___.', o: ['coat', 'swimsuit', 'sandal'] },
+    ],
+    home: [
+      { q: 'איזה אגם בצפון הארץ מתמלא ממי הגשמים בחורף?', o: ['הכנרת', 'ים המלח', 'הים האדום'] },
+      { q: 'מאיזה כיוון מגיעים רוב העננים הגשומים לישראל?', o: ['ממערב, מהים התיכון', 'מדרום, מהמדבר', 'ממזרח, מהירדן'] },
+      { q: 'מה נוהגים לעשות בט״ו בשבט?', o: ['לנטוע עצים', 'להדליק נרות', 'לבנות סוכה'] },
+    ],
+    challenge: {
+      q: 'בחנוכה מדליקים בכל ערב נר אחד יותר מהערב הקודם, ובכל ערב גם שמש. כמה נרות מדליקים בכל שמונת הלילות יחד?',
+      hint: 'בלילה הראשון: נר אחד ושמש, כלומר 2 נרות. בלילה השני: 3 נרות. המשיכו כך עד הלילה השמיני.',
+      answer: '44 נרות: 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 = 36 נרות, ועוד 8 שמשים.',
+    },
+  },
+  4: {
+    math: [
+      { q: 'בינואר ירדו 120 מ״מ גשם ובפברואר 85 מ״מ. כמה גשם ירד בשני החודשים יחד?', o: ['205 מ״מ', '195 מ״מ', '215 מ״מ'] },
+      { q: 'בחנות 6 ארגזים, ובכל ארגז 24 מטריות. כמה מטריות יש בחנות?', o: ['144', '124', '164'] },
+      { q: 'איזה שבר הוא הגדול ביותר?', o: ['1/2', '1/3', '1/4'] },
+    ],
+    lang: [
+      { q: 'מה השורש של המילה "גשום"?', o: ['ג-ש-ם', 'ג-ו-ש', 'ש-ו-ם'] },
+      { q: 'איזו מילה שייכת למשפחה של המילה "קור"?', o: ['קריר', 'קורא', 'קריאה'] },
+      { q: 'מה פירוש המילה "שלולית"?', o: ['מים שנאספו בגומה באדמה', 'ענן נמוך', 'שלג רך'] },
+    ],
+    sci: [
+      { q: 'מה יוצר את הברק?', o: ['חשמל שנוצר בעננים', 'אור השמש', 'רוח חזקה'] },
+      { q: 'למה שומעים את הרעם רק אחרי שרואים את הברק?', o: ['האור מהיר יותר מהקול', 'הרעם נוצר מאוחר יותר', 'האוזניים איטיות מהעיניים'] },
+      { q: 'איזה חומר שומר הכי טוב על חום הגוף?', o: ['צמר', 'מתכת', 'נייר'] },
+    ],
+    eng: [
+      { q: 'Which month is in winter?', o: ['January', 'July', 'August'] },
+      { q: 'The opposite of "hot" is ___.', o: ['cold', 'wet', 'big'] },
+      { q: 'Look! It is ___ outside. Take an umbrella.', o: ['raining', 'sunny', 'hot'] },
+    ],
+    home: [
+      { q: 'איזה נהר יוצא מהכנרת וזורם דרומה?', o: ['הירדן', 'הירקון', 'הקישון'] },
+      { q: 'באיזה אזור בארץ יורד הכי הרבה גשם?', o: ['בצפון', 'בנגב', 'בערבה'] },
+      { q: 'למה חשוב לחסוך במים גם בחורף?', o: ['כי מקורות המים בארץ מעטים', 'כי בחורף אין גשם', 'כי מים קרים מזיקים'] },
+    ],
+    challenge: {
+      q: 'במד הגשם של בית הספר הצטברו 4 מ״מ ביום הראשון. בכל יום ירד פי 2 גשם מביום שלפניו. באיזה יום הכמות הכוללת במד הגשם עברה את 100 מ״מ?',
+      hint: 'בנו טבלה עם שלוש עמודות: יום, כמה גשם ירד באותו יום, וכמה הצטבר עד עכשיו.',
+      answer: 'ביום החמישי: 4 + 8 + 16 + 32 + 64 = 124 מ״מ. אחרי ארבעה ימים הצטברו רק 60 מ״מ.',
+    },
+  },
+  5: {
+    math: [
+      { q: 'בארבעה ימים ירדו 12, 8, 20 ו-0 מ״מ גשם. מהו הממוצע היומי?', o: ['10 מ״מ', '8 מ״מ', '12 מ״מ'] },
+      { q: 'הטמפרטורה ירדה מ-6 מעלות ל-2 מעלות מתחת לאפס. בכמה מעלות היא ירדה?', o: ['8', '4', '6'] },
+      { q: 'איזה מספר עשרוני שווה ל-3/4?', o: ['0.75', '0.34', '0.4'] },
+    ],
+    lang: [
+      { q: 'מה תפקיד המילה "בגלל" במשפט "נשארנו בבית בגלל הסערה"?', o: ['מילת סיבה', 'מילת ניגוד', 'מילת זמן'] },
+      { q: 'מה פירוש הצירוף "מזג אוויר הפכפך"?', o: ['מזג אוויר שמשתנה הרבה', 'מזג אוויר יציב', 'מזג אוויר חם'] },
+      { q: 'באיזה משפט יש האנשה (נותנים לדבר תכונה של אדם)?', o: ['הרוח ייללה כל הלילה', 'ירד גשם חזק', 'היה קר מאוד'] },
+    ],
+    sci: [
+      { q: 'מהם אדי מים?', o: ['מים במצב גז', 'מים קפואים', 'ענן של אבק'] },
+      { q: 'איך נקרא התהליך שבו אדי מים הופכים לטיפות?', o: ['עיבוי', 'אידוי', 'המסה'] },
+      { q: 'למה מופיעות טיפות על החלון הקר מבפנים?', o: ['אוויר חם ולח מתקרר ליד הזכוכית', 'הגשם עובר דרך הזכוכית', 'הזכוכית נמסה'] },
+    ],
+    eng: [
+      { q: 'Which sentence is correct?', o: ['It rains a lot in winter.', 'It rain a lot in winter.', 'It raining a lot in winter.'] },
+      { q: 'A "storm" is ___.', o: ['strong wind and rain', 'a sunny day', 'a small cloud'] },
+      { q: 'Yesterday it ___ all day.', o: ['rained', 'rains', 'raining'] },
+    ],
+    geo: [
+      { q: 'מה עוזר לחזות את מזג האוויר מהחלל?', o: ['לוויין', 'טלסקופ', 'מצפן'] },
+      { q: 'כשאצלנו חורף, איזו עונה יש באוסטרליה?', o: ['קיץ', 'חורף', 'סתיו'] },
+      { q: 'מהו ההר הגבוה ביותר בשטח שבשליטת ישראל?', o: ['החרמון', 'הר מירון', 'הר תבור'] },
+    ],
+    challenge: {
+      q: 'בכיתה 30 תלמידים. 2/5 מהם הגיעו עם מטרייה. שליש מהשאר הגיעו עם מעיל גשם, בלי מטרייה. כמה תלמידים הגיעו בלי מטרייה ובלי מעיל גשם?',
+      hint: 'קודם חשבו: כמה הם 2/5 מ-30? וכמה תלמידים נשארו?',
+      answer: '12 תלמידים: 12 הגיעו עם מטרייה, נשארו 18, ושליש מהם (6) הגיעו עם מעיל גשם. 18 − 6 = 12.',
+    },
+  },
+  6: {
+    math: [
+      { q: 'בינואר ירדו 150 מ״מ גשם, שהם 30% מכמות הגשם של כל השנה. כמה גשם ירד בכל השנה?', o: ['500 מ״מ', '450 מ״מ', '180 מ״מ'] },
+      { q: 'היחס בין ימי גשם לימים יבשים בחודש הוא 1:2. כמה ימי גשם היו בחודש של 30 יום?', o: ['10', '15', '20'] },
+      { q: 'מטרייה פתוחה היא בערך עיגול ברדיוס 50 ס״מ. מה בערך השטח שלה? (π ≈ 3.14)', o: ['7,850 סמ״ר', '314 סמ״ר', '157 סמ״ר'] },
+    ],
+    lang: [
+      { q: 'מה פירוש הביטוי "אחרי הגשם בא הקשת"?', o: ['אחרי תקופה קשה באים ימים טובים', 'אחרי הגשם תמיד חם', 'צריך לחכות לקשת'] },
+      { q: 'איזה משפט הוא משפט מורכב?', o: ['כשהתחיל לרדת גשם, פתחנו את המטריות.', 'ירד גשם.', 'הגשם חזק מאוד.'] },
+      { q: 'באיזה זמן הפועל "יַרְעִים"?', o: ['עתיד', 'עבר', 'הווה'] },
+    ],
+    sci: [
+      { q: 'מהו אפקט החממה?', o: ['גזים באטמוספרה לוכדים חום', 'גידול צמחים בחורף', 'קירור כדור הארץ בלילה'] },
+      { q: 'למה קרח צף על פני המים?', o: ['קרח פחות צפוף ממים', 'קרח כבד ממים', 'קרח חם יותר ממים'] },
+      { q: 'איזה סוג ענן מביא לרוב סופות רעמים?', o: ['קומולונימבוס', 'צירוס', 'סטרטוס'] },
+    ],
+    eng: [
+      { q: 'If it rains tomorrow, we ___ stay home.', o: ['will', 'was', 'are'] },
+      { q: 'Choose the word that means "very cold":', o: ['freezing', 'boiling', 'windy'] },
+      { q: 'Which word is a noun?', o: ['thunder', 'quickly', 'cold'] },
+    ],
+    geo: [
+      { q: 'מהו האקלים בצפון ובמרכז הארץ?', o: ['ים תיכוני', 'טרופי', 'קוטבי'] },
+      { q: 'מה קורה למפלס הכנרת אחרי חורף גשום?', o: ['הוא עולה', 'הוא יורד', 'הוא לא משתנה'] },
+      { q: 'באיזו יבשת נמדדה הטמפרטורה הנמוכה ביותר בעולם?', o: ['אנטארקטיקה', 'אירופה', 'אפריקה'] },
+    ],
+    challenge: {
+      q: 'בתחנה מטאורולוגית נמדדו במשך 5 ימים הטמפרטורות 4, 7, ?, 9 ו-5 מעלות. הטמפרטורה הממוצעת הייתה 6 מעלות. מה הייתה הטמפרטורה ביום השלישי?',
+      hint: 'אם הממוצע של 5 ימים הוא 6, מה סכום כל הטמפרטורות?',
+      answer: '5 מעלות: הסכום הוא 6 × 5 = 30, וסכום הימים הידועים הוא 25. 30 − 25 = 5.',
+    },
+  },
+};
+
+/* ================================================================
+   Drawing
+   ================================================================ */
+const ICONS = {
+  math: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M7 3.5v7M3.5 7h7M14 7h7M14.5 14.5l6 6M20.5 14.5l-6 6M3.5 17.5h7"/></svg>',
+  lang: '<span>אב</span>',
+  eng: '<span dir="ltr">ABC</span>',
+  sci: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v6l-5.4 9.4A1.8 1.8 0 0 0 6.2 21h11.6a1.8 1.8 0 0 0 1.6-2.6L14 9V3"/><path d="M7.2 15h9.6"/></svg>',
+  home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 21.5s-6.5-5.8-6.5-11.5a6.5 6.5 0 0 1 13 0c0 5.7-6.5 11.5-6.5 11.5z"/><circle cx="12" cy="10" r="2.3"/></svg>',
+  geo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/></svg>',
+  art: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-1.4-1.2-1.6-1.2-2.8 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10.2" cy="7" r="1.1" fill="currentColor"/><circle cx="14.8" cy="7" r="1.1" fill="currentColor"/></svg>',
+  challenge: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>',
+};
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const BACK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>';
+const DROP_PATH = 'M50 4C50 4 10 54 10 80a40 40 0 0 0 80 0C90 54 50 4 50 4Z';
+
+let uid = 0;
+function umbrellaSVG(color) {
+  return `<svg class="umb" viewBox="0 0 120 84" aria-hidden="true">
+    <path d="M60 10V3" stroke="#3d4a5c" stroke-width="3" stroke-linecap="round"/>
+    <path d="M60 46V70a6 6 0 0 1-12 0" fill="none" stroke="#3d4a5c" stroke-width="4" stroke-linecap="round"/>
+    <path d="M8 50C8 22 33 9 60 9s52 13 52 41q-10.4-9-20.8 0q-10.4-9-20.8 0q-10.4-9-20.8 0q-10.4-9-20.8 0q-10.4-9-20.8 0Z" fill="${color}"/>
+    <path d="M60 9C48 18 42 34 39.2 50M60 9c12 9 18 25 20.8 41M60 9v41" fill="none" stroke="rgba(0,0,0,.16)" stroke-width="2"/>
+    <path d="M24 30c6-10 16-15 26-17" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="4" stroke-linecap="round"/>
+  </svg>`;
+}
+function cloudSVG(letter) {
+  return `<svg class="cld" viewBox="0 0 160 96" aria-hidden="true">
+    <g fill="var(--cloud-shade)" transform="translate(0 5)">
+      <circle cx="46" cy="56" r="26"/><circle cx="80" cy="42" r="34"/><circle cx="116" cy="56" r="26"/><rect x="20" y="52" width="122" height="34" rx="17"/>
+    </g>
+    <g fill="var(--cloud)">
+      <circle cx="46" cy="56" r="26"/><circle cx="80" cy="42" r="34"/><circle cx="116" cy="56" r="26"/><rect x="20" y="52" width="122" height="34" rx="17"/>
+    </g>
+    <text x="80" y="70" text-anchor="middle" font-family="Secular One, Arial Hebrew, Arial, sans-serif" font-size="40" fill="var(--cloud-ink)">${letter}׳</text>
+  </svg>`;
+}
+function dropSVG(color, key) {
+  const id = 'dg' + (++uid);
+  const gold = key === 'challenge';
+  return `<svg viewBox="0 0 100 124" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="${color}" stop-opacity="${gold ? 1 : .78}"/><stop offset="1" stop-color="${color}"/>
+    </linearGradient></defs>
+    <path d="${DROP_PATH}" fill="url(#${id})"/>
+    ${gold ? '<path d="M50 4C50 4 10 54 10 80a40 40 0 0 0 80 0C90 54 50 4 50 4Z" fill="none" stroke="#fff6d2" stroke-width="3" stroke-dasharray="2 7" stroke-linecap="round"/>' : ''}
+    <ellipse cx="33" cy="66" rx="7" ry="13" fill="rgba(255,255,255,.4)" transform="rotate(20 33 66)"/>
+  </svg>`;
+}
+const miniDrop = (fill, stroke) => `<svg viewBox="0 0 100 124" aria-hidden="true"><path d="${DROP_PATH}" fill="${fill}" stroke="${stroke}" stroke-width="8"/></svg>`;
+
+/* ================================================================
+   Progress (only in this browser)
+   ================================================================ */
+const KEY = 'winter-clouds-done';
+let done = {};
+try { done = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (e) {} };
+const doneCount = g => g.drops.filter(k => done[g.n + '-' + k]).length;
+
+/* ================================================================
+   Views
+   ================================================================ */
+const app = document.getElementById('app');
+const gradeOf = n => GRADES.find(g => g.n === n);
+const subjectName = (key, n) => SUBJECTS[key].name(n);
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function renderHome() {
+  app.innerHTML = `<div class="view">
+    <header class="home-head">
+      <h1>ענני החורף</h1>
+      <p>סביבת למידה חורפית לכיתות א׳–ו׳. בחרו את הענן של הכיתה שלכם.</p>
+    </header>
+    <div class="grades">
+      ${GRADES.map(g => {
+        const c = doneCount(g);
+        return `<button class="grade" data-go="g${g.n}" aria-label="כיתה ${g.letter}׳, ${c} מתוך ${g.drops.length} טיפות הושלמו">
+          ${umbrellaSVG(g.color)}${cloudSVG(g.letter)}
+          <span class="name">כיתה ${g.letter}׳</span>
+          <span class="count">${miniDrop(c ? 'var(--good)' : 'none', c ? 'var(--good)' : 'var(--ink-soft)')}${c} מתוך ${g.drops.length} טיפות</span>
+        </button>`;
+      }).join('')}
+    </div>
+  </div>`;
+}
+
+function renderGrade(g) {
+  app.innerHTML = `<div class="view">
+    <div class="bar"><button class="back" data-go="home" aria-label="חזרה לכל הכיתות">${BACK}</button></div>
+    <div class="sky-hero">${umbrellaSVG(g.color)}${cloudSVG(g.letter)}
+      <h2>כיתה ${g.letter}׳</h2>
+      <p class="hint-line">בחרו טיפה כדי להתחיל</p>
+    </div>
+    <div class="drops">
+      ${g.drops.map((k, i) => {
+        const s = SUBJECTS[k], name = subjectName(k, g.n), isDone = done[g.n + '-' + k];
+        return `<button class="drop${k === 'challenge' ? ' challenge' : ''}" data-go="g${g.n}-${k}" style="animation-delay:${(i * .12).toFixed(2)}s" aria-label="${name}${isDone ? ', הושלם' : ''}">
+          ${dropSVG(s.color, k)}
+          <span class="in"><span class="ic">${ICONS[k]}</span><span class="lbl">${name}</span></span>
+          ${isDone ? `<span class="done">${CHECK}</span>` : ''}
+        </button>`;
+      }).join('')}
+    </div>
+    <div class="ground"></div>
+  </div>`;
+}
+
+function header(g, key) {
+  const s = SUBJECTS[key];
+  return `<div class="bar">
+    <button class="back" data-go="g${g.n}" aria-label="חזרה לטיפות של כיתה ${g.letter}׳">${BACK}</button>
+    <span class="chip" style="background:${s.color};${key === 'challenge' ? 'color:var(--gold-ink)' : ''}">${subjectName(key, g.n)}</span>
+    <h2>כיתה ${g.letter}׳</h2>
+  </div>`;
+}
+
+function nextDrop(g, key) {
+  const i = g.drops.indexOf(key);
+  return g.drops.slice(i + 1).concat(g.drops.slice(0, i)).find(k => !done[g.n + '-' + k]);
+}
+function finishHTML(g, key, line) {
+  const nxt = nextDrop(g, key);
+  return `<div class="finish">
+    <svg class="star-big" viewBox="0 0 24 24" fill="var(--gold)" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+    <h2>כל הכבוד!</h2>
+    <p>${line}</p>
+  </div>
+  <div class="actions">
+    ${nxt ? `<button class="btn" data-go="g${g.n}-${nxt}">לטיפה הבאה: ${subjectName(nxt, g.n)}</button>` : ''}
+    <button class="btn ghost" data-go="g${g.n}">חזרה לענן</button>
+  </div>`;
+}
+
+function renderQuiz(g, key) {
+  const s = SUBJECTS[key];
+  const items = (CONTENT[g.n] && CONTENT[g.n][key]) || [];
+  const dir = s.ltr ? ' dir="ltr" lang="en"' : '';
+  let i = 0, firstTry = 0;
+  app.innerHTML = `<div class="view">${header(g, key)}<section class="panel" style="--accent:${s.color}"></section></div>`;
+  const panel = app.querySelector('.panel');
+
+  if (!items.length) {
+    panel.innerHTML = `<p class="question">השאלות לטיפה הזו עוד בדרך.</p>
+      <div class="actions"><button class="btn ghost" data-go="g${g.n}">חזרה לענן</button></div>`;
+    return;
+  }
+
+  function show() {
+    const item = items[i];
+    const opts = shuffle(item.o.map((t, j) => ({ t, right: j === 0 })));
+    let missed = false;
+    panel.innerHTML = `
+      <div class="steps" aria-hidden="true">${items.map((_, j) => miniDrop(j < i ? s.color : 'none', j <= i ? s.color : 'var(--line)')).join('')}</div>
+      <p class="qnum">שאלה ${i + 1} מתוך ${items.length}</p>
+      <p class="question"${dir}>${esc(item.q)}</p>
+      <div class="options">${opts.map((o, j) => `<button class="opt" data-i="${j}"${dir}>${esc(o.t)}</button>`).join('')}</div>
+      <p class="feedback" aria-live="polite"></p>
+      <div class="actions" hidden><button class="btn next">${i + 1 < items.length ? 'הלאה' : 'סיום'}</button></div>`;
+    panel.querySelectorAll('.opt').forEach(b => b.addEventListener('click', () => {
+      const o = opts[+b.dataset.i];
+      if (!o.right) { b.classList.add('wrong'); b.disabled = true; missed = true; return; }
+      if (!missed) firstTry++;
+      b.classList.add('right');
+      panel.querySelectorAll('.opt').forEach(x => { x.disabled = true; });
+      panel.querySelector('.feedback').textContent = missed ? 'נכון! הצלחתם.' : 'נכון מאוד!';
+      const act = panel.querySelector('.actions');
+      act.hidden = false;
+      act.querySelector('.next').focus();
+    }));
+    panel.querySelector('.next').addEventListener('click', () => {
+      i++;
+      if (i < items.length) return show();
+      done[g.n + '-' + key] = true; save();
+      panel.innerHTML = finishHTML(g, key, `סיימתם את טיפת ה${subjectName(key, g.n)}. עניתם נכון בניסיון הראשון על ${firstTry} מתוך ${items.length} שאלות.`);
+    });
+  }
+  show();
+}
+
+function renderChallenge(g) {
+  const c = CONTENT[g.n] && CONTENT[g.n].challenge;
+  app.innerHTML = `<div class="view">${header(g, 'challenge')}<section class="panel challenge-panel" style="--accent:#b07d00"></section></div>`;
+  const panel = app.querySelector('.panel');
+  if (!c) {
+    panel.innerHTML = `<p class="question">האתגר לכיתה הזו עוד בדרך.</p>
+      <div class="actions"><button class="btn ghost" data-go="g${g.n}">חזרה לענן</button></div>`;
+    return;
+  }
+  panel.innerHTML = `
+    <svg class="star-big" viewBox="0 0 24 24" fill="var(--gold)" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>
+    <p class="question">${esc(c.q)}</p>
+    <p class="reveal" id="hint" hidden><strong>רמז</strong>${esc(c.hint)}</p>
+    <p class="reveal" id="answer" hidden><strong>הפתרון</strong>${esc(c.answer)}</p>
+    <div class="actions">
+      <button class="btn ghost" id="show-hint">רמז</button>
+      <button class="btn ghost" id="show-answer">הצגת הפתרון</button>
+      <button class="btn" id="solved">פתרתי!</button>
+    </div>`;
+  panel.querySelector('#show-hint').addEventListener('click', e => { panel.querySelector('#hint').hidden = false; e.currentTarget.hidden = true; });
+  panel.querySelector('#show-answer').addEventListener('click', e => { panel.querySelector('#answer').hidden = false; e.currentTarget.hidden = true; });
+  panel.querySelector('#solved').addEventListener('click', () => {
+    done[g.n + '-challenge'] = true; save();
+    panel.innerHTML = finishHTML(g, 'challenge', `פתרתם את האתגר של כיתה ${g.letter}׳.`);
+  });
+}
+
+/* ================================================================
+   Routing: #g3 is a grade, #g3-math is a drop inside it.
+   ================================================================ */
+function route(token, push) {
+  const m = /^g([1-6])(?:-([a-z]+))?$/.exec(token || '');
+  const g = m && gradeOf(+m[1]);
+  const key = m && m[2];
+  if (!g) { renderHome(); token = ''; }
+  else if (!key || !g.drops.includes(key)) { renderGrade(g); token = 'g' + g.n; }
+  else if (key === 'challenge') renderChallenge(g);
+  else renderQuiz(g, key);
+  if (push) {
+    try { history.pushState(null, '', token ? '#' + token : location.pathname + location.search); } catch (e) {}
+  }
+  window.scrollTo(0, 0);
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-go]');
+  if (b) route(b.dataset.go === 'home' ? '' : b.dataset.go, true);
+});
+window.addEventListener('popstate', () => route(location.hash.slice(1)));
+route(location.hash.slice(1));
+
+/* ================================================================
+   Background rain
+   ================================================================ */
+const cv = document.getElementById('rain');
+const ctx = cv.getContext('2d');
+const still = window.matchMedia('(prefers-reduced-motion: reduce)');
+let streaks = [], W = 0, H = 0, color = '';
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W * dpr; cv.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const n = Math.round(W * H / 14000);
+  streaks = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, l: 10 + Math.random() * 16, v: 4 + Math.random() * 5 }));
+  color = getComputedStyle(document.documentElement).getPropertyValue('--rain').trim() || 'rgba(60,100,150,.28)';
+  if (still.matches) draw();
+}
+function draw() {
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = color; ctx.lineWidth = 1.4; ctx.lineCap = 'round';
+  ctx.beginPath();
+  for (const s of streaks) { ctx.moveTo(s.x, s.y); ctx.lineTo(s.x - s.l * .18, s.y + s.l); }
+  ctx.stroke();
+}
+function tick() {
+  if (!still.matches && !document.hidden) {
+    for (const s of streaks) {
+      s.y += s.v; s.x -= s.v * .18;
+      if (s.y > H) { s.y = -s.l; s.x = Math.random() * (W + 60); }
+    }
+    draw();
+  }
+  requestAnimationFrame(tick);
+}
+window.addEventListener('resize', resize);
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', resize);
+new MutationObserver(resize).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+resize();
+tick();
+})();
+</script>
+<footer class="hh-credit" dir="rtl" lang="he">נוצר על ידי הדס הרצמן</footer>
+</body>
+</html>
