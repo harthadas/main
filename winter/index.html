@@ -363,21 +363,21 @@ svg { display: block; }
   border-radius: 12px; font: inherit; color: var(--ink); padding: 0 10px; line-height: 1.15;
 }
 .cnode.d1 .cn-label, .cnode.d1 .cn-input {
-  font-family: var(--display); font-size: 1.02rem; border: 2.5px solid var(--bc); color: var(--bc);
+  font-family: var(--display); font-size: 1.12rem; border: 2.5px solid var(--bc); color: var(--bc);
   background: color-mix(in srgb, var(--bc) 10%, var(--card));
 }
 .cnode.d1 .cn-input { border-style: dashed; }
-.cnode:not(.d1) .cn-input { border: 2px dashed color-mix(in srgb, var(--bc) 55%, var(--line)); background: var(--card); font-size: .9rem; padding: 0 6px; }
-.cnode.d3 .cn-input, .cnode.d4 .cn-input { font-size: .85rem; }
+.cnode:not(.d1) .cn-input { border: 2px dashed color-mix(in srgb, var(--bc) 55%, var(--line)); background: var(--card); font-size: .92rem; padding: 0 6px; }
+.cnode.d2 .cn-input { font-size: .88rem; }
 .cnode .cn-input:focus-visible { outline: 3px solid var(--bc); outline-offset: 1px; border-style: solid; }
 .cn-add, .cn-del {
-  position: absolute; top: 50%; transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%;
+  position: absolute; top: 50%; transform: translateY(-50%); width: 24px; height: 24px; border-radius: 50%;
   display: grid; place-items: center; padding: 0; font-size: 1rem; line-height: 1; border: 2px solid var(--bc);
   background: var(--card); color: var(--bc); opacity: .55; transition: opacity .15s;
 }
 .cnode:hover .cn-add, .cnode:focus-within .cn-add, .cnode:hover .cn-del, .cnode:focus-within .cn-del, .cn-add:focus-visible { opacity: 1; }
-.out-r .cn-add { right: -12px; }
-.out-l .cn-add { left: -12px; }
+.out-r .cn-add { right: -14px; }
+.out-l .cn-add { left: -14px; }
 .cn-del { top: -9px; transform: none; width: 20px; height: 20px; font-size: .85rem; border-color: var(--line); color: var(--ink-soft); }
 .out-r .cn-del { left: -8px; }
 .out-l .cn-del { right: -8px; }
@@ -1401,7 +1401,8 @@ function renderCmap(g) {
   const nodeAt = path => path.reduce((n, k, d) => d ? n.kids[k] : st.branches[k], null);
 
   /* layout: two-sided tree, each level one column further from the centre */
-  const W = [0, 150, 114, 108, 104], H = [0, 48, 36, 34, 34], ROW = 44, GAP = 26, CR = 62, MAXD = 4;
+  /* the second ring (d2) is kept narrow so a fourth ring fits on screen */
+  const W = [0, 144, 108, 114, 110], H = [0, 50, 40, 38, 38], ROW = 50, GAP = 26, CR = 62, MAXD = 4;
   const w = d => W[Math.min(d, 4)], h = d => H[Math.min(d, 4)];
   const rows = n => n.kids.length ? n.kids.reduce((t, k) => t + rows(k), 0) : 1;
   const depth = n => n.kids.length ? 1 + Math.max(...n.kids.map(depth)) : 1;
