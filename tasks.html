@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>נצנים בשפה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Same calm language as the story labs: neutral paper; the pictures and the color drops carry the color.
+   Start: two groups of four task cards. A task: the question, a large prompt, then big one-tap answers. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --glass: #97a3b6;
+  --good: #2f8a55;
+  --near: #b7791f;
+  --mark: #fff1b0;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+svg { display: block; }
+[hidden] { display: none !important; }
+
+h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+button, input { font: inherit; color: inherit; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none; padding: 0;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn.off { color: var(--glass); }
+.bar h2 { font-size: 1.35rem; flex: 1; }
+.icon-btn.off { color: var(--glass); }
+
+/* ---------- start ---------- */
+.start { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; text-align: center; }
+.start h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.start > p { margin: -14px 0 0; color: var(--ink-soft); font-family: var(--display); font-size: 1.25rem; }
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
+.kind { display: flex; flex-direction: column; gap: 10px; }
+.kind-card {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 22px 18px 20px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: border-color .15s, transform .15s;
+}
+.kind-card:hover { border-color: var(--glass); }
+.kind-card:active { transform: scale(.98); }
+.kind-card svg { width: min(220px, 100%); height: auto; margin-bottom: 6px; }
+.kind-card strong { font-family: var(--display); font-size: 1.4rem; font-weight: 700; line-height: 1.5; }
+.kind-card small { color: var(--ink-soft); font-size: 1rem; line-height: 1.5; }
+.kind-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ---------- buttons ---------- */
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.15rem; line-height: 1.4;
+  padding: 10px 22px; min-height: 54px; text-decoration: none; color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+}
+.act svg { width: 24px; height: 24px; flex: none; }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act.big { font-size: 1.4rem; font-weight: 700; min-height: 64px; padding-inline: 34px; min-width: min(300px, 100%); }
+.act:disabled { opacity: .3; }
+.act:not(:disabled):active { transform: scale(.97); }
+
+.panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+.spk {
+  flex: none; width: 40px; height: 40px; border-radius: 50%; padding: 0;
+  border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center;
+}
+.spk svg { width: 20px; height: 20px; }
+
+/* ---------- tasks ---------- */
+.tasks-sec { width: 100%; max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.tasks-sec + .tasks-sec { margin-top: 10px; padding-top: 24px; border-top: 2px solid var(--line); }
+.tasks-sec h2 { font-size: clamp(1.35rem, 4.5vw, 1.6rem); color: var(--ink-soft); font-weight: 500; }
+.task-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; }
+.task-card > svg { width: min(150px, 100%); }
+.q-stars { display: inline-flex; gap: 2px; }
+.q-stars span { color: var(--line); display: inline-flex; }
+.q-stars span.on { color: #f2a20c; }
+.q-stars svg { width: 20px; height: 20px; }
+.q-done .q-stars svg { width: 46px; height: 46px; }
+.quiz { width: 100%; max-width: 720px; margin: 14px auto 0; padding: 20px 16px 22px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.q-head { display: flex; align-items: center; gap: 10px; }
+.q-head h2 { font-size: 1.5rem; }
+.q-head .spk { margin-top: 0; }
+.q-prompt { min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.q-word { font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, 12vw, 4rem); line-height: 1.5; }
+.q-word mark { background: var(--mark); color: inherit; border-radius: 10px; padding-inline: 4px; }
+.q-pic svg { width: 180px; max-width: 100%; height: auto; }
+.q-pic.small svg { width: 120px; }
+.q-sentence { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 8vw, 2.4rem); line-height: 1.6; }
+.q-gap { display: inline-block; min-width: 4.2em; border-bottom: 4px dashed var(--glass); }
+.q-gap.done { border-bottom: 4px solid var(--good); color: var(--good); min-width: 0; }
+.q-options { display: grid; gap: 14px; width: 100%; max-width: 560px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.q-options.blobs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.q-options.letters { max-width: 420px; }
+.q-options.pair { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 420px; }
+.q-many { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 10px 28px; }
+.q-many > div { display: flex; flex-direction: column; align-items: center; }
+.q-many .q-sentence { font-size: clamp(1.3rem, 5.5vw, 1.9rem); white-space: nowrap; }
+.q-many .q-gap { min-width: 3em; }
+.q-opt {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  min-height: 88px; padding: 10px 6px; display: grid; place-items: center;
+  transition: border-color .15s, opacity .25s, transform .15s, box-shadow .15s;
+}
+.q-opt:hover { border-color: var(--glass); }
+.q-opt:not(:disabled):active { transform: scale(.96); }
+.q-opt svg { max-width: 100%; height: auto; }
+.q-opt.miss { opacity: .25; animation: shake .35s; }
+.q-opt.right { border-color: var(--good); box-shadow: 0 0 0 3px var(--good); }
+.q-opt-word { font-family: var(--display); font-size: clamp(1.4rem, 6vw, 1.9rem); font-weight: 700; line-height: 1.5; }
+.q-letter { font-family: var(--display); font-size: 3.2rem; font-weight: 700; line-height: 1; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.q-feedback { margin: 0; min-height: 1.6em; display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 1.5rem; font-weight: 700; }
+.q-feedback svg { width: 28px; height: 28px; }
+.q-feedback.good { color: var(--good); }
+.q-feedback.again { color: var(--near); }
+.q-dots { flex: 1; display: flex; justify-content: center; gap: 8px; }
+.q-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
+.q-dot.done { background: var(--ink); }
+.q-dot.cur { background: var(--surface); box-shadow: 0 0 0 3px var(--ink); }
+@media (max-width: 420px) {
+  .q-options { gap: 10px; }
+  .q-options.blobs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .q-opt { min-height: 76px; }
+}
+
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .bar { gap: 8px; }
+  .icon-btn { width: 46px; height: 46px; }
+  .act { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body>
+<div id="app" lang="he" dir="rtl"></div>
+
+<script>
+(() => {
+/* ================= shared =================
+   Colors, small drawings, the children and the school things the tasks show. */
+const COLORS = [
+  { id: 'red',    hex: '#ef3b44', name: 'אָדֹם',  def: 'הָאָדֹם',  to: 'לָאָדֹם',  gift: 'כֹּחַ וְאֹמֶץ' },
+  { id: 'orange', hex: '#fb7a2c', name: 'כָּתֹם', def: 'הַכָּתֹם', to: 'לַכָּתֹם', gift: 'מֶרֶץ וְשִׂמְחָה' },
+  { id: 'yellow', hex: '#fad21e', name: 'צָהֹב',  def: 'הַצָּהֹב',  to: 'לַצָּהֹב',  gift: 'אוֹר' },
+  { id: 'green',  hex: '#2f9e55', name: 'יָרֹק',  def: 'הַיָּרֹק',  to: 'לַיָּרֹק',  gift: 'עֵץ גָּבוֹהַּ' },
+  { id: 'blue',   hex: '#1f6fd6', name: 'כָּחֹל', def: 'הַכָּחֹל', to: 'לַכָּחֹל', gift: 'רֹגַע' },
+  { id: 'purple', hex: '#8a4cc2', name: 'סָגֹל',  def: 'הַסָּגֹל',  to: 'לַסָּגֹל',  gift: 'קְסָמִים' },
+  { id: 'pink',   hex: '#f58cb2', name: 'וָרֹד',  def: 'הַוָּרֹד',  to: 'לַוָּרֹד',  gift: 'חִבּוּק' },
+];
+const C = Object.fromEntries(COLORS.map(c => [c.id, c]));
+
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+const pick = (list, id) => list.find(o => o.id === id);
+
+/* ================= drawings ================= */
+const INK = '#1d2431';
+const PLAIN = '#eef1f5';   // "not colored yet"
+const SKIN = '#f0c4a0', HAIR = '#4a3426';
+const DROP = 'M50 3 C44 19 12 42 12 62 A38 36 0 0 0 88 62 C88 42 56 19 50 3 Z';
+
+// A paint-drop character. mood: happy | shy | brave | curious | sad | angry | sleep
+function drop(hex, mood, cx, bottom, size, extra = '') {
+  const s = size / 100;
+  let px = 0, py = 0, face = '';
+  const line = d => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>`;
+  switch (mood) {
+    case 'shy':
+      py = 2.5; px = 1.5;
+      face = line('M44 77 Q50 81 56 77') + '<ellipse cx="27" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/><ellipse cx="73" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/>';
+      break;
+    case 'brave':
+      face = line('M35 72 Q50 87 65 72') + line('M28 45 L45 50') + line('M72 45 L55 50');
+      break;
+    case 'curious':
+      px = -2; py = -2.5;
+      face = `<circle cx="50" cy="77" r="4.6" fill="${INK}"/>` + line('M54 45 Q63 39 72 45');
+      break;
+    case 'sad':
+      py = 1.5;
+      face = line('M40 81 Q50 72 60 81') + line('M29 49 L44 45') + line('M71 49 L56 45');
+      break;
+    case 'angry':
+      face = line('M41 79 Q50 75 59 79') + line('M29 45 L45 51') + line('M71 45 L55 51');
+      break;
+    case 'sleep':
+      face = line('M38 74 Q50 84 62 74');
+      break;
+    default:
+      face = line('M37 72 Q50 86 63 72');
+  }
+  const eyes = mood === 'sleep'
+    ? line('M31 59 Q38 64 45 59') + line('M55 59 Q62 64 69 59')
+    : [38, 62].map(x => `<circle cx="${x}" cy="59" r="8.5" fill="#fff" stroke="${INK}" stroke-width="2.6"/><circle cx="${x + px}" cy="${59 + py}" r="4.3" fill="${INK}"/>`).join('');
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${s})" ${extra}>
+    <path d="${DROP}" fill="${hex}" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+    <ellipse cx="28" cy="46" rx="5" ry="9" fill="#fff" opacity=".45" transform="rotate(28 28 46)"/>
+    ${eyes}${face}</g>`;
+}
+function ghost(cx, bottom, size) {
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">
+    <path d="${DROP}" fill="#ffffff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="8 7"/>
+    <text x="50" y="76" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="34" fill="#97a3b6">?</text></g>`;
+}
+const heart = (x, y, r, fill = '#ef3b44') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 9 C-12 0 -10 -10 -4.5 -10 C-1.5 -10 0 -7.5 0 -6 C0 -7.5 1.5 -10 4.5 -10 C10 -10 12 0 0 9 Z" fill="${fill}" stroke="${INK}" stroke-width="${16 / r}"/>`;
+const sparkle = (x, y, r, fill = '#ffd84d') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 -10 L2.4 -2.4 L10 0 L2.4 2.4 L0 10 L-2.4 2.4 L-10 0 L-2.4 -2.4 Z" fill="${fill}"/>`;
+const moon = (x, y, r) =>
+  `<path d="M${x} ${y - r} a${r} ${r} 0 1 0 ${r * 0.75} ${r * 1.66} a${r * 0.8} ${r * 0.8} 0 1 1 ${-r * 0.75} ${-r * 1.66} Z" fill="#fff2a8" stroke="${INK}" stroke-width="2"/>`;
+const note = (x, y, s) =>
+  `<g transform="translate(${x} ${y}) scale(${s})" fill="${INK}"><ellipse cx="0" cy="12" rx="5" ry="4" transform="rotate(-20 0 12)"/><rect x="3.5" y="-8" width="2.4" height="20"/><path d="M5.9 -8 q8 3 6 11 q-1 -6 -6 -6 Z"/></g>`;
+function rainbowArcs(cx, cy, r0, step, width) {
+  return COLORS.map((c, i) => {
+    const r = r0 - i * step;
+    return `<path d="M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}" fill="none" stroke="${c.hex}" stroke-width="${width}"/>`;
+  }).join('');
+}
+/* ================= the children =================
+   Eight named children, four boys and four girls. Each sentence agrees with
+   the hero's gender, the friend's, or both (הֵם for any boy in the pair,
+   הֵן for two girls). "and" and "to" carry the right vav and lamed. */
+const withAnd = n => (/^[במפ]/.test(n) ? 'וּ' : 'וְ') + soft(n);
+// After a prefix (וְ, לְ) the first letter of בגדכפ״ת loses its dagesh: תָּמָר, וְתָמָר.
+const soft = n => n.replace(/^([בגדכפת][\u05b0-\u05c7]*?)\u05bc/, '$1');
+const KIDS = [
+  { id: 'ori',     name: 'אוֹרִי',   g: 'm', skin: '#f0c4a0', hair: '#4a3426', style: 'short', shirt: '#1f6fd6' },
+  { id: 'yonatan', name: 'יוֹנָתָן', g: 'm', skin: '#c68a5e', hair: '#2b2b2b', style: 'short', shirt: '#2f9e55', glasses: true },
+  { id: 'omer',    name: 'עוֹמֶר',   g: 'm', skin: '#8d5a3b', hair: '#1d1d1d', style: 'curly', shirt: '#ef3b44' },
+  { id: 'itai',    name: 'אִיתַי',   g: 'm', skin: '#f3d2b3', hair: '#c4702a', style: 'short', shirt: '#fb7a2c' },
+  { id: 'maya',    name: 'מָאיָה',   g: 'f', skin: '#f0c4a0', hair: '#4a3426', style: 'long',  shirt: '#8a4cc2' },
+  { id: 'noa',     name: 'נוֹעָה',   g: 'f', skin: '#8d5a3b', hair: '#1d1d1d', style: 'curly', shirt: '#fad21e' },
+  { id: 'tamar',   name: 'תָּמָר',   g: 'f', skin: '#c68a5e', hair: '#2b2b2b', style: 'long',  shirt: '#f58cb2', glasses: true },
+  { id: 'shira',   name: 'שִׁירָה',  g: 'f', skin: '#f3d2b3', hair: '#d8a24a', style: 'long',  shirt: '#2f9e55' },
+].map(k => Object.assign(k, { and: withAnd(k.name), to: 'לְ' + soft(k.name), andTo: 'וּלְ' + soft(k.name) }));
+const KID = Object.fromEntries(KIDS.map(k => [k.id, k]));
+const TEACHER = { g: 'f', skin: '#e8b896', hair: '#8a8f99', style: 'bun', shirt: '#1ea7a0', glasses: true };
+const NOBODY = { id: '', name: '___', g: 'm', and: 'וְ___', to: 'לְ___', andTo: 'וּלְ___' };
+
+// mood: happy | sad | scared | sleep
+function face(cx, ey, mood) {
+  const s = `fill="none" stroke="${INK}" stroke-width="2.8" stroke-linecap="round"`;
+  let eyes = mood === 'sleep'
+    ? `<path d="M${cx - 10} ${ey} q4 4 8 0 M${cx + 2} ${ey} q4 4 8 0" ${s}/>`
+    : `<circle cx="${cx - 7}" cy="${ey}" r="${mood === 'scared' ? 3.6 : 2.9}" fill="${INK}"/><circle cx="${cx + 7}" cy="${ey}" r="${mood === 'scared' ? 3.6 : 2.9}" fill="${INK}"/>`;
+  if (mood === 'sad' || mood === 'scared') eyes += `<path d="M${cx - 12} ${ey - 7} l6 -2 M${cx + 12} ${ey - 7} l-6 -2" ${s}/>`;
+  const mouth = mood === 'sad' ? `<path d="M${cx - 6} ${ey + 13} q6 -6 12 0" ${s}/>`
+    : mood === 'scared' ? `<ellipse cx="${cx}" cy="${ey + 11}" rx="3.5" ry="4.5" fill="${INK}"/>`
+    : `<path d="M${cx - 7} ${ey + 8} q7 7 14 0" ${s}/>`;
+  const cheeks = mood === 'happy' || mood === 'sleep'
+    ? `<circle cx="${cx - 12}" cy="${ey + 7}" r="3.5" fill="#ff7a96" opacity=".4"/><circle cx="${cx + 12}" cy="${ey + 7}" r="3.5" fill="#ff7a96" opacity=".4"/>` : '';
+  return eyes + mouth + cheeks;
+}
+// A child (or the teacher), drawn in a 100 x 100 box standing on its bottom edge.
+function kid(k, mood, cx, bottom, size) {
+  const o = `stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
+  const girl = k.g === 'f';
+  let g = '';
+  g += `<rect x="39" y="78" width="9" height="20" rx="4" fill="#5b6577" ${o}/><rect x="52" y="78" width="9" height="20" rx="4" fill="#5b6577" ${o}/>`;
+  g += `<path d="M38 60 Q27 66 27 76" fill="none" ${o} stroke-linecap="round"/><path d="M62 60 Q73 66 73 76" fill="none" ${o} stroke-linecap="round"/>`;
+  g += `<circle cx="27" cy="78" r="4" fill="${k.skin}" ${o}/><circle cx="73" cy="78" r="4" fill="${k.skin}" ${o}/>`;
+  if (k.style === 'long') g += `<path d="M31 36 Q28 60 37 63 H63 Q72 60 69 36 Q69 15 50 15 Q31 15 31 36 Z" fill="${k.hair}" ${o}/>`;
+  if (k.style === 'curly' && girl) g += [[32, 30], [36, 46], [68, 30], [64, 46], [50, 16], [36, 18], [64, 18]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="10" fill="${k.hair}" ${o}/>`).join('');
+  g += girl ? `<path d="M31 88 Q33 60 41 55 H59 Q67 60 69 88 Z" fill="${k.shirt}" ${o}/>`
+            : `<path d="M33 84 Q31 60 41 55 H59 Q69 60 67 84 Z" fill="${k.shirt}" ${o}/>`;
+  g += `<circle cx="50" cy="37" r="18" fill="${k.skin}" ${o}/>`;
+  if (k.style === 'short') g += `<path d="M32 35 Q31 17 50 17 Q69 17 68 35 Q62 25 50 26 Q38 25 32 35 Z" fill="${k.hair}" ${o}/>`;
+  if (k.style === 'long') g += `<path d="M32 34 Q35 19 50 19 Q65 19 68 34 Q59 26 50 28 Q41 26 32 34 Z" fill="${k.hair}" ${o}/>`;
+  if (k.style === 'curly' && !girl) g += [[36, 26], [46, 20], [56, 20], [65, 27]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="${k.hair}" ${o}/>`).join('');
+  if (k.style === 'curly' && girl) g += `<path d="M34 30 Q50 16 66 30 Q58 24 50 26 Q42 24 34 30 Z" fill="${k.hair}"/>`;
+  if (k.style === 'bun') g += `<circle cx="50" cy="15" r="8" fill="${k.hair}" ${o}/><path d="M32 34 Q34 18 50 18 Q66 18 68 34 Q60 26 50 27 Q40 26 32 34 Z" fill="${k.hair}" ${o}/>`;
+  g += face(50, 39, mood);
+  if (k.glasses) g += `<g fill="none" stroke="${INK}" stroke-width="2"><circle cx="43" cy="39" r="6"/><circle cx="57" cy="39" r="6"/><path d="M49 39 h2"/></g>`;
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">${g}</g>`;
+}
+function kidGhost(cx, bottom, size) {
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">
+    <circle cx="50" cy="36" r="18" fill="#fff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="7 6"/>
+    <path d="M33 92 Q31 62 41 56 H59 Q69 62 67 92 Z" fill="#fff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="7 6"/>
+    <text x="50" y="47" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="#97a3b6">?</text></g>`;
+}
+
+/* ================= things =================
+   School things in a 120 x 100 box, shown big in the tasks and small on the cards. */
+const OBJ = {
+  book: () => `<path d="M14 24 H58 V84 H14 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M62 24 H106 V84 H62 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M58 24 Q60 20 62 24 V84 Q60 88 58 84 Z" fill="#164f9c" stroke="${INK}" stroke-width="2.5"/><path d="M22 40 h28 M22 52 h28 M22 64 h20 M70 40 h28 M70 52 h28 M70 64 h20" stroke="#cfe2ff" stroke-width="3" stroke-linecap="round"/>`,
+  pencil: () => `<g transform="rotate(-30 60 50)"><rect x="14" y="40" width="72" height="20" fill="#fad21e" stroke="${INK}" stroke-width="3"/><rect x="6" y="40" width="10" height="20" rx="3" fill="#f58cb2" stroke="${INK}" stroke-width="3"/><path d="M86 40 L106 50 L86 60 Z" fill="#f3d9b1" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M100 47 L106 50 L100 53 Z" fill="${INK}"/></g>`,
+  bag: () => `<path d="M40 30 Q40 12 60 12 Q80 12 80 30" fill="none" stroke="${INK}" stroke-width="5"/><rect x="24" y="28" width="72" height="62" rx="14" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><rect x="36" y="56" width="48" height="24" rx="6" fill="#c92d36" stroke="${INK}" stroke-width="2.5"/><path d="M24 46 H96" stroke="${INK}" stroke-width="2.5"/>`,
+  ball: () => `<circle cx="60" cy="52" r="36" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M60 36 L75 47 L69 64 H51 L45 47 Z" fill="${INK}"/><path d="M60 16 V36 M75 47 L93 41 M69 64 L80 82 M51 64 L40 82 M45 47 L27 41" stroke="${INK}" stroke-width="2.5"/>`,
+  board: () => `<rect x="8" y="12" width="104" height="68" rx="4" fill="#2f6b4f" stroke="#9a6b4a" stroke-width="6"/><text x="60" y="56" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="#fff">אבג</text><path d="M30 92 L40 80 M90 92 L80 80" stroke="#9a6b4a" stroke-width="5" stroke-linecap="round"/>`,
+  table: () => `<rect x="10" y="36" width="100" height="12" rx="3" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><path d="M20 48 V90 M100 48 V90" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="M20 48 V90 M100 48 V90" stroke="#d39a5f" stroke-width="2.5" stroke-linecap="round"/>`,
+  chair: () => `<rect x="38" y="10" width="44" height="40" rx="5" fill="#1ea7a0" stroke="${INK}" stroke-width="3"/><rect x="32" y="50" width="56" height="10" rx="3" fill="#1ea7a0" stroke="${INK}" stroke-width="3"/><path d="M38 60 V92 M82 60 V92" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
+  notebook: () => `<rect x="30" y="12" width="64" height="80" rx="6" fill="#8a4cc2" stroke="${INK}" stroke-width="3"/>${[22, 34, 46, 58, 70, 82].map(y => `<circle cx="30" cy="${y}" r="3.5" fill="#fff" stroke="${INK}" stroke-width="2"/>`).join('')}<rect x="44" y="28" width="38" height="16" rx="3" fill="#fff"/>`,
+  bell: () => `<path d="M60 14 V22" stroke="${INK}" stroke-width="4"/><path d="M30 76 Q30 30 60 24 Q90 30 90 76 Z" fill="#f5b22a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="74" width="72" height="8" rx="4" fill="#f5b22a" stroke="${INK}" stroke-width="3"/><circle cx="60" cy="88" r="6" fill="${INK}"/>`,
+  ruler: () => `<g transform="rotate(-12 60 50)"><rect x="8" y="36" width="104" height="26" rx="3" fill="#fad21e" stroke="${INK}" stroke-width="3"/>${Array.from({ length: 10 }, (_, i) => `<path d="M${18 + i * 9.5} 36 v${i % 2 ? 7 : 12}" stroke="${INK}" stroke-width="2"/>`).join('')}</g>`,
+  // story-only things
+  bus: () => `<rect x="10" y="26" width="100" height="52" rx="10" fill="#fad21e" stroke="${INK}" stroke-width="3"/>${[20, 44, 68].map(x => `<rect x="${x}" y="34" width="18" height="16" rx="3" fill="#bfe3ff" stroke="${INK}" stroke-width="2"/>`).join('')}<rect x="90" y="34" width="12" height="34" rx="2" fill="#bfe3ff" stroke="${INK}" stroke-width="2"/><circle cx="32" cy="80" r="9" fill="${INK}"/><circle cx="88" cy="80" r="9" fill="${INK}"/>`,
+  bike: () => `<g fill="none" stroke="${INK}" stroke-width="4"><circle cx="30" cy="66" r="18"/><circle cx="90" cy="66" r="18"/><path d="M30 66 L50 40 H78 L90 66 M50 40 L62 66 L78 40 M46 32 H58 M78 40 L74 28 H84" stroke-linejoin="round"/></g>`,
+  feet: () => `<path d="M30 30 C18 30 16 56 24 70 C30 80 44 78 44 64 C44 50 42 30 30 30 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M80 22 C68 22 66 48 74 62 C80 72 94 70 94 56 C94 42 92 22 80 22 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/>`,
+  family: () => kid({ g: 'm', skin: '#e8b896', hair: '#4a3426', style: 'short', shirt: '#1f6fd6' }, 'happy', 42, 98, 92) + kid({ g: 'm', skin: '#f0c4a0', hair: '#4a3426', style: 'short', shirt: '#fb7a2c' }, 'happy', 86, 98, 60),
+  math: () => `<rect x="8" y="12" width="104" height="68" rx="4" fill="#2f6b4f" stroke="#9a6b4a" stroke-width="6"/><text x="60" y="58" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="30" fill="#fff" direction="ltr">2+3=5</text>`,
+  art: () => `<path d="M60 12 C30 12 12 32 12 54 C12 78 34 90 52 86 C62 84 60 74 66 70 C74 64 90 72 100 62 C112 50 98 12 60 12 Z" fill="#f3d9b1" stroke="${INK}" stroke-width="3"/>${[[38, 34, '#ef3b44'], [62, 28, '#1f6fd6'], [84, 38, '#fad21e'], [32, 58, '#2f9e55']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="8" fill="${c}"/>`).join('')}`,
+  music: () => `<g fill="${INK}"><ellipse cx="34" cy="76" rx="14" ry="10" transform="rotate(-20 34 76)"/><ellipse cx="86" cy="66" rx="14" ry="10" transform="rotate(-20 86 66)"/><rect x="44" y="18" width="5" height="58"/><rect x="96" y="10" width="5" height="56"/><path d="M44 18 L101 10 V24 L44 32 Z"/></g>`,
+  sport: () => OBJ.ball(),
+  swing: () => `<path d="M14 92 L30 12 H90 L106 92" fill="none" stroke="#9a6b4a" stroke-width="6" stroke-linejoin="round"/><path d="M48 12 V66 M72 12 V66" stroke="${INK}" stroke-width="2.5"/><rect x="42" y="64" width="36" height="8" rx="3" fill="#ef3b44" stroke="${INK}" stroke-width="2.5"/>`,
+  chalk: () => `<path d="M14 70 Q30 40 50 60 T90 50" fill="none" stroke="#f58cb2" stroke-width="7" stroke-linecap="round"/><path d="M20 86 L100 80" stroke="#1f6fd6" stroke-width="7" stroke-linecap="round"/><rect x="70" y="16" width="34" height="12" rx="5" fill="#fad21e" stroke="${INK}" stroke-width="2.5" transform="rotate(30 87 22)"/>`,
+  confused: () => `<text x="60" y="78" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="76" fill="#8a4cc2">?</text>`,
+  pencilcase: () => `<rect x="14" y="34" width="92" height="40" rx="18" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><path d="M30 34 H90" stroke="#fad21e" stroke-width="4" stroke-dasharray="4 4"/><circle cx="96" cy="40" r="5" fill="#fad21e" stroke="${INK}" stroke-width="2"/>`,
+  noise: () => `<g fill="none" stroke="#ef3b44" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 30 l12 10 -12 10 12 10"/><path d="M106 30 l-12 10 12 10 -12 10"/></g><text x="60" y="66" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="34" fill="${INK}">!!!</text>`,
+  breathe: () => `<g fill="none" stroke="#7cc4ff" stroke-width="6" stroke-linecap="round"><path d="M14 36 H74 a12 12 0 1 0 -12 -12"/><path d="M14 58 H90 a12 12 0 1 1 -12 12"/></g>`,
+  hand: () => `<path d="M46 92 V44 a6 6 0 0 1 12 0 V30 a6 6 0 0 1 12 0 V34 a6 6 0 0 1 12 0 V44 a6 6 0 0 1 12 0 V70 Q94 92 72 92 Z" fill="#f0c4a0" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M46 60 Q34 52 30 60 Q34 72 46 78" fill="#f0c4a0" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`,
+  cushion: () => `<path d="M14 60 Q16 34 60 36 Q104 34 106 60 Q104 86 60 84 Q16 86 14 60 Z" fill="#c9b6ff" stroke="${INK}" stroke-width="3"/><path d="M40 60 h40" stroke="#8a4cc2" stroke-width="3" stroke-linecap="round"/>`,
+  teacher: () => kid(TEACHER, 'happy', 60, 98, 96),
+  heart: () => `<path transform="translate(60 52) scale(3.4)" d="M0 9 C-12 0 -10 -10 -4.5 -10 C-1.5 -10 0 -7.5 0 -6 C0 -7.5 1.5 -10 4.5 -10 C10 -10 12 0 0 9 Z" fill="#ef3b44" stroke="${INK}" stroke-width=".9"/>`,
+  house: () => `<path d="M16 46 L60 12 L104 46 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><rect x="26" y="46" width="68" height="44" fill="#fff3d6" stroke="${INK}" stroke-width="3"/><rect x="52" y="62" width="16" height="28" fill="#9a6b4a"/><rect x="34" y="56" width="12" height="12" fill="#bfe3ff" stroke="${INK}" stroke-width="2"/>`,
+  star: () => `<path d="M60 10 L71 38 L102 40 L78 58 L86 88 L60 72 L34 88 L42 58 L18 40 L49 38 Z" fill="#f5b22a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`,
+  moon: () => `<path d="M70 14 a36 36 0 1 0 26 60 a28 28 0 1 1 -26 -60 Z" fill="#fff2a8" stroke="${INK}" stroke-width="3"/>${sparkle(30, 30, 8, '#ffe27a')}`,
+  speech: () => `<path d="M14 18 h92 a10 10 0 0 1 10 10 v34 a10 10 0 0 1 -10 10 h-58 l-16 16 v-16 h-18 a10 10 0 0 1 -10 -10 v-34 a10 10 0 0 1 10 -10 Z" fill="#fff" stroke="${INK}" stroke-width="3"/><text x="60" y="54" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="22" fill="${INK}">שָׁלוֹם</text>`,
+  hamster: () => `<ellipse cx="60" cy="62" rx="40" ry="28" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><circle cx="34" cy="38" r="9" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><circle cx="86" cy="38" r="9" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><ellipse cx="60" cy="70" rx="22" ry="14" fill="#f3d9b1"/><circle cx="48" cy="54" r="3.5" fill="${INK}"/><circle cx="72" cy="54" r="3.5" fill="${INK}"/><circle cx="60" cy="62" r="3" fill="#ff7a96"/>`,
+  key: () => `<circle cx="34" cy="50" r="20" fill="none" stroke="#f5b22a" stroke-width="9"/><path d="M54 50 H104 M88 50 V66 M100 50 V62" stroke="#f5b22a" stroke-width="9" stroke-linecap="round"/>`,
+  map: () => `<path d="M10 20 L42 12 L78 22 L110 14 V84 L78 92 L42 82 L10 90 Z" fill="#f3e2b8" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M42 12 V82 M78 22 V92" stroke="#d6c08c" stroke-width="2.5"/><path d="M22 70 Q40 40 60 54 T96 34" fill="none" stroke="#ef3b44" stroke-width="3" stroke-dasharray="6 5"/><path d="M90 28 l10 10 M100 28 l-10 10" stroke="#ef3b44" stroke-width="4" stroke-linecap="round"/>`,
+  chest: () => `<rect x="18" y="44" width="84" height="44" rx="4" fill="#9a6b4a" stroke="${INK}" stroke-width="3"/><path d="M18 46 Q18 18 60 18 Q102 18 102 46 Z" fill="#b07c52" stroke="${INK}" stroke-width="3"/><rect x="52" y="40" width="16" height="18" rx="2" fill="#f5b22a" stroke="${INK}" stroke-width="2.5"/>${sparkle(30, 16, 7)}${sparkle(94, 12, 6)}`,
+  steps: () => [[30, 74], [54, 58], [74, 44], [96, 28]].map(([x, y], i) => `<ellipse cx="${x}" cy="${y}" rx="8" ry="11" fill="#9a6b4a" transform="rotate(${i % 2 ? 20 : -20} ${x} ${y})"/>`).join(''),
+  crumbs: () => `<path d="M40 30 a26 26 0 1 0 40 0 a12 12 0 0 1 -40 0 Z" fill="#d39a5f" stroke="${INK}" stroke-width="3"/>${[[24, 84], [40, 90], [62, 86], [84, 92], [98, 82]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#d39a5f" stroke="${INK}" stroke-width="1.5"/>`).join('')}`,
+  note: () => `<path d="M24 16 H84 L98 30 V88 H24 Z" fill="#fff" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M84 16 V30 H98" fill="none" stroke="${INK}" stroke-width="3"/><path d="M36 44 h48 M36 58 h48 M36 72 h30" stroke="#97a3b6" stroke-width="4" stroke-linecap="round"/>`,
+  tick: () => `<text x="60" y="58" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="${INK}">טִיק טִיק</text><g fill="none" stroke="#97a3b6" stroke-width="4" stroke-linecap="round"><path d="M14 40 q-8 14 0 28"/><path d="M106 40 q8 14 0 28"/></g>`,
+  toybox: () => `<rect x="16" y="40" width="88" height="50" rx="4" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="36" r="12" fill="#ef3b44" stroke="${INK}" stroke-width="2.5"/><rect x="62" y="20" width="24" height="24" fill="#fad21e" stroke="${INK}" stroke-width="2.5"/><text x="74" y="38" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="16" fill="${INK}">א</text>`,
+  shelf: () => `<rect x="12" y="10" width="96" height="84" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><path d="M12 38 H108 M12 66 H108" stroke="${INK}" stroke-width="3"/>${[[18, '#ef3b44'], [30, '#1f6fd6'], [42, '#2f9e55'], [72, '#fad21e'], [84, '#8a4cc2']].map(([x, c]) => `<rect x="${x}" y="16" width="10" height="22" fill="${c}"/>`).join('')}${[[20, '#fb7a2c'], [34, '#1ea7a0'], [62, '#ef3b44'], [76, '#f58cb2']].map(([x, c]) => `<rect x="${x}" y="44" width="12" height="22" fill="${c}"/>`).join('')}`,
+  guard: () => kid({ g: 'm', skin: '#c68a5e', hair: '#2b2b2b', style: 'short', shirt: '#3b2f86' }, 'happy', 60, 98, 96) + `<path d="M36 22 Q36 8 60 8 Q84 8 84 22 Z" fill="#3b2f86" stroke="${INK}" stroke-width="2.5"/><path d="M34 22 H90" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`,
+  clap: () => `${sparkle(30, 30, 12)}${sparkle(90, 26, 10)}${sparkle(60, 70, 14, '#f58cb2')}${sparkle(24, 76, 8, '#7cc4ff')}${sparkle(98, 72, 9, '#2f9e55')}`,
+  glass: () => `<circle cx="50" cy="44" r="26" fill="#dff1ff" stroke="${INK}" stroke-width="6"/><path d="M70 64 L98 90" stroke="${INK}" stroke-width="10" stroke-linecap="round"/>`,
+  paper: () => `<rect x="20" y="12" width="80" height="78" rx="4" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M34 30 h52 M34 42 h52 M34 54 h34" stroke="#97a3b6" stroke-width="3.5" stroke-linecap="round"/><circle cx="78" cy="72" r="12" fill="#f5b22a" stroke="${INK}" stroke-width="2.5"/><path d="M72 82 L68 96 L78 90 L88 96 L84 82" fill="#ef3b44" stroke="${INK}" stroke-width="2"/>`,
+  drawing: () => `<rect x="14" y="14" width="92" height="72" rx="4" fill="#fff" stroke="${INK}" stroke-width="3"/>${OBJ.house().replace(/<path d="M16 46/, '<g transform="translate(24 20) scale(.6)"><path d="M16 46') + '</g>'}<circle cx="88" cy="30" r="8" fill="#fad21e"/>`,
+  game: () => `<rect x="18" y="24" width="44" height="44" rx="8" fill="#fff" stroke="${INK}" stroke-width="3"/><rect x="58" y="40" width="44" height="44" rx="8" fill="#fff" stroke="${INK}" stroke-width="3" transform="rotate(12 80 62)"/><g fill="${INK}"><circle cx="30" cy="36" r="4"/><circle cx="50" cy="56" r="4"/><circle cx="40" cy="46" r="4"/><circle cx="72" cy="54" r="4"/><circle cx="88" cy="72" r="4"/></g>`,
+};
+const pic = (name, size) => `<svg viewBox="0 0 120 100" aria-hidden="true"${size ? ` style="width:${size}px"` : ''}>${OBJ[name]()}</svg>`;
+const place = (name, x, y, s) => `<g transform="translate(${x - 60 * s} ${y - 100 * s}) scale(${s})">${OBJ[name]()}</g>`;
+
+/* ================= icons ================= */
+const I = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
+  speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/></svg>',
+  noteOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/><path d="M3 3l18 18" stroke-width="2.6"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><g fill="currentColor" stroke="none"><circle cx="8.5" cy="8.5" r="1.7"/><circle cx="15.5" cy="15.5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="15.5" cy="8.5" r="1.7"/><circle cx="8.5" cy="15.5" r="1.7"/></g></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+  print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z" fill="currentColor" fill-opacity=".15"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 5.5h6a3 3 0 0 1 3 3V20a2.5 2.5 0 0 0-2.5-2.5H3z"/><path d="M21 5.5h-6a3 3 0 0 0-3 3V20a2.5 2.5 0 0 1 2.5-2.5H21z"/></svg>',
+  save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M4.5 19.5h15"/></svg>',
+  palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.2-.5-1.3.3-2.8 1.9-2.8H18a3 3 0 0 0 3-3C21 7 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.5" fill="currentColor"/><circle cx="11" cy="7" r="1.5" fill="currentColor"/><circle cx="16" cy="8.5" r="1.5" fill="currentColor"/></svg>',
+};
+
+/* ================= sounds ================= */
+let actx = null;
+function tone(freq, at, dur, type = 'triangle', vol = 0.1) {
+  const t = actx.currentTime + at, o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const SFX = {
+  tap:   () => tone(700, 0, 0.07, 'sine', 0.06),
+  pick:  () => { tone(523, 0, 0.13); tone(784, 0.09, 0.2); },
+  back:  () => { tone(523, 0, 0.1, 'sine', 0.07); tone(392, 0.08, 0.14, 'sine', 0.07); },
+  magic: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.06, 0.15, 'triangle', 0.07)),
+  done:  () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, i === 3 ? 0.6 : 0.2, 'triangle', 0.1)),
+};
+function sfx(name) {
+  if (!store.sound) return;
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    SFX[name]();
+  } catch (e) {}
+}
+
+/* ================= reading aloud ================= */
+const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+let reading = 0;   // token of the current reading, 0 when silent
+function stopReading() {
+  reading = 0;
+  if (canSpeak) speechSynthesis.cancel();
+  app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+}
+function read(items) {   // items: [{ id, text }]
+  if (!canSpeak) return;
+  stopReading();
+  const token = reading = Date.now();
+  const voice = speechSynthesis.getVoices().find(vo => /^(he|iw)/i.test(vo.lang));
+  let i = 0;
+  const next = () => {
+    if (reading !== token) return;
+    app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+    if (i >= items.length) { stopReading(); return; }
+    const it = items[i++];
+    const el = app.querySelector(`.sent[data-sid="${it.id}"]`);
+    if (el) el.classList.add('reading');
+    const u = new SpeechSynthesisUtterance(it.text.replace(/[״"]/g, ''));
+    u.lang = 'he-IL'; if (voice) u.voice = voice; u.rate = 0.85;
+    u.onend = next; u.onerror = next;
+    speechSynthesis.speak(u);
+  };
+  next();
+}
+/* ================= school words =================
+   Four sets of six one-tap questions for young readers: read a word and
+   find its picture, read the name of a pictured thing, one and many
+   (singular and plural, with a common wrong plural as the trap), and the
+   first letter of a word. A right answer on the first try earns a star;
+   a wrong one fades out and the child tries again. */
+const QUIZ_LEN = 6;
+// [picture, word, gender, plural, wrong plural, first letter, two other letters]
+const WORDS = [
+  ['book',     'סֵפֶר',     'm', 'סְפָרִים',     'סֵפֶרִים',     'ס', 'ש', 'צ'],
+  ['pencil',   'עִפָּרוֹן',  'm', 'עֶפְרוֹנוֹת',  'עִפָּרוֹנִים',  'ע', 'א', 'ה'],
+  ['bag',      'תִּיק',     'm', 'תִּיקִים',     'תִּיקוֹת',     'ת', 'ט', 'ד'],
+  ['ball',     'כַּדּוּר',   'm', 'כַּדּוּרִים',   'כַּדּוּרוֹת',   'כ', 'ק', 'ח'],
+  ['board',    'לוּחַ',     'm', 'לוּחוֹת',     'לוּחִים',      'ל', 'נ', 'ר'],
+  ['table',    'שֻׁלְחָן',   'm', 'שֻׁלְחָנוֹת',   'שֻׁלְחָנִים',   'ש', 'ס', 'צ'],
+  ['chair',    'כִּסֵּא',    'm', 'כִּסְאוֹת',    'כִּסְאִים',    'כ', 'ק', 'ח'],
+  ['notebook', 'מַחְבֶּרֶת', 'f', 'מַחְבָּרוֹת',  'מַחְבֶּרֶתִים', 'מ', 'נ', 'ב'],
+  ['bell',     'פַּעֲמוֹן',  'm', 'פַּעֲמוֹנִים', 'פַּעֲמוֹנוֹת',  'פ', 'ב', 'ו'],
+  ['ruler',    'סַרְגֵּל',   'm', 'סַרְגֵּלִים',  'סַרְגֵּלוֹת',   'ס', 'ש', 'ז'],
+].map(([id, word, g, plural, wrong, first, a, b]) => ({ id, word, g, plural, wrong, first, others: [a, b] }));
+const shuffle = list => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+// The first letter with its vowel marks, then the rest of the word.
+function splitFirst(word) {
+  const m = word.match(/^([א-ת][֑-ׇ]*)(.*)$/);
+  return m ? [m[1], m[2]] : [word, ''];
+}
+const many = id => `<svg viewBox="0 0 120 100" aria-hidden="true">${[[34, 86], [86, 86], [60, 54]].map(([x, y]) => place(id, x, y, .48)).join('')}</svg>`;
+
+const SCHOOL_TASKS = [
+  { id: 'read', title: 'קוֹרְאִים מִלִּים', hint: 'קוֹרְאִים מִלָּה וּבוֹחֲרִים תְּמוּנָה',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="34" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="${INK}">תִּיק</text>${place('bag', 60, 84, .45)}</svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => ({
+      q: 'מָה כָּתוּב?',
+      prompt: `<div class="q-word">${o.word}</div>`,
+      answer: o.id,
+      options: shuffle([o, ...shuffle(WORDS.filter(x => x.id !== o.id)).slice(0, 3)]).map(x => ({ id: x.id, html: pic(x.id), label: x.word })),
+      kind: 'blobs',
+    })) },
+  { id: 'what', title: 'מָה בַּתְּמוּנָה?', hint: 'מִסְתַּכְּלִים וְקוֹרְאִים',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${place('pencil', 60, 84, .8)}</svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => ({
+      q: 'מָה בַּתְּמוּנָה?',
+      prompt: `<div class="q-pic">${pic(o.id)}</div>`,
+      answer: o.id,
+      options: shuffle([o, ...shuffle(WORDS.filter(x => x.id !== o.id)).slice(0, 2)]).map(x => ({ id: x.id, html: `<span class="q-opt-word">${x.word}</span>`, label: x.word })),
+      kind: 'words',
+    })) },
+  { id: 'many', title: 'אֶחָד וְהַרְבֵּה', hint: 'בּוֹחֲרִים אֶת הַמִּלָּה הַנְּכוֹנָה',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${place('book', 26, 70, .34)}<path d="M50 46 h18 m-6 -6 l6 6 -6 6" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 59 46)"/>${[[84, 76], [104, 76], [94, 50]].map(([x, y]) => place('book', x, y, .26)).join('')}</svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => {
+      const one = `${o.word} ${o.g === 'f' ? 'אַחַת' : 'אֶחָד'}`;
+      const row = gap => `<div class="q-many"><div><div class="q-pic small">${pic(o.id)}</div><div class="q-sentence">${one}</div></div>
+        <div><div class="q-pic small">${many(o.id)}</div><div class="q-sentence">הַרְבֵּה ${gap}</div></div></div>`;
+      return {
+        q: 'אֵיךְ אוֹמְרִים הַרְבֵּה?',
+        prompt: row(`<span class="q-gap">${' '.repeat(8)}</span>`),
+        filled: row(`<span class="q-gap done">${o.plural}</span>`),
+        answer: 'right',
+        options: shuffle([{ id: 'right', w: o.plural }, { id: 'wrong', w: o.wrong }]).map(x => ({ id: x.id, html: `<span class="q-opt-word">${x.w}</span>`, label: x.w })),
+        kind: 'pair',
+        readAfter: `${one}, הַרְבֵּה ${o.plural}.`,
+      };
+    }) },
+  { id: 'letter', title: 'הָאוֹת הָרִאשׁוֹנָה', hint: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${place('ball', 40, 80, .5)}<text x="92" y="62" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="44" fill="${INK}">כ</text></svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => ({
+      q: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+      prompt: `<div class="q-pic">${pic(o.id)}</div>`,
+      filled: `<div class="q-pic">${pic(o.id)}</div><div class="q-word"><mark>${splitFirst(o.word)[0]}</mark>${splitFirst(o.word)[1]}</div>`,
+      sayWord: true,
+      word: o.word,
+      answer: o.first,
+      options: shuffle([o.first, ...o.others]).map(l => ({ id: l, html: `<span class="q-letter">${l}</span>`, label: l })),
+      kind: 'letters',
+    })) },
+];
+
+/* ================= colors =================
+   Four sets of six one-tap questions for young readers, all about colors:
+   reading a color word, reading the color of a thing, agreement (זָכָר,
+   נְקֵבָה, רַבִּים) and the first letter of a color word. A right answer on
+   the first try earns a star; a wrong one fades out and the child tries again. */
+const FORMS = {   // masculine, feminine, plural
+  red:    ['אָדֹם', 'אֲדֻמָּה', 'אֲדֻמִּים'],
+  orange: ['כָּתֹם', 'כְּתֻמָּה', 'כְּתֻמִּים'],
+  yellow: ['צָהֹב', 'צְהֻבָּה', 'צְהֻבִּים'],
+  green:  ['יָרֹק', 'יְרֻקָּה', 'יְרֻקִּים'],
+  blue:   ['כָּחֹל', 'כְּחֻלָּה', 'כְּחֻלִּים'],
+  purple: ['סָגֹל', 'סְגֻלָּה', 'סְגֻלִּים'],
+  pink:   ['וָרֹד', 'וְרֻדָּה', 'וְרֻדִּים'],
+};
+// Things to look at, drawn in a 120 x 100 box.
+const THINGS = {
+  sun: { def: 'הַשֶּׁמֶשׁ', g: 1, color: 'yellow', pic: () => `<g stroke="#f2a20c" stroke-width="5" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+      const t = a * Math.PI / 180; return `<path d="M${60 + Math.cos(t) * 32} ${50 + Math.sin(t) * 32} L${60 + Math.cos(t) * 44} ${50 + Math.sin(t) * 44}"/>`; }).join('')}</g><circle cx="60" cy="50" r="24" fill="#fad21e" stroke="${INK}" stroke-width="3"/>` },
+  leaf: { def: 'הֶעָלֶה', g: 0, color: 'green', pic: () => `<path d="M20 82 C20 30 60 12 100 16 C104 56 80 90 20 82 Z" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><path d="M20 82 L84 30" stroke="#bde7c8" stroke-width="3"/>` },
+  strawberry: { def: 'הַתּוּת', g: 0, color: 'red', pic: () => `<path d="M60 92 C30 74 26 40 40 30 H80 C94 40 90 74 60 92 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M40 30 L50 18 L60 28 L70 18 L80 30 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>${[[50, 46], [68, 44], [58, 60], [46, 64], [72, 62], [60, 76]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="#ffe08a"/>`).join('')}` },
+  orange: { def: 'הַתַּפּוּז', g: 0, color: 'orange', pic: () => `<circle cx="60" cy="56" r="32" fill="#fb7a2c" stroke="${INK}" stroke-width="3"/><path d="M60 24 q10 -14 24 -8 q-8 12 -24 8 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2.5"/><circle cx="48" cy="46" r="3" fill="#fff" opacity=".6"/>` },
+  grapes: { def: 'הָעֲנָבִים', g: 2, color: 'purple', pic: () => `<path d="M60 10 V22" stroke="#9a6b4a" stroke-width="4" stroke-linecap="round"/>${[[46, 32], [60, 30], [74, 32], [40, 46], [54, 46], [68, 46], [80, 46], [48, 60], [62, 60], [74, 60], [56, 74], [68, 74], [62, 88]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9" fill="#8a4cc2" stroke="${INK}" stroke-width="2.2"/>`).join('')}` },
+  sea: { def: 'הַיָּם', g: 0, color: 'blue', pic: () => `<path d="M6 40 q14 -12 27 0 t27 0 t27 0 t27 0 V92 H6 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M6 60 q14 -10 27 0 t27 0 t27 0 t27 0" fill="none" stroke="#fff" stroke-width="3"/><path d="M12 78 q14 -8 27 0 t27 0 t27 0" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/>` },
+  sky: { def: 'הַשָּׁמַיִם', g: 2, color: 'blue', pic: () => `<rect x="6" y="8" width="108" height="84" rx="12" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><g fill="#fff" stroke="${INK}" stroke-width="2"><path d="M30 46 a8 8 0 0 1 2 -15 a11 11 0 0 1 20 -3 a9 9 0 0 1 12 10 a6 6 0 0 1 -2 8 Z"/><path d="M66 74 a7 7 0 0 1 2 -12 a9 9 0 0 1 16 -2 a7 7 0 0 1 10 8 a5 5 0 0 1 -2 6 Z"/></g>` },
+  pig: { def: 'הַחֲזִיר', g: 0, color: 'pink', pic: () => `<path d="M30 30 L26 10 L46 22 Z M90 30 L94 10 L74 22 Z" fill="#f58cb2" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="52" r="36" fill="#f58cb2" stroke="${INK}" stroke-width="3"/><circle cx="46" cy="42" r="4" fill="${INK}"/><circle cx="74" cy="42" r="4" fill="${INK}"/><ellipse cx="60" cy="62" rx="15" ry="11" fill="#ffb3cc" stroke="${INK}" stroke-width="2.5"/><circle cx="55" cy="62" r="3" fill="${INK}"/><circle cx="65" cy="62" r="3" fill="${INK}"/>` },
+  banana: { def: 'הַבָּנָנָה', g: 1, color: 'yellow', pic: () => `<path d="M18 30 C24 76 72 92 104 66 C96 64 92 60 90 56 C66 72 38 62 30 26 Z" fill="#fad21e" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M18 30 L24 22 L30 26" fill="none" stroke="#7a5236" stroke-width="4" stroke-linecap="round"/>` },
+  tomato: { def: 'הָעַגְבָנִיָּה', g: 1, color: 'red', pic: () => `<circle cx="60" cy="58" r="32" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M60 26 L52 18 L58 30 L44 28 L58 34 L60 42 L62 34 L76 28 L62 30 L68 18 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` },
+  frog: { def: 'הַצְּפַרְדֵּעַ', g: 1, color: 'green', pic: () => `<ellipse cx="60" cy="62" rx="40" ry="28" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="34" r="12" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="80" cy="34" r="12" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="33" r="6" fill="#fff"/><circle cx="80" cy="33" r="6" fill="#fff"/><circle cx="40" cy="34" r="3" fill="${INK}"/><circle cx="80" cy="34" r="3" fill="${INK}"/><path d="M44 66 q16 12 32 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>` },
+  carrots: { def: 'הַגְּזָרִים', g: 2, color: 'orange', pic: () => [[36, 0], [60, 4], [84, 0]].map(([x, d]) => `<path d="M${x - 9} ${26 + d} L${x + 9} ${26 + d} L${x} ${88 + d} Z" fill="#fb7a2c" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M${x} ${26 + d} l-6 -14 M${x} ${26 + d} l0 -16 M${x} ${26 + d} l6 -14" stroke="#2f9e55" stroke-width="3.5" stroke-linecap="round"/>`).join('') },
+};
+const LETTER_ITEMS = [   // [color, right letter, two other letters]
+  ['red', 'א', 'ע', 'ה'], ['blue', 'כ', 'ק', 'ח'], ['green', 'י', 'ו', 'ר'], ['yellow', 'צ', 'ס', 'ז'],
+  ['purple', 'ס', 'ש', 'צ'], ['pink', 'ו', 'ב', 'ז'], ['orange', 'כ', 'ק', 'ת'],
+];
+const blob = (hex, size = 70) => `<svg viewBox="0 0 100 100" aria-hidden="true" style="width:${size}px">${drop(hex, 'happy', 50, 98, 94)}</svg>`;
+const thingPic = t => `<svg viewBox="0 0 120 100" aria-hidden="true">${THINGS[t].pic()}</svg>`;
+
+const COLOR_TASKS = [
+  { id: 'read', title: 'קוֹרְאִים צְבָעִים', hint: 'קוֹרְאִים מִלָּה וּבוֹחֲרִים צֶבַע',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="44" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="30" fill="${INK}">כָּחֹל</text>${drop(C.blue.hex, 'happy', 60, 84, 34)}</svg>`,
+    make: () => shuffle(COLORS).slice(0, QUIZ_LEN).map(c => ({
+      q: 'אֵיזֶה צֶבַע כָּתוּב?',
+      prompt: `<div class="q-word">${c.name}</div>`,
+      answer: c.id,
+      options: shuffle([c, ...shuffle(COLORS.filter(o => o.id !== c.id)).slice(0, 3)]).map(o => ({ id: o.id, html: blob(o.hex), label: o.name })),
+      kind: 'blobs',
+    })) },
+  { id: 'thing', title: 'מָה הַצֶּבַע?', hint: 'מִסְתַּכְּלִים וְקוֹרְאִים',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><g transform="translate(20 0) scale(.8)">${THINGS.strawberry.pic()}</g></svg>`,
+    make: () => shuffle(['sun', 'leaf', 'strawberry', 'orange', 'grapes', 'sea', 'pig']).slice(0, QUIZ_LEN).map(t => {
+      const right = C[THINGS[t].color];
+      return {
+        q: `בְּאֵיזֶה צֶבַע ${THINGS[t].def}?`,
+        prompt: `<div class="q-pic">${thingPic(t)}</div>`,
+        answer: right.id,
+        options: shuffle([right, ...shuffle(COLORS.filter(o => o.id !== right.id)).slice(0, 2)]).map(o => ({ id: o.id, html: `<span class="q-opt-word">${o.name}</span>`, label: o.name })),
+        kind: 'words',
+      };
+    }) },
+  { id: 'agree', title: 'זָכָר, נְקֵבָה, רַבִּים', hint: 'מַשְׁלִימִים אֶת הַמִּשְׁפָּט',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="36" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="22" fill="${INK}">הַשֶּׁמֶשׁ</text><rect x="28" y="50" width="64" height="24" rx="6" fill="none" stroke="#97a3b6" stroke-width="3" stroke-dasharray="6 5"/></svg>`,
+    make: () => shuffle(['sun', 'strawberry', 'leaf', 'banana', 'grapes', 'orange', 'tomato', 'sky', 'frog', 'carrots']).slice(0, QUIZ_LEN).map(t => {
+      const th = THINGS[t], forms = FORMS[th.color];
+      return {
+        q: 'אֵיזוֹ מִלָּה מַתְאִימָה?',
+        prompt: `<div class="q-pic small">${thingPic(t)}</div><div class="q-sentence">${th.def} <span class="q-gap">${' '.repeat(10)}</span>.</div>`,
+        filled: `<div class="q-pic small">${thingPic(t)}</div><div class="q-sentence">${th.def} <span class="q-gap done">${forms[th.g]}</span>.</div>`,
+        answer: String(th.g),
+        options: shuffle([0, 1, 2]).map(g => ({ id: String(g), html: `<span class="q-opt-word">${forms[g]}</span>`, label: forms[g] })),
+        kind: 'words',
+        readAfter: `${th.def} ${forms[th.g]}.`,
+      };
+    }) },
+  { id: 'letter', title: 'הָאוֹת הָרִאשׁוֹנָה', hint: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${drop(C.red.hex, 'happy', 38, 80, 52)}<text x="88" y="62" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="44" fill="${INK}">א</text></svg>`,
+    make: () => shuffle(LETTER_ITEMS).slice(0, QUIZ_LEN).map(([id, right, a, b]) => ({
+      q: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+      prompt: `<div class="q-pic">${blob(C[id].hex, 120)}</div>`,
+      filled: `<div class="q-pic">${blob(C[id].hex, 120)}</div><div class="q-word"><mark>${splitFirst(C[id].name)[0]}</mark>${splitFirst(C[id].name)[1]}</div>`,
+      sayWord: true,
+      word: C[id].name,
+      answer: right,
+      options: shuffle([right, a, b]).map(l => ({ id: l, html: `<span class="q-letter">${l}</span>`, label: l })),
+      kind: 'letters',
+    })) },
+];
+
+let quiz = null;   // { task, items, i, stars, missed, solved }
+function startQuiz(id) {
+  const task = ALL_TASKS.find(t => t.id === id);
+  quiz = { task, items: task.make(), i: 0, stars: 0, missed: new Set(), solved: false };
+  view = 'quiz'; render(); window.scrollTo(0, 0);
+  sayQuestion();
+}
+function sayQuestion() {
+  if (!quiz || view !== 'quiz') return;
+  const it = quiz.items[quiz.i];
+  read(it.sayWord ? [{ id: 'q', text: it.q }, { id: 'q', text: it.word }] : [{ id: 'q', text: it.q }]);
+}
+function quizStars(n, of) {
+  return `<span class="q-stars" aria-label="${n} מִתּוֹךְ ${of}">${Array.from({ length: of }, (_, k) => `<span class="${k < n ? 'on' : ''}">${I.star}</span>`).join('')}</span>`;
+}
+function quizView() {
+  const it = quiz.items[quiz.i];
+  const dots = quiz.items.map((_, k) => `<span class="q-dot${k < quiz.i ? ' done' : ''}${k === quiz.i ? ' cur' : ''}"></span>`).join('');
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <div class="q-dots" aria-label="שְׁאֵלָה ${quiz.i + 1} מִתּוֹךְ ${quiz.items.length}">${dots}</div>
+      ${soundBtn()}
+    </div>
+    <section class="quiz panel">
+      <div class="q-head">
+        ${canSpeak ? `<button class="spk" data-act="q-say" data-key="q-say" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+        <h2>${it.q}</h2>
+      </div>
+      <div class="q-prompt" id="q-prompt">${quiz.solved && it.filled ? it.filled : it.prompt}</div>
+      <div class="q-options ${it.kind}">${it.options.map(o => `<button class="q-opt${quiz.missed.has(o.id) ? ' miss' : ''}${quiz.solved && o.id === it.answer ? ' right' : ''}"
+          data-act="q-answer" data-id="${o.id}" data-key="opt-${o.id}" aria-label="${o.label}" ${quiz.missed.has(o.id) || quiz.solved ? 'disabled' : ''}>${o.html}</button>`).join('')}</div>
+      <p class="q-feedback ${quiz.solved ? 'good' : quiz.missed.size ? 'again' : ''}" role="status">${quiz.solved ? `${I.star}כָּל הַכָּבוֹד!` : quiz.missed.size ? 'נַסּוּ שׁוּב' : ''}</p>
+    </section>`;
+}
+function quizDoneView() {
+  const n = quiz.stars, of = quiz.items.length;
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <h2>${quiz.task.title}</h2>
+      ${soundBtn()}
+    </div>
+    <div class="start q-done">
+      ${quizStars(n, of)}
+      <h1>${n === of ? 'מְצֻיָּן!' : n >= of / 2 ? 'כָּל הַכָּבוֹד!' : 'יָפֶה מְאוֹד!'}</h1>
+      <p>${n === 1 ? 'כּוֹכָב אֶחָד' : `${n} כּוֹכָבִים`} מִתּוֹךְ ${of}</p>
+      <div class="actions">
+        <button class="act primary big" data-act="quiz" data-task="${quiz.task.id}" data-key="again">${I.next}עוֹד פַּעַם</button>
+        <button class="act" data-act="q-home" data-key="q-home">${I.book}לְכָל הַמְּשִׂימוֹת</button>
+      </div>
+    </div>`;
+}
+let quizTimer = null;
+function quizAnswer(id) {
+  const it = quiz.items[quiz.i];
+  if (quiz.solved) return;
+  if (id === it.answer) {
+    quiz.solved = true;
+    if (!quiz.missed.size) quiz.stars++;
+    sfx('pick');
+    render();
+    if (it.readAfter) read([{ id: 'q', text: it.readAfter }]);
+    quizTimer = setTimeout(() => {
+      if (view !== 'quiz') return;
+      if (quiz.i < quiz.items.length - 1) {
+        quiz.i++; quiz.missed = new Set(); quiz.solved = false;
+        render(); sayQuestion();
+      } else {
+        store.tasks = store.tasks || {};
+        store.tasks[quiz.task.id] = Math.max(store.tasks[quiz.task.id] || 0, quiz.stars);
+        view = 'quizDone'; sfx('done'); render(); window.scrollTo(0, 0);
+      }
+    }, it.readAfter ? 1800 : 1100);
+  } else {
+    quiz.missed.add(id);
+    sfx('back');
+    render();
+  }
+}
+// Handles the task screens' buttons; returns true when it did.
+function quizClick(b) {
+  switch (b.dataset.act) {
+    case 'quiz': clearTimeout(quizTimer); sfx('tap'); startQuiz(b.dataset.task); return true;
+    case 'q-answer': quizAnswer(b.dataset.id); return true;
+    case 'q-say': sayQuestion(); return true;
+    case 'q-home': clearTimeout(quizTimer); sfx('tap'); view = 'start'; render(); window.scrollTo(0, 0); return true;
+    case 'back':
+      if (view !== 'quiz' && view !== 'quizDone') return false;
+      clearTimeout(quizTimer); sfx('back'); view = 'start'; render(); window.scrollTo(0, 0); return true;
+  }
+  return false;
+}
+
+
+const GROUPS = [
+  { title: 'מִלִּים מִבֵּית הַסֵּפֶר', tasks: SCHOOL_TASKS.map(t => Object.assign(t, { id: 'school-' + t.id })) },
+  { title: 'צְבָעִים', tasks: COLOR_TASKS.map(t => Object.assign(t, { id: 'colors-' + t.id })) },
+];
+const ALL_TASKS = GROUPS.flatMap(g => g.tasks);
+
+/* ================= state =================
+   The best score of each task and the sound setting, kept in this browser only. */
+const KEY = 'nitzanim-tasks';
+let store = { sound: true, tasks: {} };
+try { const saved = JSON.parse(localStorage.getItem(KEY) || 'null'); if (saved) store = Object.assign(store, saved); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} };
+let view = 'start';
+
+/* ================= rendering ================= */
+const app = document.getElementById('app');
+function render() {
+  stopReading();
+  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  app.innerHTML = ({ start: startView, quiz: quizView, quizDone: quizDoneView })[view]();
+  if (focusKey) {
+    const el = app.querySelector(`[data-key="${focusKey}"]`);
+    if (el && !el.disabled) el.focus();
+  }
+  save();
+}
+function soundBtn() {
+  return `<button class="icon-btn${store.sound ? '' : ' off'}" data-act="sound" data-key="sound" aria-pressed="${store.sound}" aria-label="צְלִילִים">${store.sound ? I.note : I.noteOff}</button>`;
+}
+function startView() {
+  return `<div class="bar"><span style="flex:1"></span>${soundBtn()}</div>
+    <div class="start">
+      <h1>נִצָּנִים בְּשָׂפָה</h1>
+      <p>מְשִׂימוֹת קְצָרוֹת לַצְּעִירִים</p>
+      ${GROUPS.map(g => `<section class="tasks-sec">
+        <h2>${g.title}</h2>
+        <div class="task-cards">${g.tasks.map(t => {
+          const best = store.tasks[t.id];
+          return `<button class="kind-card task-card" data-act="quiz" data-task="${t.id}" data-key="task-${t.id}">
+            ${t.icon()}<strong>${t.title}</strong><small>${t.hint}</small>
+            ${best !== undefined ? quizStars(best, QUIZ_LEN) : ''}
+          </button>`;
+        }).join('')}</div>
+      </section>`).join('')}
+    </div>`;
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled) return;
+  if (b.dataset.act === 'sound') { store.sound = !store.sound; render(); sfx('tap'); return; }
+  quizClick(b);
+});
+
+if (canSpeak) speechSynthesis.getVoices();   // some browsers load voices lazily
+render();
+})();
+</script>
+<footer class="hh-credit" dir="rtl" lang="he" style="text-align:center;font-size:15px;line-height:1.5;margin:24px 16px 16px;color:inherit;opacity:.8;font-family:inherit">נוצר על ידי הדס הרצמן</footer>
+</body>
+</html>
