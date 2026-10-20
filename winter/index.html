@@ -122,7 +122,7 @@ svg { display: block; }
 .hint-line { text-align: center; color: var(--ink-soft); margin: 4px 0 0; }
 .drops {
   display: flex; flex-wrap: wrap; justify-content: center; gap: 20px 20px;
-  padding-block: 26px 20px; max-width: 940px; margin: 0 auto;
+  padding-block: 26px 20px; max-width: 600px; margin: 0 auto;
 }
 .drop {
   position: relative; width: 116px; aspect-ratio: 100 / 124; max-width: 100%;
@@ -145,6 +145,7 @@ svg { display: block; }
 .drop .lbl { max-width: 100%; }
 .drop.long .ic, .drop.long .ic svg { width: 24px; height: 24px; }
 .drop.long .lbl { font-size: .92rem; line-height: 1.1; }
+.drop.xlong .lbl { font-size: .8rem; }
 .drop.challenge .in { color: var(--gold-ink); }
 .drop .done, .level .done {
   position: absolute; top: 18%; inset-inline-end: -4px; width: 32px; height: 32px; border-radius: 50%;
@@ -252,6 +253,33 @@ svg { display: block; }
 .connect-end:empty { display: none; }
 .connect-end { display: flex; flex-direction: column; gap: 18px; }
 
+/* ---------- see, think, wonder ---------- */
+.stw-photo { border: 0; padding: 0; background: none; border-radius: 16px; overflow: hidden; cursor: zoom-in; display: block; width: 100%; }
+.stw-photo img { display: block; width: 100%; height: auto; max-height: 420px; object-fit: contain; background: var(--sky-bottom); }
+.stw-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.stw-tab {
+  border: 2px solid var(--line); background: var(--card); border-radius: 999px; padding: 8px 6px;
+  font-family: var(--display); font-size: 1.05rem; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.stw-tab .n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: var(--line); color: var(--ink); font-size: .9rem; }
+.stw-tab.on { border-color: var(--accent); background: var(--accent); color: #fff; }
+.stw-tab.on .n { background: #fff; color: var(--accent); }
+.stw-step { display: flex; flex-direction: column; gap: 12px; }
+.stw-step h3 { font-size: 1.5rem; color: var(--accent); }
+.stw-ask { margin: 0; font-size: 1.15rem; }
+.stw-prompts { margin: 0; padding-inline-start: 1.2em; color: var(--ink-soft); display: grid; gap: 4px; }
+.stw-step textarea {
+  width: 100%; min-height: 110px; resize: vertical; padding: 12px 14px; border-radius: 14px;
+  border: 2px solid var(--line); background: var(--sky-bottom); color: var(--ink); font: inherit;
+}
+.stw-step textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.stw-end:empty { display: none; }
+.stw-end { display: flex; flex-direction: column; gap: 18px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.zoom { position: fixed; inset: 0; z-index: 20; background: rgba(8, 14, 26, .9); display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); cursor: zoom-out; }
+.zoom img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 10px; }
+.zoom-close { position: absolute; top: max(16px, env(safe-area-inset-top, 0px)); inset-inline-start: 16px; font-size: 1.3rem; }
+
 footer.hh-credit { position: relative; z-index: 1; text-align: center; font-size: 15px; line-height: 1.5; margin: 24px 16px 16px; opacity: .8; }
 
 @media (prefers-reduced-motion: reduce) {
@@ -279,17 +307,18 @@ const SUBJECTS = {
   home:      { name: g => g <= 2 ? 'מוֹלֶדֶת' : 'מולדת',     color: '#1b7896' },
   geo:       { name: () => 'גאוגרפיה',  color: '#1b7896' },
   art:       { name: g => g <= 2 ? 'אָמָּנוּת' : 'אומנות',    color: '#8a4bb0' },
+  stw:       { name: g => g <= 2 ? 'רוֹאִים, חוֹשְׁבִים, שׁוֹאֲלִים' : 'רואים, חושבים, שואלים', color: '#b8682a' },
   link:      { name: g => g <= 2 ? 'לוּחַ מָה הַקֶּשֶׁר' : 'לוח מה הקשר', color: '#b04a78' },
   challenge: { name: g => g <= 2 ? 'אֶתְגָּר' : 'אתגר',      color: '#f2b705' },
 };
 
 const GRADES = [
-  { n: 1, letter: 'א', color: '#e4572e', drops: ['math', 'lang', 'sci', 'home', 'art', 'link', 'challenge'] },
-  { n: 2, letter: 'ב', color: '#f08a24', drops: ['math', 'lang', 'sci', 'home', 'art', 'link', 'challenge'] },
-  { n: 3, letter: 'ג', color: '#e8b81a', drops: ['math', 'lang', 'sci', 'eng', 'home', 'link', 'challenge'] },
-  { n: 4, letter: 'ד', color: '#3a9a6e', drops: ['math', 'lang', 'sci', 'eng', 'home', 'link', 'challenge'] },
-  { n: 5, letter: 'ה', color: '#3f73c4', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'link', 'challenge'] },
-  { n: 6, letter: 'ו', color: '#8a62c2', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'link', 'challenge'] },
+  { n: 1, letter: 'א', color: '#e4572e', drops: ['math', 'lang', 'sci', 'home', 'art', 'stw', 'link', 'challenge'] },
+  { n: 2, letter: 'ב', color: '#f08a24', drops: ['math', 'lang', 'sci', 'home', 'art', 'stw', 'link', 'challenge'] },
+  { n: 3, letter: 'ג', color: '#e8b81a', drops: ['math', 'lang', 'sci', 'eng', 'home', 'stw', 'link', 'challenge'] },
+  { n: 4, letter: 'ד', color: '#3a9a6e', drops: ['math', 'lang', 'sci', 'eng', 'home', 'stw', 'link', 'challenge'] },
+  { n: 5, letter: 'ה', color: '#3f73c4', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'stw', 'link', 'challenge'] },
+  { n: 6, letter: 'ו', color: '#8a62c2', drops: ['math', 'lang', 'sci', 'eng', 'geo', 'stw', 'link', 'challenge'] },
 ];
 
 const CONTENT = {
@@ -650,6 +679,54 @@ const CONNECT = {
 const GROUP_COLORS = ['#e9b949', '#6cb47a', '#5b8fd1', '#a07cd0'];
 
 /* ================================================================
+   רואים, חושבים, שואלים: תמונה אחת לכל כיתה, שאלות מנחות לכל שלב,
+   ו"מה כדאי לדעת" לסיום. כיתה בלי תמונה לא מקבלת את הטיפה הזו.
+   ================================================================ */
+const STW = {
+  1: {
+    img: 'images/stw-g1.webp', w: 1176, h: 662,
+    alt: 'שני ילדים במעילים ובמגפיים עומדים במים חומים בין עצי אקליפטוס',
+    see: ['מָה לוֹבְשִׁים הַיְּלָדִים?', 'אֵיפֹה הֵם עוֹמְדִים?', 'אֵיזֶה צֶבַע יֵשׁ לַמַּיִם?'],
+    think: ['לָמָּה יֵשׁ כָּל כָּךְ הַרְבֵּה מַיִם בֵּין הָעֵצִים?', 'מָה הַיְּלָדִים מַרְגִּישִׁים, לְדַעְתְּכֶם?', 'לָמָּה הֵם נוֹעֲלִים מַגָּפַיִם?'],
+    wonder: ['מָה הֲיִיתֶם רוֹצִים לִשְׁאֹל אֶת הַיְּלָדִים?', 'מָה עוֹד אֶפְשָׁר לִשְׁאֹל עַל הַמַּיִם?'],
+    learn: 'אַחֲרֵי גֶּשֶׁם חָזָק הָאֲדָמָה מְלֵאָה בְּמַיִם, וְהַמַּיִם נֶאֱסָפִים בַּמְּקוֹמוֹת הַנְּמוּכִים. הַמַּיִם חוּמִים כִּי הֵם סוֹחֲפִים אִתָּם אֲדָמָה. מַגָּפַיִם שׁוֹמְרִים עַל הָרַגְלַיִם יְבֵשׁוֹת. נִכְנָסִים לְמַיִם רַק עִם מְבֻגָּר, כִּי לֹא תָּמִיד רוֹאִים כַּמָּה הֵם עֲמֻקִּים.',
+  },
+  2: {
+    img: 'images/stw-g2.webp', w: 435, h: 329,
+    alt: 'מכונית נוסעת בשלולית ומתיזה גל גדול של מים על אדם שעומד בצד הכביש',
+    see: ['מָה עוֹשָׂה הַמְּכוֹנִית?', 'מָה קוֹרֶה לָאִישׁ שֶׁעוֹמֵד בַּצַּד?', 'אֵיךְ נִרְאֶה הַכְּבִישׁ?'],
+    think: ['מָה גָּרַם לַמַּיִם לָעוּף כָּל כָּךְ גָּבוֹהַּ?', 'אֵיךְ מַרְגִּישׁ הָאִישׁ? וְאֵיךְ מַרְגִּישׁ הַנַּהָג?', 'הַאִם הַנַּהָג שָׂם לֵב לָאִישׁ?'],
+    wonder: ['מָה הָיָה קוֹרֶה אִם הַמְּכוֹנִית הָיְתָה נוֹסַעַת לְאַט?', 'אֵיךְ אֶפְשָׁר לְהִזָּהֵר לְיַד הַכְּבִישׁ בְּיוֹם גֶּשֶׁם?'],
+    learn: 'כְּשֶׁמְּכוֹנִית נוֹסַעַת מַהֵר בְּתוֹךְ שְׁלוּלִית, הַגַּלְגַּלִּים דּוֹחֲפִים אֶת הַמַּיִם הַצִּדָּה בְּכֹחַ. כְּכָל שֶׁהַמְּכוֹנִית מְהִירָה יוֹתֵר, הַמַּיִם עָפִים גָּבוֹהַּ יוֹתֵר. נַהָג זָהִיר מְאַט לְיַד שְׁלוּלִיּוֹת וּלְיַד אֲנָשִׁים. וּבְיוֹם גֶּשֶׁם כְּדַאי לָלֶכֶת רָחוֹק מִשְּׂפַת הַכְּבִישׁ.',
+  },
+  3: {
+    img: 'images/stw-g3.webp', w: 1280, h: 960,
+    alt: 'להקה גדולה של עגורים בשדה, כמה עגורים עפים, וברקע הרים ועננים',
+    see: ['כמה ציפורים יש בתמונה, בערך? איך הן נראות?', 'מה רואים ברקע?', 'מה עושות הציפורים שבאוויר?'],
+    think: ['למה כל כך הרבה ציפורים התאספו במקום אחד?', 'באיזו עונה צולמה התמונה? מה בתמונה רומז על כך?', 'מה הציפורים מחפשות בשדה?'],
+    wonder: ['מאיפה הגיעו הציפורים, ולאן הן ימשיכו?', 'מה צריך להיות במקום הזה כדי שהציפורים ירצו לחזור אליו?'],
+    learn: 'אלה עגורים בעמק החולה. בכל סתיו עוברים בישראל מאות אלפי עגורים בדרכם מאירופה לאפריקה, ועשרות אלפים מהם נשארים בעמק החולה כל החורף. הם בוחרים במקום הזה כי בחורף יש בו מים רדודים לשינה בטוחה ומזון בשדות. העננים הכבדים ברקע הם עננים של חורף.',
+  },
+  4: {
+    img: 'images/stw-g4.webp', w: 1280, h: 960,
+    alt: 'רחוב בעיר מוצף במים חומים, שתי מכוניות עומדות בתוך המים, ומעקה לבן בחזית',
+    see: ['מה קורה ברחוב?', 'איפה עומדות המכוניות, ועד כמה הן בתוך המים?', 'מה רואים מסביב: חנויות, מעקות, עצים, שלטים?'],
+    think: ['מאיפה הגיעו כל המים? למה הם לא נעלמים?', 'למה המים חומים?', 'למה יש ליד המים מעקה לבן ושלט?'],
+    wonder: ['מה העירייה יכולה לעשות כדי שזה לא יקרה שוב?', 'מה כדאי לעשות אם נתקעים ברחוב מוצף?', 'לאן הולכים המים האלה אחרי שהגשם נפסק?'],
+    learn: 'כשיורד הרבה גשם בזמן קצר, מערכת הניקוז של העיר לא מספיקה להעביר את כל המים, והרחוב מוצף. בעיר יש הרבה אספלט ובטון, ולכן המים לא נבלעים באדמה. המים חומים כי הם סוחפים איתם בוץ ואדמה. אסור לנסוע או ללכת במים זורמים, גם כשהם נראים רדודים: הם יכולים להיות עמוקים וחזקים יותר ממה שנראה.',
+  },
+  6: {
+    img: 'images/stw-g6.webp', w: 310, h: 310,
+    alt: 'דובת קוטב עם גורים עומדת על משטח קרח, וברקע הרים מושלגים ושמש',
+    see: ['אילו בעלי חיים רואים, וכמה הם?', 'מה יש סביבם: קרקע, הרים, עצים, שמש?', 'מה מוזר או מפתיע בתמונה?'],
+    think: ['איפה לדעתכם צולמה התמונה? מה בתמונה תומך ברעיון שלכם, ומה סותר אותו?', 'האם זו תמונה אמיתית, או תמונה ששולבה במחשב? איך אפשר לבדוק?', 'מה הקשר בין הדובים לבין הקרח שהם עומדים עליו?'],
+    wonder: ['מה יקרה לדובי הקוטב אם יהיה פחות קרח?', 'איך בודקים אם תמונה שראינו ברשת היא אמיתית?'],
+    learn: 'דובי קוטב חיים באזור הקוטב הצפוני וצדים כלבי ים מעל הקרח שצף על הים. בגלל ההתחממות של כדור הארץ, הקרח נמס מוקדם יותר באביב ונוצר מאוחר יותר בסתיו, ולדובים נשאר פחות זמן לצוד. הרקע בתמונה הזו לא מתאים לאזור הקוטב: יש בו יערות ובתים על ההרים, ולכן ייתכן שהיא שולבה מכמה תמונות. בכל תמונה כדאי לשאול מאיפה היא הגיעה ומי צילם אותה.',
+  },
+};
+GRADES.forEach(g => { if (!STW[g.n]) g.drops = g.drops.filter(k => k !== 'stw'); });
+
+/* ================================================================
    Drawing
    ================================================================ */
 const ICONS = {
@@ -660,6 +737,7 @@ const ICONS = {
   home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M12 21.5s-6.5-5.8-6.5-11.5a6.5 6.5 0 0 1 13 0c0 5.7-6.5 11.5-6.5 11.5z"/><circle cx="12" cy="10" r="2.3"/></svg>',
   geo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3.2 3 3.2 15 0 18M12 3c-3.2 3-3.2 15 0 18"/></svg>',
   art: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linejoin="round"><path d="M12 3a9 9 0 1 0 0 18c1.2 0 2-.8 2-1.8 0-1.4-1.2-1.6-1.2-2.8 0-1 .8-1.6 1.8-1.6H17a4 4 0 0 0 4-4C21 6.6 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.1" fill="currentColor"/><circle cx="10.2" cy="7" r="1.1" fill="currentColor"/><circle cx="14.8" cy="7" r="1.1" fill="currentColor"/></svg>',
+  stw: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>',
   link: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="7.5" height="7.5" rx="2"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" opacity=".6"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2" opacity=".6"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2"/></svg>',
   challenge: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>',
 };
@@ -770,7 +848,7 @@ function renderGrade(g) {
     <div class="drops">
       ${g.drops.map((k, i) => {
         const s = SUBJECTS[k], name = subjectName(k, g.n), fin = isDone(g, k);
-        return `<button class="drop${k === 'challenge' ? ' challenge' : ''}${name.length > 10 ? ' long' : ''}" data-go="g${g.n}-${k}" style="animation-delay:${(i * .12).toFixed(2)}s" aria-label="${name}${fin ? ', הושלם' : ''}">
+        return `<button class="drop${k === 'challenge' ? ' challenge' : ''}${name.length > 10 ? ' long' : ''}${name.length > 16 ? ' xlong' : ''}" data-go="g${g.n}-${k}" style="animation-delay:${(i * .12).toFixed(2)}s" aria-label="${name}${fin ? ', הושלם' : ''}">
           ${dropSVG(s.color, k)}
           <span class="in"><span class="ic">${ICONS[k]}</span><span class="lbl">${name}</span></span>
           ${fin ? `<span class="done">${CHECK}</span>` : ''}
@@ -952,6 +1030,72 @@ function renderChallenge(g) {
   });
 }
 
+const NOTES_KEY = 'winter-stw-notes';
+let notes = {};
+try { notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}') || {}; } catch (e) {}
+const saveNotes = () => { try { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); } catch (e) {} };
+
+function renderSTW(g) {
+  const d = STW[g.n], s = SUBJECTS.stw;
+  const steps = [
+    { id: 'see', name: tx(g, 'רואים', 'רוֹאִים'),
+      ask: tx(g, 'מה אתם רואים בתמונה? כתבו רק את מה שרואים בעיניים, בלי לנחש.', 'מָה אַתֶּם רוֹאִים בַּתְּמוּנָה? כִּתְבוּ רַק מָה שֶׁרוֹאִים בָּעֵינַיִם.'),
+      hint: tx(g, 'כתבו כאן מה אתם רואים...', 'כִּתְבוּ כָּאן מָה אַתֶּם רוֹאִים...') },
+    { id: 'think', name: tx(g, 'חושבים', 'חוֹשְׁבִים'),
+      ask: tx(g, 'מה אתם חושבים שקורה כאן? מה בתמונה גורם לכם לחשוב כך?', 'מָה אַתֶּם חוֹשְׁבִים שֶׁקּוֹרֶה כָּאן? לָמָּה?'),
+      hint: tx(g, 'כתבו כאן מה אתם חושבים...', 'כִּתְבוּ כָּאן מָה אַתֶּם חוֹשְׁבִים...') },
+    { id: 'wonder', name: tx(g, 'שואלים', 'שׁוֹאֲלִים'),
+      ask: tx(g, 'אילו שאלות עולות לכם כשאתם מסתכלים על התמונה?', 'אֵילוּ שְׁאֵלוֹת עוֹלוֹת לָכֶם כְּשֶׁאַתֶּם מִסְתַּכְּלִים עַל הַתְּמוּנָה?'),
+      hint: tx(g, 'כתבו כאן את השאלות שלכם...', 'כִּתְבוּ כָּאן אֶת הַשְּׁאֵלוֹת שֶׁלָּכֶם...') },
+  ];
+  let at = 0;
+  app.innerHTML = `<div class="view">${header(g, 'stw')}
+    <section class="panel stw" style="--accent:${s.color}">
+      <button class="stw-photo" type="button" aria-label="${tx(g, 'הגדלת התמונה', 'הַגְדָּלַת הַתְּמוּנָה')}">
+        <img src="${d.img}" alt="${esc(d.alt)}" width="${d.w}" height="${d.h}">
+      </button>
+      <div class="stw-tabs" role="tablist">${steps.map((st, i) => `<button class="stw-tab" role="tab" data-step="${i}"><span class="n">${i + 1}</span>${st.name}</button>`).join('')}</div>
+      <div class="stw-step"></div>
+      <div class="stw-end"></div>
+    </section></div>
+    <div class="zoom" hidden><img src="${d.img}" alt="${esc(d.alt)}"><button class="back zoom-close" type="button" aria-label="${tx(g, 'סגירה', 'סְגִירָה')}">✕</button></div>`;
+  const panel = app.querySelector('.panel'), stepBox = panel.querySelector('.stw-step'), zoom = app.querySelector('.zoom');
+  panel.querySelector('.stw-photo').addEventListener('click', () => { zoom.hidden = false; zoom.querySelector('.zoom-close').focus(); });
+  zoom.addEventListener('click', () => { zoom.hidden = true; panel.querySelector('.stw-photo').focus(); });
+  panel.querySelector('.stw-tabs').addEventListener('click', e => { const b = e.target.closest('.stw-tab'); if (b) { at = +b.dataset.step; show(); } });
+
+  function show() {
+    const st = steps[at], key = `${g.n}-${st.id}`, last = at === steps.length - 1;
+    panel.querySelectorAll('.stw-tab').forEach((b, i) => { b.classList.toggle('on', i === at); b.setAttribute('aria-selected', i === at); });
+    stepBox.innerHTML = `
+      <h3>${st.name}</h3>
+      <p class="stw-ask">${st.ask}</p>
+      <ul class="stw-prompts">${d[st.id].map(q => `<li>${esc(q)}</li>`).join('')}</ul>
+      <label class="sr" for="stw-${key}">${st.name}</label>
+      <textarea id="stw-${key}" rows="4" placeholder="${st.hint}"></textarea>
+      <div class="actions">
+        ${at ? `<button class="btn ghost" data-move="-1">${tx(g, 'חזרה', 'חֲזָרָה')}: ${steps[at - 1].name}</button>` : ''}
+        ${last
+          ? `<button class="btn ghost" id="learn">${tx(g, 'מה כדאי לדעת', 'מָה כְּדַאי לָדַעַת')}</button><button class="btn" id="stw-done">${tx(g, 'סיימנו', 'סִיַּמְנוּ')}</button>`
+          : `<button class="btn" data-move="1">${tx(g, 'הלאה', 'הָלְאָה')}: ${steps[at + 1].name}</button>`}
+      </div>
+      <p class="reveal" id="learn-text" hidden><strong>${tx(g, 'מה כדאי לדעת', 'מָה כְּדַאי לָדַעַת')}</strong>${esc(d.learn)}</p>`;
+    const ta = stepBox.querySelector('textarea');
+    ta.value = notes[key] || '';
+    ta.addEventListener('input', () => { notes[key] = ta.value; saveNotes(); });
+    stepBox.querySelectorAll('[data-move]').forEach(b => b.addEventListener('click', () => { at += +b.dataset.move; show(); }));
+    if (last) {
+      stepBox.querySelector('#learn').addEventListener('click', e => { stepBox.querySelector('#learn-text').hidden = false; e.currentTarget.hidden = true; });
+      stepBox.querySelector('#stw-done').addEventListener('click', () => {
+        done[`${g.n}-stw`] = true; save();
+        stepBox.querySelector('.actions').hidden = true;
+        panel.querySelector('.stw-end').innerHTML = finishHTML(g, 'stw', tx(g, 'התבוננתם, חשבתם ושאלתם. אפשר לשתף את השאלות שלכם עם הכיתה.', 'הִתְבּוֹנַנְתֶּם, חֲשַׁבְתֶּם וּשְׁאַלְתֶּם. אֶפְשָׁר לְשַׁתֵּף אֶת הַשְּׁאֵלוֹת שֶׁלָּכֶם עִם הַכִּתָּה.'));
+      });
+    }
+  }
+  show();
+}
+
 function renderConnect(g) {
   const groups = CONNECT[g.n] || [];
   const s = SUBJECTS.link;
@@ -1057,6 +1201,7 @@ function route(token, push) {
   else if (!key || !g.drops.includes(key)) { renderGrade(g); token = 'g' + g.n; }
   else if (key === 'challenge') renderChallenge(g);
   else if (key === 'link') renderConnect(g);
+  else if (key === 'stw') renderSTW(g);
   else if (key === 'math') {
     if (levelOf(level)) renderQuiz(g, 'math', level);
     else { renderMathLevels(g); token = `g${g.n}-math`; }
