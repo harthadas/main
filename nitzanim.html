@@ -1,0 +1,1890 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>נצנים בשפה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700&family=Noto+Sans+Hebrew:wght@400;600&display=swap">
+<style>
+/* Same calm language as the color story lab: neutral paper; the growing things and the children carry the color.
+   Start: pick one of three stories about growing, or one of the short language tasks below them. Wide screens: choices on the right, the picture and the growing story on the left.
+   Book: the printed pages, previewed as paper sheets. */
+:root {
+  --paper: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #1d2431;
+  --ink-soft: #5a6476;
+  --line: #d8dee7;
+  --glass: #97a3b6;
+  --good: #2f8a55;
+  --near: #b7791f;
+  --mark: #fff1b0;
+  --display: "Rubik", "Noto Sans Hebrew", "Arial Hebrew", Arial, sans-serif;
+  --body: "Noto Sans Hebrew", "Rubik", "Arial Hebrew", Arial, sans-serif;
+  --radius: 22px;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.6;
+  -webkit-tap-highlight-color: transparent;
+}
+#story-app {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  padding-block: 16px 32px;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+button { font: inherit; color: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+h1, h2 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+svg { display: block; }
+[hidden] { display: none !important; }
+
+h3 { font-family: var(--display); font-weight: 700; margin: 0; text-wrap: balance; line-height: 1.5; }
+button, input { font: inherit; color: inherit; }
+
+/* ---------- top bar ---------- */
+.bar { display: flex; align-items: center; gap: 12px; min-height: 56px; }
+.icon-btn {
+  width: 52px; height: 52px; border-radius: 50%;
+  border: 2px solid var(--line); background: var(--surface);
+  display: grid; place-items: center; flex: none; padding: 0;
+}
+.icon-btn svg { width: 26px; height: 26px; }
+.icon-btn.off { color: var(--glass); }
+.bar h2 { font-size: 1.35rem; flex: 1; }
+.steps { flex: 1; display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
+.stepdot {
+  width: 36px; height: 36px; border-radius: 50%; padding: 0;
+  border: 2px solid var(--line); background: var(--surface);
+  font-family: var(--display); font-weight: 700; font-size: 1rem; line-height: 1;
+  display: grid; place-items: center;
+}
+.stepdot.done { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.stepdot.cur { box-shadow: 0 0 0 3px var(--paper), 0 0 0 6px var(--ink); }
+.stepdot:disabled { opacity: .4; }
+
+/* ---------- start ---------- */
+.start { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; padding-block: 24px; text-align: center; }
+.start h1 { font-size: clamp(2rem, 7vw, 2.8rem); }
+.start p { margin: -14px 0 0; color: var(--ink-soft); font-family: var(--display); font-size: 1.25rem; }
+.kinds { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
+.kind { display: flex; flex-direction: column; gap: 10px; }
+.kind-card {
+  border: 2px solid var(--line); background: var(--surface); border-radius: var(--radius);
+  padding: 22px 18px 20px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  transition: border-color .15s, transform .15s;
+}
+.kind-card:hover { border-color: var(--glass); }
+.kind-card:active { transform: scale(.98); }
+.kind-card svg { width: min(220px, 100%); height: auto; margin-bottom: 6px; }
+.kind-card strong { font-family: var(--display); font-size: 1.4rem; font-weight: 700; line-height: 1.5; }
+.kind-card small { color: var(--ink-soft); font-size: 1rem; line-height: 1.5; }
+.kind-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ---------- work area ---------- */
+.work { display: grid; gap: 18px; padding-top: 14px; grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "ask" "story"; }
+.work.final { grid-template-areas: "stage" "story" "more"; }
+@media (min-width: 860px) {
+  .work { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "ask stage" "ask story"; align-items: start; }
+  .work.final { grid-template-areas: "stage story" "more story"; grid-template-rows: auto 1fr; }
+}
+.panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); }
+.stage { grid-area: stage; overflow: hidden; }
+.stage svg { width: 100%; height: auto; }
+
+.ask { grid-area: ask; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.ask h2 { font-size: 1.5rem; }
+.choices { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+.choices.small { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); }
+.card {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  padding: 10px 8px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  font-family: var(--display); font-size: 1.15rem; font-weight: 500; line-height: 1.5; text-align: center;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.card:hover { border-color: var(--glass); }
+.card:active { transform: scale(.97); }
+.card.on, .card.flash { border-color: var(--ink); box-shadow: 0 0 0 2px var(--ink); }
+.card.on { background: #f7f9fc; }
+.card svg { width: 100%; height: auto; }
+.choices.small .card svg { max-width: 70px; }
+.card .thumb { width: 100%; border-radius: 10px; overflow: hidden; }
+
+.grp + .grp { margin-top: 6px; }
+.grp h3 { display: flex; align-items: center; gap: 6px; font-size: 1.05rem; font-weight: 500; color: var(--ink-soft); margin-bottom: 8px; }
+.grp h3 svg { width: 26px; height: 26px; flex: none; }
+.own {
+  width: 100%; font-size: 1.15rem; line-height: 1.6;
+  padding: 12px 16px; border: 2px dashed var(--glass); border-radius: 16px; background: var(--paper);
+}
+.own::placeholder { color: var(--ink-soft); opacity: 1; }
+.own.filled { border-style: solid; border-color: var(--ink); background: var(--surface); }
+.own:focus-visible { outline-offset: 2px; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; align-items: center; }
+
+/* ---------- story ---------- */
+.story { grid-area: story; padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.story-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.story-head h2 { font-size: 1.3rem; }
+.part h3 { font-size: 1rem; color: var(--ink-soft); font-weight: 500; margin-bottom: 2px; }
+.sent { display: flex; align-items: flex-start; gap: 8px; font-size: 1.22rem; line-height: 1.9; }
+.sent + .sent { margin-top: 4px; }
+.sent .txt { flex: 1; min-width: 0; border-radius: 6px; padding-inline: 2px; transition: background .2s; overflow-wrap: anywhere; }
+.sent.reading .txt { background: var(--mark); }
+.sent.blank .txt { color: var(--glass); letter-spacing: .12em; }
+.sent.fresh .txt { animation: rise .45s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+.spk {
+  flex: none; width: 40px; height: 40px; margin-top: 3px; border-radius: 50%; padding: 0;
+  border: 2px solid var(--line); background: var(--surface); display: grid; place-items: center;
+}
+.spk svg { width: 20px; height: 20px; }
+.spk.del { color: var(--ink-soft); }
+.spk.del svg { width: 14px; height: 14px; }
+
+/* ---------- final screen ---------- */
+.title-in {
+  width: 100%; border: 0; border-bottom: 2px dashed var(--glass); background: none;
+  font-family: var(--display); font-weight: 700; font-size: 1.6rem; line-height: 1.5; padding: 4px 2px;
+}
+.title-in::placeholder { color: var(--ink); opacity: .45; }
+.title-in:focus { border-bottom-style: solid; border-bottom-color: var(--ink); outline: none; }
+.label { font-family: var(--display); font-size: 1rem; color: var(--ink-soft); }
+.more { grid-area: more; padding: 16px; display: flex; flex-direction: column; gap: 10px; align-self: start; }
+.add-row { display: flex; gap: 10px; align-items: stretch; }
+.add-row .own { flex: 1; min-width: 0; }
+
+/* ---------- buttons ---------- */
+.actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+.act {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 999px;
+  font-family: var(--display); font-weight: 500; font-size: 1.15rem; line-height: 1.4;
+  padding: 10px 22px; min-height: 54px; text-decoration: none; color: var(--ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+}
+.act svg { width: 24px; height: 24px; flex: none; }
+.act.primary { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+.act.big { font-size: 1.4rem; font-weight: 700; min-height: 64px; padding-inline: 34px; min-width: min(300px, 100%); }
+.act:disabled { opacity: .3; }
+.act:not(:disabled):active { transform: scale(.97); }
+
+@media (max-width: 420px) {
+  body { font-size: 17px; }
+  .stepdot { width: 29px; height: 29px; font-size: .9rem; border-width: 1.5px; }
+  .stepdot.cur { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--ink); }
+  .steps { gap: 5px; flex-wrap: nowrap; }
+  .bar { gap: 8px; }
+  .icon-btn { width: 46px; height: 46px; }
+  .choices { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .choices.small { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sent { font-size: 1.15rem; }
+  .act { padding-inline: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+/* ---------- book ---------- */
+.book { display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 14px; }
+.book-status { margin: 0; min-height: 1.6em; color: var(--ink-soft); font-family: var(--display); text-align: center; }
+.pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 18px; width: 100%; }
+.page { margin: 0; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 2px 10px rgba(29,36,49,.08); }
+.page img { display: block; width: 100%; height: auto; }
+
+/* ---------- נִצָּנִים בְּשָׂפָה: language tasks ---------- */
+.tasks-sec { width: 100%; max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 18px; padding-top: 26px; border-top: 2px solid var(--line); }
+.tasks-sec h2 { font-size: clamp(1.6rem, 5vw, 2rem); }
+.grp-title { width: 100%; margin-top: 6px; font-size: 1.15rem; font-weight: 500; color: var(--ink-soft); }
+.task-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; width: 100%; }
+.task-card > svg { width: min(150px, 100%); }
+.q-stars { display: inline-flex; gap: 2px; }
+.q-stars span { color: var(--line); display: inline-flex; }
+.q-stars span.on { color: #f2a20c; }
+.q-stars svg { width: 20px; height: 20px; }
+.q-done .q-stars svg { width: 46px; height: 46px; }
+.quiz { width: 100%; max-width: 720px; margin: 14px auto 0; padding: 20px 16px 22px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+.q-head { display: flex; align-items: center; gap: 10px; }
+.q-head h2 { font-size: 1.5rem; }
+.q-head .spk { margin-top: 0; }
+.q-prompt { min-height: 150px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center; }
+.q-word { font-family: var(--display); font-weight: 700; font-size: clamp(2.6rem, 12vw, 4rem); line-height: 1.5; }
+.q-word mark { background: var(--mark); color: inherit; border-radius: 10px; padding-inline: 4px; }
+.q-pic svg { width: 180px; max-width: 100%; height: auto; }
+.q-pic.small svg { width: 120px; }
+.q-sentence { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 8vw, 2.4rem); line-height: 1.6; }
+.q-gap { display: inline-block; min-width: 4.2em; border-bottom: 4px dashed var(--glass); }
+.q-gap.done { border-bottom: 4px solid var(--good); color: var(--good); min-width: 0; }
+.q-options { display: grid; gap: 14px; width: 100%; max-width: 560px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.q-options.blobs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.q-options.letters { max-width: 420px; }
+.q-options.pair { grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 420px; }
+.q-many { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 10px 28px; }
+.q-many > div { display: flex; flex-direction: column; align-items: center; }
+.q-many .q-sentence { font-size: clamp(1.3rem, 5.5vw, 1.9rem); white-space: nowrap; }
+.q-many .q-gap { min-width: 3em; }
+.q-opt {
+  border: 2px solid var(--line); background: var(--surface); border-radius: 18px;
+  min-height: 88px; padding: 10px 6px; display: grid; place-items: center;
+  transition: border-color .15s, opacity .25s, transform .15s, box-shadow .15s;
+}
+.q-opt:hover { border-color: var(--glass); }
+.q-opt:not(:disabled):active { transform: scale(.96); }
+.q-opt svg { max-width: 100%; height: auto; }
+.q-opt.miss { opacity: .25; animation: shake .35s; }
+.q-opt.right { border-color: var(--good); box-shadow: 0 0 0 3px var(--good); }
+.q-opt-word { font-family: var(--display); font-size: clamp(1.4rem, 6vw, 1.9rem); font-weight: 700; line-height: 1.5; }
+.q-letter { font-family: var(--display); font-size: 3.2rem; font-weight: 700; line-height: 1; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.q-feedback { margin: 0; min-height: 1.6em; display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 1.5rem; font-weight: 700; }
+.q-feedback svg { width: 28px; height: 28px; }
+.q-feedback.good { color: var(--good); }
+.q-feedback.again { color: var(--near); }
+.q-dots { flex: 1; display: flex; justify-content: center; gap: 8px; }
+.q-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--line); }
+.q-dot.done { background: var(--ink); }
+.q-dot.cur { background: var(--surface); box-shadow: 0 0 0 3px var(--ink); }
+@media (max-width: 420px) {
+  .q-options { gap: 10px; }
+  .q-options.blobs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .q-opt { min-height: 76px; }
+}
+
+@media print {
+  @page { size: A4; margin: 0; }
+  body { background: #fff; }
+  #story-app { padding: 0; max-width: none; }
+  .bar, .book-actions, .book-status { display: none !important; }
+  .book { display: block; padding: 0; }
+  .pages { display: block; }
+  .page { border: 0; box-shadow: none; break-after: page; }
+  .page img { width: 210mm; height: 297mm; }
+}
+</style>
+</head>
+<body>
+<div id="story-app" lang="he" dir="rtl"></div>
+
+<script>
+(() => {
+/* ================= shared =================
+   Three kinds of story about growing share one engine:
+   - seed: a seed grows into a flower.
+   - garden: two children plant a garden.
+   - butterfly: a caterpillar, a cocoon and a butterfly.
+   Each kind is a "mode" object below with its own steps, sentences and picture. */
+const COLORS = [
+  { id: 'red',    hex: '#ef3b44', name: 'אָדֹם',  def: 'הָאָדֹם',  to: 'לָאָדֹם',  gift: 'כֹּחַ וְאֹמֶץ' },
+  { id: 'orange', hex: '#fb7a2c', name: 'כָּתֹם', def: 'הַכָּתֹם', to: 'לַכָּתֹם', gift: 'מֶרֶץ וְשִׂמְחָה' },
+  { id: 'yellow', hex: '#fad21e', name: 'צָהֹב',  def: 'הַצָּהֹב',  to: 'לַצָּהֹב',  gift: 'אוֹר' },
+  { id: 'green',  hex: '#2f9e55', name: 'יָרֹק',  def: 'הַיָּרֹק',  to: 'לַיָּרֹק',  gift: 'עֵץ גָּבוֹהַּ' },
+  { id: 'blue',   hex: '#1f6fd6', name: 'כָּחֹל', def: 'הַכָּחֹל', to: 'לַכָּחֹל', gift: 'רֹגַע' },
+  { id: 'purple', hex: '#8a4cc2', name: 'סָגֹל',  def: 'הַסָּגֹל',  to: 'לַסָּגֹל',  gift: 'קְסָמִים' },
+  { id: 'pink',   hex: '#f58cb2', name: 'וָרֹד',  def: 'הַוָּרֹד',  to: 'לַוָּרֹד',  gift: 'חִבּוּק' },
+];
+const C = Object.fromEntries(COLORS.map(c => [c.id, c]));
+
+// The color born when two colors hug or work together.
+const MIX = {};
+[
+  ['red', 'orange', 'צֶבַע שְׁקִיעָה', '#f4582f'], ['red', 'yellow', 'כָּתֹם', '#fb8f22'],
+  ['red', 'green', 'חוּם', '#7a5236'],             ['red', 'blue', 'סָגֹל', '#7b3fa8'],
+  ['red', 'purple', 'צֶבַע דֻּבְדְּבָן', '#b0306e'], ['red', 'pink', 'צֶבַע תּוּת', '#e8475f'],
+  ['orange', 'yellow', 'צֶבַע זָהָב', '#f5b22a'],  ['orange', 'green', 'צֶבַע זַיִת', '#8a8a32'],
+  ['orange', 'blue', 'צֶבַע עָנָן', '#8f949b'],    ['orange', 'purple', 'צֶבַע שׁוֹקוֹלָד', '#6b3f2a'],
+  ['orange', 'pink', 'צֶבַע אֲפַרְסֵק', '#ffb38a'], ['yellow', 'green', 'צֶבַע פִּיסְטוּק', '#a5cf4a'],
+  ['yellow', 'blue', 'יָרֹק', '#2fa35a'],          ['yellow', 'purple', 'צֶבַע חוֹל', '#cbb58a'],
+  ['yellow', 'pink', 'צֶבַע מֶלוֹן', '#ffad7a'],    ['green', 'blue', 'טוּרְקִיז', '#1ea7a0'],
+  ['green', 'purple', 'צֶבַע אֶבֶן', '#6b6e6a'],   ['green', 'pink', 'צֶבַע עֵץ', '#a8825e'],
+  ['blue', 'purple', 'צֶבַע לַיְלָה', '#3b2f86'],  ['blue', 'pink', 'לִילָךְ', '#b39ddb'],
+  ['purple', 'pink', 'צֶבַע סִגָּלִית', '#c06ad0'],
+].forEach(([a, b, name, hex]) => { MIX[[a, b].sort().join('+')] = { name, hex }; });
+const mixOf = (a, b) => MIX[[a, b].sort().join('+')];
+
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[ch]);
+const pick = (list, id) => list.find(o => o.id === id);
+
+/* ================= drawings ================= */
+const INK = '#1d2431';
+const PLAIN = '#eef1f5';   // "not colored yet"
+const SKIN = '#f0c4a0', HAIR = '#4a3426';
+const DROP = 'M50 3 C44 19 12 42 12 62 A38 36 0 0 0 88 62 C88 42 56 19 50 3 Z';
+
+// A paint-drop character. mood: happy | shy | brave | curious | sad | angry | sleep
+function drop(hex, mood, cx, bottom, size, extra = '') {
+  const s = size / 100;
+  let px = 0, py = 0, face = '';
+  const line = d => `<path d="${d}" fill="none" stroke="${INK}" stroke-width="3.6" stroke-linecap="round"/>`;
+  switch (mood) {
+    case 'shy':
+      py = 2.5; px = 1.5;
+      face = line('M44 77 Q50 81 56 77') + '<ellipse cx="27" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/><ellipse cx="73" cy="71" rx="7" ry="4.5" fill="#ff6f91" opacity=".55"/>';
+      break;
+    case 'brave':
+      face = line('M35 72 Q50 87 65 72') + line('M28 45 L45 50') + line('M72 45 L55 50');
+      break;
+    case 'curious':
+      px = -2; py = -2.5;
+      face = `<circle cx="50" cy="77" r="4.6" fill="${INK}"/>` + line('M54 45 Q63 39 72 45');
+      break;
+    case 'sad':
+      py = 1.5;
+      face = line('M40 81 Q50 72 60 81') + line('M29 49 L44 45') + line('M71 49 L56 45');
+      break;
+    case 'angry':
+      face = line('M41 79 Q50 75 59 79') + line('M29 45 L45 51') + line('M71 45 L55 51');
+      break;
+    case 'sleep':
+      face = line('M38 74 Q50 84 62 74');
+      break;
+    default:
+      face = line('M37 72 Q50 86 63 72');
+  }
+  const eyes = mood === 'sleep'
+    ? line('M31 59 Q38 64 45 59') + line('M55 59 Q62 64 69 59')
+    : [38, 62].map(x => `<circle cx="${x}" cy="59" r="8.5" fill="#fff" stroke="${INK}" stroke-width="2.6"/><circle cx="${x + px}" cy="${59 + py}" r="4.3" fill="${INK}"/>`).join('');
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${s})" ${extra}>
+    <path d="${DROP}" fill="${hex}" stroke="${INK}" stroke-width="3.2" stroke-linejoin="round"/>
+    <ellipse cx="28" cy="46" rx="5" ry="9" fill="#fff" opacity=".45" transform="rotate(28 28 46)"/>
+    ${eyes}${face}</g>`;
+}
+function ghost(cx, bottom, size) {
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">
+    <path d="${DROP}" fill="#ffffff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="8 7"/>
+    <text x="50" y="76" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="34" fill="#97a3b6">?</text></g>`;
+}
+const heart = (x, y, r, fill = '#ef3b44') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 9 C-12 0 -10 -10 -4.5 -10 C-1.5 -10 0 -7.5 0 -6 C0 -7.5 1.5 -10 4.5 -10 C10 -10 12 0 0 9 Z" fill="${fill}" stroke="${INK}" stroke-width="${16 / r}"/>`;
+const sparkle = (x, y, r, fill = '#ffd84d') =>
+  `<path transform="translate(${x} ${y}) scale(${r / 10})" d="M0 -10 L2.4 -2.4 L10 0 L2.4 2.4 L0 10 L-2.4 2.4 L-10 0 L-2.4 -2.4 Z" fill="${fill}"/>`;
+const moon = (x, y, r) =>
+  `<path d="M${x} ${y - r} a${r} ${r} 0 1 0 ${r * 0.75} ${r * 1.66} a${r * 0.8} ${r * 0.8} 0 1 1 ${-r * 0.75} ${-r * 1.66} Z" fill="#fff2a8" stroke="${INK}" stroke-width="2"/>`;
+const note = (x, y, s) =>
+  `<g transform="translate(${x} ${y}) scale(${s})" fill="${INK}"><ellipse cx="0" cy="12" rx="5" ry="4" transform="rotate(-20 0 12)"/><rect x="3.5" y="-8" width="2.4" height="20"/><path d="M5.9 -8 q8 3 6 11 q-1 -6 -6 -6 Z"/></g>`;
+function rainbowArcs(cx, cy, r0, step, width) {
+  return COLORS.map((c, i) => {
+    const r = r0 - i * step;
+    return `<path d="M${cx - r} ${cy} A${r} ${r} 0 0 1 ${cx + r} ${cy}" fill="none" stroke="${c.hex}" stroke-width="${width}"/>`;
+  }).join('');
+}
+function flower(x, y, color, wilted) {
+  if (wilted) return `<path d="M${x} ${y + 24} V${y + 6} q0 -8 -9 -6" fill="none" stroke="#8c7a52" stroke-width="3" stroke-linecap="round"/><circle cx="${x - 11}" cy="${y + 2}" r="6" fill="#a89a78"/>`;
+  return `<path d="M${x} ${y + 24} V${y}" stroke="#3e8f4f" stroke-width="3"/><circle cx="${x}" cy="${y}" r="9" fill="${color}"/><circle cx="${x}" cy="${y}" r="3.5" fill="#fff6c2"/>`;
+}
+
+/* ================= the children =================
+   Eight named children, four boys and four girls. Each sentence agrees with
+   the hero's gender, the friend's, or both (הֵם for any boy in the pair,
+   הֵן for two girls). "and" and "to" carry the right vav and lamed. */
+const withAnd = n => (/^[במפ]/.test(n) ? 'וּ' : 'וְ') + soft(n);
+// After a prefix (וְ, לְ) the first letter of בגדכפ״ת loses its dagesh: תָּמָר, וְתָמָר.
+const soft = n => n.replace(/^([בגדכפת][\u05b0-\u05c7]*?)\u05bc/, '$1');
+const KIDS = [
+  { id: 'ori',     name: 'אוֹרִי',   g: 'm', skin: '#f0c4a0', hair: '#4a3426', style: 'short', shirt: '#1f6fd6' },
+  { id: 'yonatan', name: 'יוֹנָתָן', g: 'm', skin: '#c68a5e', hair: '#2b2b2b', style: 'short', shirt: '#2f9e55', glasses: true },
+  { id: 'omer',    name: 'עוֹמֶר',   g: 'm', skin: '#8d5a3b', hair: '#1d1d1d', style: 'curly', shirt: '#ef3b44' },
+  { id: 'itai',    name: 'אִיתַי',   g: 'm', skin: '#f3d2b3', hair: '#c4702a', style: 'short', shirt: '#fb7a2c' },
+  { id: 'maya',    name: 'מָאיָה',   g: 'f', skin: '#f0c4a0', hair: '#4a3426', style: 'long',  shirt: '#8a4cc2' },
+  { id: 'noa',     name: 'נוֹעָה',   g: 'f', skin: '#8d5a3b', hair: '#1d1d1d', style: 'curly', shirt: '#fad21e' },
+  { id: 'tamar',   name: 'תָּמָר',   g: 'f', skin: '#c68a5e', hair: '#2b2b2b', style: 'long',  shirt: '#f58cb2', glasses: true },
+  { id: 'shira',   name: 'שִׁירָה',  g: 'f', skin: '#f3d2b3', hair: '#d8a24a', style: 'long',  shirt: '#2f9e55' },
+].map(k => Object.assign(k, { and: withAnd(k.name), to: 'לְ' + soft(k.name), andTo: 'וּלְ' + soft(k.name) }));
+const KID = Object.fromEntries(KIDS.map(k => [k.id, k]));
+const TEACHER = { g: 'f', skin: '#e8b896', hair: '#8a8f99', style: 'bun', shirt: '#1ea7a0', glasses: true };
+const NOBODY = { id: '', name: '___', g: 'm', and: 'וְ___', to: 'לְ___', andTo: 'וּלְ___' };
+
+// mood: happy | sad | scared | sleep
+function face(cx, ey, mood) {
+  const s = `fill="none" stroke="${INK}" stroke-width="2.8" stroke-linecap="round"`;
+  let eyes = mood === 'sleep'
+    ? `<path d="M${cx - 10} ${ey} q4 4 8 0 M${cx + 2} ${ey} q4 4 8 0" ${s}/>`
+    : `<circle cx="${cx - 7}" cy="${ey}" r="${mood === 'scared' ? 3.6 : 2.9}" fill="${INK}"/><circle cx="${cx + 7}" cy="${ey}" r="${mood === 'scared' ? 3.6 : 2.9}" fill="${INK}"/>`;
+  if (mood === 'sad' || mood === 'scared') eyes += `<path d="M${cx - 12} ${ey - 7} l6 -2 M${cx + 12} ${ey - 7} l-6 -2" ${s}/>`;
+  const mouth = mood === 'sad' ? `<path d="M${cx - 6} ${ey + 13} q6 -6 12 0" ${s}/>`
+    : mood === 'scared' ? `<ellipse cx="${cx}" cy="${ey + 11}" rx="3.5" ry="4.5" fill="${INK}"/>`
+    : `<path d="M${cx - 7} ${ey + 8} q7 7 14 0" ${s}/>`;
+  const cheeks = mood === 'happy' || mood === 'sleep'
+    ? `<circle cx="${cx - 12}" cy="${ey + 7}" r="3.5" fill="#ff7a96" opacity=".4"/><circle cx="${cx + 12}" cy="${ey + 7}" r="3.5" fill="#ff7a96" opacity=".4"/>` : '';
+  return eyes + mouth + cheeks;
+}
+// A child (or the teacher), drawn in a 100 x 100 box standing on its bottom edge.
+function kid(k, mood, cx, bottom, size) {
+  const o = `stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
+  const girl = k.g === 'f';
+  let g = '';
+  g += `<rect x="39" y="78" width="9" height="20" rx="4" fill="#5b6577" ${o}/><rect x="52" y="78" width="9" height="20" rx="4" fill="#5b6577" ${o}/>`;
+  g += `<path d="M38 60 Q27 66 27 76" fill="none" ${o} stroke-linecap="round"/><path d="M62 60 Q73 66 73 76" fill="none" ${o} stroke-linecap="round"/>`;
+  g += `<circle cx="27" cy="78" r="4" fill="${k.skin}" ${o}/><circle cx="73" cy="78" r="4" fill="${k.skin}" ${o}/>`;
+  if (k.style === 'long') g += `<path d="M31 36 Q28 60 37 63 H63 Q72 60 69 36 Q69 15 50 15 Q31 15 31 36 Z" fill="${k.hair}" ${o}/>`;
+  if (k.style === 'curly' && girl) g += [[32, 30], [36, 46], [68, 30], [64, 46], [50, 16], [36, 18], [64, 18]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="10" fill="${k.hair}" ${o}/>`).join('');
+  g += girl ? `<path d="M31 88 Q33 60 41 55 H59 Q67 60 69 88 Z" fill="${k.shirt}" ${o}/>`
+            : `<path d="M33 84 Q31 60 41 55 H59 Q69 60 67 84 Z" fill="${k.shirt}" ${o}/>`;
+  g += `<circle cx="50" cy="37" r="18" fill="${k.skin}" ${o}/>`;
+  if (k.style === 'short') g += `<path d="M32 35 Q31 17 50 17 Q69 17 68 35 Q62 25 50 26 Q38 25 32 35 Z" fill="${k.hair}" ${o}/>`;
+  if (k.style === 'long') g += `<path d="M32 34 Q35 19 50 19 Q65 19 68 34 Q59 26 50 28 Q41 26 32 34 Z" fill="${k.hair}" ${o}/>`;
+  if (k.style === 'curly' && !girl) g += [[36, 26], [46, 20], [56, 20], [65, 27]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="7" fill="${k.hair}" ${o}/>`).join('');
+  if (k.style === 'curly' && girl) g += `<path d="M34 30 Q50 16 66 30 Q58 24 50 26 Q42 24 34 30 Z" fill="${k.hair}"/>`;
+  if (k.style === 'bun') g += `<circle cx="50" cy="15" r="8" fill="${k.hair}" ${o}/><path d="M32 34 Q34 18 50 18 Q66 18 68 34 Q60 26 50 27 Q40 26 32 34 Z" fill="${k.hair}" ${o}/>`;
+  g += face(50, 39, mood);
+  if (k.glasses) g += `<g fill="none" stroke="${INK}" stroke-width="2"><circle cx="43" cy="39" r="6"/><circle cx="57" cy="39" r="6"/><path d="M49 39 h2"/></g>`;
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">${g}</g>`;
+}
+function kidGhost(cx, bottom, size) {
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">
+    <circle cx="50" cy="36" r="18" fill="#fff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="7 6"/>
+    <path d="M33 92 Q31 62 41 56 H59 Q69 62 67 92 Z" fill="#fff" fill-opacity=".6" stroke="#97a3b6" stroke-width="3" stroke-dasharray="7 6"/>
+    <text x="50" y="47" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="#97a3b6">?</text></g>`;
+}
+
+/* ================= things =================
+   School things in a 120 x 100 box. The tasks show them big; the stories
+   and the choice cards reuse them small through pic(). */
+const OBJ = {
+  book: () => `<path d="M14 24 H58 V84 H14 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M62 24 H106 V84 H62 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M58 24 Q60 20 62 24 V84 Q60 88 58 84 Z" fill="#164f9c" stroke="${INK}" stroke-width="2.5"/><path d="M22 40 h28 M22 52 h28 M22 64 h20 M70 40 h28 M70 52 h28 M70 64 h20" stroke="#cfe2ff" stroke-width="3" stroke-linecap="round"/>`,
+  pencil: () => `<g transform="rotate(-30 60 50)"><rect x="14" y="40" width="72" height="20" fill="#fad21e" stroke="${INK}" stroke-width="3"/><rect x="6" y="40" width="10" height="20" rx="3" fill="#f58cb2" stroke="${INK}" stroke-width="3"/><path d="M86 40 L106 50 L86 60 Z" fill="#f3d9b1" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M100 47 L106 50 L100 53 Z" fill="${INK}"/></g>`,
+  bag: () => `<path d="M40 30 Q40 12 60 12 Q80 12 80 30" fill="none" stroke="${INK}" stroke-width="5"/><rect x="24" y="28" width="72" height="62" rx="14" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><rect x="36" y="56" width="48" height="24" rx="6" fill="#c92d36" stroke="${INK}" stroke-width="2.5"/><path d="M24 46 H96" stroke="${INK}" stroke-width="2.5"/>`,
+  ball: () => `<circle cx="60" cy="52" r="36" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M60 36 L75 47 L69 64 H51 L45 47 Z" fill="${INK}"/><path d="M60 16 V36 M75 47 L93 41 M69 64 L80 82 M51 64 L40 82 M45 47 L27 41" stroke="${INK}" stroke-width="2.5"/>`,
+  board: () => `<rect x="8" y="12" width="104" height="68" rx="4" fill="#2f6b4f" stroke="#9a6b4a" stroke-width="6"/><text x="60" y="56" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="#fff">אבג</text><path d="M30 92 L40 80 M90 92 L80 80" stroke="#9a6b4a" stroke-width="5" stroke-linecap="round"/>`,
+  table: () => `<rect x="10" y="36" width="100" height="12" rx="3" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><path d="M20 48 V90 M100 48 V90" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="M20 48 V90 M100 48 V90" stroke="#d39a5f" stroke-width="2.5" stroke-linecap="round"/>`,
+  chair: () => `<rect x="38" y="10" width="44" height="40" rx="5" fill="#1ea7a0" stroke="${INK}" stroke-width="3"/><rect x="32" y="50" width="56" height="10" rx="3" fill="#1ea7a0" stroke="${INK}" stroke-width="3"/><path d="M38 60 V92 M82 60 V92" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
+  notebook: () => `<rect x="30" y="12" width="64" height="80" rx="6" fill="#8a4cc2" stroke="${INK}" stroke-width="3"/>${[22, 34, 46, 58, 70, 82].map(y => `<circle cx="30" cy="${y}" r="3.5" fill="#fff" stroke="${INK}" stroke-width="2"/>`).join('')}<rect x="44" y="28" width="38" height="16" rx="3" fill="#fff"/>`,
+  bell: () => `<path d="M60 14 V22" stroke="${INK}" stroke-width="4"/><path d="M30 76 Q30 30 60 24 Q90 30 90 76 Z" fill="#f5b22a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><rect x="24" y="74" width="72" height="8" rx="4" fill="#f5b22a" stroke="${INK}" stroke-width="3"/><circle cx="60" cy="88" r="6" fill="${INK}"/>`,
+  ruler: () => `<g transform="rotate(-12 60 50)"><rect x="8" y="36" width="104" height="26" rx="3" fill="#fad21e" stroke="${INK}" stroke-width="3"/>${Array.from({ length: 10 }, (_, i) => `<path d="M${18 + i * 9.5} 36 v${i % 2 ? 7 : 12}" stroke="${INK}" stroke-width="2"/>`).join('')}</g>`,
+  // story-only things
+  bus: () => `<rect x="10" y="26" width="100" height="52" rx="10" fill="#fad21e" stroke="${INK}" stroke-width="3"/>${[20, 44, 68].map(x => `<rect x="${x}" y="34" width="18" height="16" rx="3" fill="#bfe3ff" stroke="${INK}" stroke-width="2"/>`).join('')}<rect x="90" y="34" width="12" height="34" rx="2" fill="#bfe3ff" stroke="${INK}" stroke-width="2"/><circle cx="32" cy="80" r="9" fill="${INK}"/><circle cx="88" cy="80" r="9" fill="${INK}"/>`,
+  bike: () => `<g fill="none" stroke="${INK}" stroke-width="4"><circle cx="30" cy="66" r="18"/><circle cx="90" cy="66" r="18"/><path d="M30 66 L50 40 H78 L90 66 M50 40 L62 66 L78 40 M46 32 H58 M78 40 L74 28 H84" stroke-linejoin="round"/></g>`,
+  feet: () => `<path d="M30 30 C18 30 16 56 24 70 C30 80 44 78 44 64 C44 50 42 30 30 30 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M80 22 C68 22 66 48 74 62 C80 72 94 70 94 56 C94 42 92 22 80 22 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/>`,
+  family: () => kid({ g: 'm', skin: '#e8b896', hair: '#4a3426', style: 'short', shirt: '#1f6fd6' }, 'happy', 42, 98, 92) + kid({ g: 'm', skin: '#f0c4a0', hair: '#4a3426', style: 'short', shirt: '#fb7a2c' }, 'happy', 86, 98, 60),
+  math: () => `<rect x="8" y="12" width="104" height="68" rx="4" fill="#2f6b4f" stroke="#9a6b4a" stroke-width="6"/><text x="60" y="58" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="30" fill="#fff" direction="ltr">2+3=5</text>`,
+  art: () => `<path d="M60 12 C30 12 12 32 12 54 C12 78 34 90 52 86 C62 84 60 74 66 70 C74 64 90 72 100 62 C112 50 98 12 60 12 Z" fill="#f3d9b1" stroke="${INK}" stroke-width="3"/>${[[38, 34, '#ef3b44'], [62, 28, '#1f6fd6'], [84, 38, '#fad21e'], [32, 58, '#2f9e55']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="8" fill="${c}"/>`).join('')}`,
+  music: () => `<g fill="${INK}"><ellipse cx="34" cy="76" rx="14" ry="10" transform="rotate(-20 34 76)"/><ellipse cx="86" cy="66" rx="14" ry="10" transform="rotate(-20 86 66)"/><rect x="44" y="18" width="5" height="58"/><rect x="96" y="10" width="5" height="56"/><path d="M44 18 L101 10 V24 L44 32 Z"/></g>`,
+  sport: () => OBJ.ball(),
+  swing: () => `<path d="M14 92 L30 12 H90 L106 92" fill="none" stroke="#9a6b4a" stroke-width="6" stroke-linejoin="round"/><path d="M48 12 V66 M72 12 V66" stroke="${INK}" stroke-width="2.5"/><rect x="42" y="64" width="36" height="8" rx="3" fill="#ef3b44" stroke="${INK}" stroke-width="2.5"/>`,
+  chalk: () => `<path d="M14 70 Q30 40 50 60 T90 50" fill="none" stroke="#f58cb2" stroke-width="7" stroke-linecap="round"/><path d="M20 86 L100 80" stroke="#1f6fd6" stroke-width="7" stroke-linecap="round"/><rect x="70" y="16" width="34" height="12" rx="5" fill="#fad21e" stroke="${INK}" stroke-width="2.5" transform="rotate(30 87 22)"/>`,
+  confused: () => `<text x="60" y="78" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="76" fill="#8a4cc2">?</text>`,
+  pencilcase: () => `<rect x="14" y="34" width="92" height="40" rx="18" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><path d="M30 34 H90" stroke="#fad21e" stroke-width="4" stroke-dasharray="4 4"/><circle cx="96" cy="40" r="5" fill="#fad21e" stroke="${INK}" stroke-width="2"/>`,
+  noise: () => `<g fill="none" stroke="#ef3b44" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 30 l12 10 -12 10 12 10"/><path d="M106 30 l-12 10 12 10 -12 10"/></g><text x="60" y="66" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="34" fill="${INK}">!!!</text>`,
+  breathe: () => `<g fill="none" stroke="#7cc4ff" stroke-width="6" stroke-linecap="round"><path d="M14 36 H74 a12 12 0 1 0 -12 -12"/><path d="M14 58 H90 a12 12 0 1 1 -12 12"/></g>`,
+  hand: () => `<path d="M46 92 V44 a6 6 0 0 1 12 0 V30 a6 6 0 0 1 12 0 V34 a6 6 0 0 1 12 0 V44 a6 6 0 0 1 12 0 V70 Q94 92 72 92 Z" fill="#f0c4a0" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M46 60 Q34 52 30 60 Q34 72 46 78" fill="#f0c4a0" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`,
+  cushion: () => `<path d="M14 60 Q16 34 60 36 Q104 34 106 60 Q104 86 60 84 Q16 86 14 60 Z" fill="#c9b6ff" stroke="${INK}" stroke-width="3"/><path d="M40 60 h40" stroke="#8a4cc2" stroke-width="3" stroke-linecap="round"/>`,
+  teacher: () => kid(TEACHER, 'happy', 60, 98, 96),
+  heart: () => `<path transform="translate(60 52) scale(3.4)" d="M0 9 C-12 0 -10 -10 -4.5 -10 C-1.5 -10 0 -7.5 0 -6 C0 -7.5 1.5 -10 4.5 -10 C10 -10 12 0 0 9 Z" fill="#ef3b44" stroke="${INK}" stroke-width=".9"/>`,
+  house: () => `<path d="M16 46 L60 12 L104 46 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><rect x="26" y="46" width="68" height="44" fill="#fff3d6" stroke="${INK}" stroke-width="3"/><rect x="52" y="62" width="16" height="28" fill="#9a6b4a"/><rect x="34" y="56" width="12" height="12" fill="#bfe3ff" stroke="${INK}" stroke-width="2"/>`,
+  star: () => `<path d="M60 10 L71 38 L102 40 L78 58 L86 88 L60 72 L34 88 L42 58 L18 40 L49 38 Z" fill="#f5b22a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/>`,
+  moon: () => `<path d="M70 14 a36 36 0 1 0 26 60 a28 28 0 1 1 -26 -60 Z" fill="#fff2a8" stroke="${INK}" stroke-width="3"/>${sparkle(30, 30, 8, '#ffe27a')}`,
+  speech: () => `<path d="M14 18 h92 a10 10 0 0 1 10 10 v34 a10 10 0 0 1 -10 10 h-58 l-16 16 v-16 h-18 a10 10 0 0 1 -10 -10 v-34 a10 10 0 0 1 10 -10 Z" fill="#fff" stroke="${INK}" stroke-width="3"/><text x="60" y="54" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="22" fill="${INK}">שָׁלוֹם</text>`,
+  hamster: () => `<ellipse cx="60" cy="62" rx="40" ry="28" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><circle cx="34" cy="38" r="9" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><circle cx="86" cy="38" r="9" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><ellipse cx="60" cy="70" rx="22" ry="14" fill="#f3d9b1"/><circle cx="48" cy="54" r="3.5" fill="${INK}"/><circle cx="72" cy="54" r="3.5" fill="${INK}"/><circle cx="60" cy="62" r="3" fill="#ff7a96"/>`,
+  key: () => `<circle cx="34" cy="50" r="20" fill="none" stroke="#f5b22a" stroke-width="9"/><path d="M54 50 H104 M88 50 V66 M100 50 V62" stroke="#f5b22a" stroke-width="9" stroke-linecap="round"/>`,
+  map: () => `<path d="M10 20 L42 12 L78 22 L110 14 V84 L78 92 L42 82 L10 90 Z" fill="#f3e2b8" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M42 12 V82 M78 22 V92" stroke="#d6c08c" stroke-width="2.5"/><path d="M22 70 Q40 40 60 54 T96 34" fill="none" stroke="#ef3b44" stroke-width="3" stroke-dasharray="6 5"/><path d="M90 28 l10 10 M100 28 l-10 10" stroke="#ef3b44" stroke-width="4" stroke-linecap="round"/>`,
+  chest: () => `<rect x="18" y="44" width="84" height="44" rx="4" fill="#9a6b4a" stroke="${INK}" stroke-width="3"/><path d="M18 46 Q18 18 60 18 Q102 18 102 46 Z" fill="#b07c52" stroke="${INK}" stroke-width="3"/><rect x="52" y="40" width="16" height="18" rx="2" fill="#f5b22a" stroke="${INK}" stroke-width="2.5"/>${sparkle(30, 16, 7)}${sparkle(94, 12, 6)}`,
+  steps: () => [[30, 74], [54, 58], [74, 44], [96, 28]].map(([x, y], i) => `<ellipse cx="${x}" cy="${y}" rx="8" ry="11" fill="#9a6b4a" transform="rotate(${i % 2 ? 20 : -20} ${x} ${y})"/>`).join(''),
+  crumbs: () => `<path d="M40 30 a26 26 0 1 0 40 0 a12 12 0 0 1 -40 0 Z" fill="#d39a5f" stroke="${INK}" stroke-width="3"/>${[[24, 84], [40, 90], [62, 86], [84, 92], [98, 82]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="4" fill="#d39a5f" stroke="${INK}" stroke-width="1.5"/>`).join('')}`,
+  note: () => `<path d="M24 16 H84 L98 30 V88 H24 Z" fill="#fff" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M84 16 V30 H98" fill="none" stroke="${INK}" stroke-width="3"/><path d="M36 44 h48 M36 58 h48 M36 72 h30" stroke="#97a3b6" stroke-width="4" stroke-linecap="round"/>`,
+  tick: () => `<text x="60" y="58" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="${INK}">טִיק טִיק</text><g fill="none" stroke="#97a3b6" stroke-width="4" stroke-linecap="round"><path d="M14 40 q-8 14 0 28"/><path d="M106 40 q8 14 0 28"/></g>`,
+  toybox: () => `<rect x="16" y="40" width="88" height="50" rx="4" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="36" r="12" fill="#ef3b44" stroke="${INK}" stroke-width="2.5"/><rect x="62" y="20" width="24" height="24" fill="#fad21e" stroke="${INK}" stroke-width="2.5"/><text x="74" y="38" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="16" fill="${INK}">א</text>`,
+  shelf: () => `<rect x="12" y="10" width="96" height="84" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><path d="M12 38 H108 M12 66 H108" stroke="${INK}" stroke-width="3"/>${[[18, '#ef3b44'], [30, '#1f6fd6'], [42, '#2f9e55'], [72, '#fad21e'], [84, '#8a4cc2']].map(([x, c]) => `<rect x="${x}" y="16" width="10" height="22" fill="${c}"/>`).join('')}${[[20, '#fb7a2c'], [34, '#1ea7a0'], [62, '#ef3b44'], [76, '#f58cb2']].map(([x, c]) => `<rect x="${x}" y="44" width="12" height="22" fill="${c}"/>`).join('')}`,
+  guard: () => kid({ g: 'm', skin: '#c68a5e', hair: '#2b2b2b', style: 'short', shirt: '#3b2f86' }, 'happy', 60, 98, 96) + `<path d="M36 22 Q36 8 60 8 Q84 8 84 22 Z" fill="#3b2f86" stroke="${INK}" stroke-width="2.5"/><path d="M34 22 H90" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`,
+  clap: () => `${sparkle(30, 30, 12)}${sparkle(90, 26, 10)}${sparkle(60, 70, 14, '#f58cb2')}${sparkle(24, 76, 8, '#7cc4ff')}${sparkle(98, 72, 9, '#2f9e55')}`,
+  glass: () => `<circle cx="50" cy="44" r="26" fill="#dff1ff" stroke="${INK}" stroke-width="6"/><path d="M70 64 L98 90" stroke="${INK}" stroke-width="10" stroke-linecap="round"/>`,
+  paper: () => `<rect x="20" y="12" width="80" height="78" rx="4" fill="#fff" stroke="${INK}" stroke-width="3"/><path d="M34 30 h52 M34 42 h52 M34 54 h34" stroke="#97a3b6" stroke-width="3.5" stroke-linecap="round"/><circle cx="78" cy="72" r="12" fill="#f5b22a" stroke="${INK}" stroke-width="2.5"/><path d="M72 82 L68 96 L78 90 L88 96 L84 82" fill="#ef3b44" stroke="${INK}" stroke-width="2"/>`,
+  drawing: () => `<rect x="14" y="14" width="92" height="72" rx="4" fill="#fff" stroke="${INK}" stroke-width="3"/>${OBJ.house().replace(/<path d="M16 46/, '<g transform="translate(24 20) scale(.6)"><path d="M16 46') + '</g>'}<circle cx="88" cy="30" r="8" fill="#fad21e"/>`,
+  game: () => `<rect x="18" y="24" width="44" height="44" rx="8" fill="#fff" stroke="${INK}" stroke-width="3"/><rect x="58" y="40" width="44" height="44" rx="8" fill="#fff" stroke="${INK}" stroke-width="3" transform="rotate(12 80 62)"/><g fill="${INK}"><circle cx="30" cy="36" r="4"/><circle cx="50" cy="56" r="4"/><circle cx="40" cy="46" r="4"/><circle cx="72" cy="54" r="4"/><circle cx="88" cy="72" r="4"/></g>`,
+};
+const pic = (name, size) => `<svg viewBox="0 0 120 100" aria-hidden="true"${size ? ` style="width:${size}px"` : ''}>${OBJ[name]()}</svg>`;
+const place = (name, x, y, s) => `<g transform="translate(${x - 60 * s} ${y - 100 * s}) scale(${s})">${OBJ[name]()}</g>`;
+
+/* ================= growing things =================
+   The plant, the caterpillar and the small garden friends, each drawn in a
+   100 x 100 box standing on its bottom edge, with the same faces as the
+   children. */
+function plant(stage, hex, mood, cx, bottom, size) {
+  const o = `stroke="${INK}" stroke-width="3" stroke-linejoin="round"`;
+  let g = '';
+  if (stage === 'seed') {
+    g = `<ellipse cx="50" cy="80" rx="22" ry="16" fill="#a8743f" ${o}/>${face(50, 78, mood).replace(/r="2\.9"/g, 'r="2.4"')}`;
+  } else {
+    const top = stage === 'sprout' ? 52 : 34;
+    g += `<path d="M50 98 V${top + 14}" stroke="#2f9e55" stroke-width="6" stroke-linecap="round"/>`;
+    g += `<path d="M50 84 C34 84 26 74 24 64 C38 62 48 70 50 84 Z" fill="#57b36b" ${o}/><path d="M50 76 C66 76 74 66 76 56 C62 54 52 62 50 76 Z" fill="#57b36b" ${o}/>`;
+    if (stage === 'sprout') g += `<circle cx="50" cy="${top}" r="15" fill="#8fd18a" ${o}/>${face(50, top - 1, mood)}`;
+    if (stage === 'bud') g += `<path d="M50 ${top - 22} C66 ${top - 10} 68 ${top + 10} 50 ${top + 18} C32 ${top + 10} 34 ${top - 10} 50 ${top - 22} Z" fill="${hex}" ${o}/><path d="M38 ${top + 10} Q50 ${top + 22} 62 ${top + 10} L58 ${top + 18} H42 Z" fill="#57b36b" ${o}/>${face(50, top - 2, mood)}`;
+    if (stage === 'flower') {
+      g += Array.from({ length: 8 }, (_, i) => { const a = i * Math.PI / 4; return `<ellipse cx="${50 + Math.cos(a) * 22}" cy="${top + Math.sin(a) * 22}" rx="13" ry="9" fill="${hex}" ${o} transform="rotate(${i * 45} ${50 + Math.cos(a) * 22} ${top + Math.sin(a) * 22})"/>`; }).join('');
+      g += `<circle cx="50" cy="${top}" r="17" fill="#ffd84d" ${o}/>${face(50, top - 1, mood)}`;
+    }
+  }
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">${g}</g>`;
+}
+function caterpillar(hex, mood, cx, bottom, size) {
+  const o = `stroke="${INK}" stroke-width="3"`;
+  let g = [14, 28, 42, 56].map((x, i) => `<circle cx="${x}" cy="${80 - (i % 2) * 6}" r="12" fill="${hex}" ${o}/>`).join('');
+  g += `<path d="M70 44 l-6 -14 M82 44 l6 -14" stroke="${INK}" stroke-width="3" stroke-linecap="round"/><circle cx="64" cy="29" r="3.5" fill="${INK}"/><circle cx="88" cy="29" r="3.5" fill="${INK}"/>`;
+  g += `<circle cx="76" cy="62" r="18" fill="${hex}" ${o}/>${face(76, 60, mood)}`;
+  return `<g transform="translate(${cx - size / 2} ${bottom - size}) scale(${size / 100})">${g}</g>`;
+}
+function butterfly(hex, mood, cx, cy, size) {
+  const o = `stroke="${INK}" stroke-width="3"`;
+  const g = `<ellipse cx="28" cy="36" rx="24" ry="20" fill="${hex}" ${o}/><ellipse cx="72" cy="36" rx="24" ry="20" fill="${hex}" ${o}/>
+    <ellipse cx="32" cy="68" rx="16" ry="14" fill="${hex}" ${o}/><ellipse cx="68" cy="68" rx="16" ry="14" fill="${hex}" ${o}/>
+    <circle cx="24" cy="34" r="6" fill="#fff" opacity=".6"/><circle cx="76" cy="34" r="6" fill="#fff" opacity=".6"/>
+    <rect x="44" y="34" width="12" height="50" rx="6" fill="${INK}"/><circle cx="50" cy="26" r="13" fill="${hex}" ${o}/>${face(50, 24, mood).replace(/r="2\.9"/g, 'r="2.3"')}
+    <path d="M46 14 q-6 -10 -12 -10 M54 14 q6 -10 12 -10" fill="none" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/>`;
+  return `<g transform="translate(${cx - size / 2} ${cy - size / 2}) scale(${size / 100})">${g}</g>`;
+}
+const cocoon = (cx, top, size) => `<g transform="translate(${cx - size / 2} ${top}) scale(${size / 100})"><path d="M50 0 V10" stroke="${INK}" stroke-width="3"/><path d="M50 10 C74 18 72 70 50 96 C28 70 26 18 50 10 Z" fill="#a8743f" stroke="${INK}" stroke-width="3"/><path d="M38 34 Q50 40 62 34 M36 52 Q50 58 64 52 M40 70 Q50 76 60 70" fill="none" stroke="#7a5236" stroke-width="2.5"/></g>`;
+
+const BUG = {
+  ant: (cx, bottom, s) => `<g transform="translate(${cx - 50 * s} ${bottom - 100 * s}) scale(${s})"><g fill="#3b2f2f" stroke="${INK}" stroke-width="2"><circle cx="24" cy="74" r="14"/><circle cx="48" cy="72" r="10"/><circle cx="70" cy="64" r="14"/></g><path d="M40 82 l-8 16 M50 80 l0 18 M58 80 l8 16 M74 50 q4 -14 14 -18 M66 50 q-2 -14 -10 -20" fill="none" stroke="#3b2f2f" stroke-width="3" stroke-linecap="round"/>${face(70, 64, 'happy').replace(/fill="#1d2431"/g, 'fill="#fff"').replace(/stroke="#1d2431"/g, 'stroke="#fff"')}</g>`,
+  ladybug: (cx, bottom, s) => `<g transform="translate(${cx - 50 * s} ${bottom - 100 * s}) scale(${s})"><circle cx="50" cy="40" r="14" fill="${INK}"/><path d="M14 74 a36 34 0 0 1 72 0 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M50 42 V74" stroke="${INK}" stroke-width="3"/>${[[34, 58], [66, 58], [28, 70], [72, 70]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="5" fill="${INK}"/>`).join('')}<circle cx="45" cy="38" r="2.5" fill="#fff"/><circle cx="55" cy="38" r="2.5" fill="#fff"/><path d="M14 74 H86" stroke="${INK}" stroke-width="3"/></g>`,
+  snail: (cx, bottom, s) => `<g transform="translate(${cx - 50 * s} ${bottom - 100 * s}) scale(${s})"><path d="M8 96 H88 Q96 96 92 86 L80 82 H30 L26 58 Q20 48 12 56 L14 86 Q4 90 8 96 Z" fill="#f3d9b1" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><circle cx="58" cy="60" r="24" fill="#d39a5f" stroke="${INK}" stroke-width="3"/><path d="M58 60 m-4 0 a4 4 0 1 1 8 0 a9 9 0 1 1 -16 0 a14 14 0 1 1 26 0" fill="none" stroke="#7a5236" stroke-width="3"/><path d="M14 54 l-4 -14 M22 52 l4 -14" stroke="${INK}" stroke-width="2.5" stroke-linecap="round"/><circle cx="10" cy="38" r="3" fill="${INK}"/><circle cx="26" cy="36" r="3" fill="${INK}"/></g>`,
+  bee: (cx, bottom, s) => `<g transform="translate(${cx - 50 * s} ${bottom - 100 * s}) scale(${s})"><ellipse cx="38" cy="40" rx="14" ry="20" fill="#dff1ff" stroke="${INK}" stroke-width="2.5" transform="rotate(-20 38 40)"/><ellipse cx="62" cy="40" rx="14" ry="20" fill="#dff1ff" stroke="${INK}" stroke-width="2.5" transform="rotate(20 62 40)"/><ellipse cx="50" cy="70" rx="30" ry="22" fill="#fad21e" stroke="${INK}" stroke-width="3"/><path d="M40 50 V90 M56 49 V91" stroke="${INK}" stroke-width="6"/>${face(70, 66, 'happy')}</g>`,
+};
+
+// Small pictures for the cards (120 x 100), added to the school things.
+Object.assign(OBJ, {
+  sun: () => `<g stroke="#f2a20c" stroke-width="5" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => { const t = a * Math.PI / 180; return `<path d="M${60 + Math.cos(t) * 30} ${50 + Math.sin(t) * 30} L${60 + Math.cos(t) * 42} ${50 + Math.sin(t) * 42}"/>`; }).join('')}</g><circle cx="60" cy="50" r="22" fill="#fad21e" stroke="${INK}" stroke-width="3"/>`,
+  rain: () => `<path d="M24 50 a14 14 0 0 1 4 -27 a20 20 0 0 1 36 -6 a16 16 0 0 1 26 16 a12 12 0 0 1 -4 17 Z" fill="#dce6f2" stroke="${INK}" stroke-width="3"/><g stroke="#1f6fd6" stroke-width="5" stroke-linecap="round"><path d="M36 64 l-5 14"/><path d="M58 64 l-5 14"/><path d="M80 64 l-5 14"/><path d="M47 82 l-4 10"/><path d="M69 82 l-4 10"/></g>`,
+  worm: () => `<path d="M16 72 q14 -26 28 0 t28 0 t28 0" fill="none" stroke="${INK}" stroke-width="16" stroke-linecap="round"/><path d="M16 72 q14 -26 28 0 t28 0 t28 0" fill="none" stroke="#f58cb2" stroke-width="10" stroke-linecap="round"/><circle cx="102" cy="68" r="2.5" fill="${INK}"/>`,
+  girl: () => kid(KID.maya, 'happy', 60, 98, 96),
+  boy: () => kid(KID.ori, 'happy', 60, 98, 96),
+  grandma: () => kid(GRANDMA, 'happy', 60, 98, 96),
+  dry: () => plant('sprout', '#fff', 'sad', 60, 98, 96).replace(/#57b36b/g, '#c9b27a').replace(/#8fd18a/g, '#d8c896'),
+  cold: () => `${['M30 30', 'M80 24', 'M58 66', 'M24 74', 'M94 70'].map((m, i) => { const [x, y] = m.slice(2).split(' ').map(Number); const r = [14, 11, 16, 9, 10][i]; return [0, 60, 120].map(a => `<path d="M${x - r} ${y} H${x + r}" stroke="#6fb1e8" stroke-width="4" stroke-linecap="round" transform="rotate(${a} ${x} ${y})"/>`).join(''); }).join('')}`,
+  snail: () => BUG.snail(60, 98, .96),
+  wind: () => `<g fill="none" stroke="#97a3b6" stroke-width="7" stroke-linecap="round"><path d="M10 36 H76 a14 14 0 1 0 -14 -14"/><path d="M10 60 H92 a14 14 0 1 1 -14 14"/></g>`,
+  stick: () => `<path d="M76 98 V10" stroke="#9a6b4a" stroke-width="8" stroke-linecap="round"/>${plant('sprout', '#fff', 'happy', 46, 98, 86)}<path d="M56 52 q10 4 20 0" fill="none" stroke="#ef3b44" stroke-width="4"/>`,
+  friends: () => [[26, '#ef3b44'], [60, '#fad21e'], [94, '#8a4cc2']].map(([x, c]) => plant('flower', c, 'happy', x, 98, 56)).join(''),
+  patience: () => `<circle cx="60" cy="54" r="36" fill="#fff" stroke="${INK}" stroke-width="4"/><path d="M60 54 V30 M60 54 L78 64" stroke="${INK}" stroke-width="5" stroke-linecap="round"/>`,
+  bloom: () => plant('flower', '#f58cb2', 'happy', 60, 98, 96),
+  bee: () => BUG.bee(60, 96, .9),
+  seeds: () => [[30, 40], [60, 28], [88, 46], [44, 70], [76, 76]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="10" ry="7" fill="#a8743f" stroke="${INK}" stroke-width="2.5" transform="rotate(${x % 40 - 20} ${x} ${y})"/>`).join(''),
+  flowers: () => [[22, '#ef3b44'], [46, '#1f6fd6'], [74, '#fad21e'], [98, '#8a4cc2']].map(([x, c]) => plant('flower', c, 'happy', x, 98, 50)).join(''),
+  tomato: () => `<circle cx="60" cy="58" r="32" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M60 26 L52 18 L58 30 L44 28 L58 34 L60 42 L62 34 L76 28 L62 30 L68 18 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>`,
+  sunflower: () => `<path d="M60 98 V50" stroke="#2f9e55" stroke-width="6"/>` + Array.from({ length: 12 }, (_, i) => { const a = i * Math.PI / 6; return `<ellipse cx="${60 + Math.cos(a) * 26}" cy="${40 + Math.sin(a) * 26}" rx="11" ry="6" fill="#fad21e" stroke="${INK}" stroke-width="2" transform="rotate(${i * 30} ${60 + Math.cos(a) * 26} ${40 + Math.sin(a) * 26})"/>`; }).join('') + `<circle cx="60" cy="40" r="18" fill="#7a5236" stroke="${INK}" stroke-width="3"/>`,
+  strawberry: () => `<path d="M60 92 C30 74 26 40 40 30 H80 C94 40 90 74 60 92 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M40 30 L50 18 L60 28 L70 18 L80 30 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>${[[50, 46], [68, 44], [58, 60], [46, 64], [72, 62], [60, 76]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="#ffe08a"/>`).join('')}`,
+  lemon: () => `<rect x="54" y="56" width="12" height="42" fill="#9a6b4a" stroke="${INK}" stroke-width="2.5"/><circle cx="60" cy="40" r="34" fill="#3f9a58" stroke="${INK}" stroke-width="3"/>${[[42, 32], [70, 26], [78, 52], [50, 56]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="8" ry="6" fill="#fad21e" stroke="${INK}" stroke-width="2"/>`).join('')}`,
+  water: () => `<path d="M30 46 H82 V88 H30 Z" fill="#1ea7a0" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M82 56 L108 34" stroke="${INK}" stroke-width="7" stroke-linecap="round"/><path d="M82 56 L108 34" stroke="#1ea7a0" stroke-width="3" stroke-linecap="round"/><path d="M40 46 Q56 26 72 46" fill="none" stroke="${INK}" stroke-width="4"/><g fill="#7cc4ff"><circle cx="110" cy="46" r="3"/><circle cx="104" cy="54" r="3"/><circle cx="112" cy="58" r="3"/></g>`,
+  sign: () => `<path d="M60 98 V56" stroke="#9a6b4a" stroke-width="8"/><rect x="14" y="14" width="92" height="46" rx="6" fill="#fff3d6" stroke="${INK}" stroke-width="3"/><text x="60" y="46" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="20" fill="#ef3b44">זְהִירוּת!</text>`,
+  weeds: () => `<path d="M10 92 H110" stroke="#9a6b4a" stroke-width="6" stroke-linecap="round"/>${[24, 48, 72, 96].map(x => `<path d="M${x} 90 q-8 -30 -2 -50 M${x} 90 q8 -26 4 -46 M${x} 90 q-14 -18 -16 -30" fill="none" stroke="#7a8a32" stroke-width="4" stroke-linecap="round"/>`).join('')}`,
+  sing: () => OBJ.music(),
+  bird: () => `<path d="M14 52 Q36 26 58 50 Q80 26 106 52" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/><path d="M40 72 Q52 60 64 72 Q76 60 88 72" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`,
+  forgot: () => `${plant('sprout', '#fff', 'sad', 40, 98, 80).replace(/#57b36b/g, '#c9b27a').replace(/#8fd18a/g, '#d8c896')}<text x="92" y="60" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="54" fill="#8a4cc2">?</text>`,
+  storm: () => `${OBJ.rain()}<path d="M70 40 l-12 22 h12 l-10 22" fill="none" stroke="#f5b22a" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>`,
+  slow: () => `${OBJ.patience()}`,
+  scarecrow: () => `<path d="M60 98 V30 M24 50 H96" stroke="#9a6b4a" stroke-width="7" stroke-linecap="round"/><path d="M40 46 H80 L74 80 H46 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><circle cx="60" cy="26" r="15" fill="#f3d9b1" stroke="${INK}" stroke-width="3"/><path d="M38 16 H82 L70 2 H50 Z" fill="#c9a24a" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>${face(60, 26, 'happy')}`,
+  schedule: () => `<rect x="14" y="10" width="92" height="82" rx="6" fill="#fff" stroke="${INK}" stroke-width="3"/>${[30, 50, 70].map((y, i) => `<path d="M26 ${y} h12" stroke="#2f9e55" stroke-width="5" stroke-linecap="round"/><path d="M48 ${y} h46" stroke="#97a3b6" stroke-width="4" stroke-linecap="round"/>`).join('')}`,
+  replant: () => `${OBJ.stick()}`,
+  basket: () => `<path d="M14 50 H106 L94 92 H26 Z" fill="#c9a24a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M30 50 Q60 6 90 50" fill="none" stroke="${INK}" stroke-width="5"/>${[[40, 46, '#ef3b44'], [60, 42, '#fb7a2c'], [80, 46, '#ef3b44']].map(([x, y, c]) => `<circle cx="${x}" cy="${y}" r="11" fill="${c}" stroke="${INK}" stroke-width="2"/>`).join('')}`,
+  picnic: () => `<path d="M8 70 L60 52 L112 70 L60 92 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M34 61 L86 81 M86 61 L34 81" stroke="#fff" stroke-width="4"/>${OBJ.basket().replace('<path d="M14 50', '<g transform="translate(40 8) scale(.35)"><path d="M14 50') + '</g>'}`,
+  apple: () => `<path d="M60 30 C30 14 12 44 24 70 C34 92 50 90 60 84 C70 90 86 92 96 70 C108 44 90 14 60 30 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M60 30 Q62 16 70 10" fill="none" stroke="#7a5236" stroke-width="4"/><path d="M64 20 q14 -10 22 0 q-12 8 -22 0 Z" fill="#2f9e55"/>`,
+  pear: () => `<path d="M60 18 C48 18 46 36 42 46 C26 60 26 92 60 92 C94 92 94 60 78 46 C74 36 72 18 60 18 Z" fill="#a5cf4a" stroke="${INK}" stroke-width="3"/><path d="M60 18 V8" stroke="#7a5236" stroke-width="4"/>`,
+  leaf: () => `<path d="M20 82 C20 30 60 12 100 16 C104 56 80 90 20 82 Z" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><path d="M20 82 L84 30" stroke="#bde7c8" stroke-width="3"/>`,
+  flower: () => plant('flower', '#f58cb2', 'happy', 60, 98, 96),
+  ant: () => BUG.ant(60, 98, .96),
+  ladybug: () => BUG.ladybug(60, 98, .96),
+  branch: () => `<path d="M6 30 H114" stroke="#9a6b4a" stroke-width="10" stroke-linecap="round"/><path d="M80 30 q10 -14 24 -14" fill="none" stroke="#9a6b4a" stroke-width="6"/>${cocoon(54, 30, 60)}`,
+  underleaf: () => `<path d="M10 30 C40 6 90 6 112 30 C90 40 40 40 10 30 Z" fill="#2f9e55" stroke="${INK}" stroke-width="3"/>${cocoon(60, 36, 60)}`,
+  fence: () => `${[16, 46, 76, 106].map(x => `<path d="M${x - 10} 96 V24 l10 -12 10 12 V96 Z" fill="#fff3d6" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>`).join('')}<path d="M4 44 H116 M4 76 H116" stroke="${INK}" stroke-width="3"/>`,
+  between: () => `${OBJ.flowers()}`,
+  search: () => `${OBJ.glass()}`,
+  hide: () => `<path d="M6 30 H114" stroke="#9a6b4a" stroke-width="10" stroke-linecap="round"/>${cocoon(60, 30, 60).replace(/#a8743f/g, '#9a6b4a')}`,
+  guard: () => BUG.ant(60, 98, .96) + heart(96, 22, 9),
+  fly: () => butterfly('#f58cb2', 'happy', 60, 50, 90),
+  hello: () => butterfly('#1f6fd6', 'happy', 40, 46, 70) + BUG.ladybug(92, 98, .5),
+  show: () => `${OBJ.clap()}`,
+  sky: () => `${butterfly('#fad21e', 'happy', 70, 36, 56)}${butterfly('#8a4cc2', 'happy', 34, 70, 44)}`,
+});
+const GRANDMA = { g: 'f', skin: '#f0c4a0', hair: '#c9ccd3', style: 'bun', shirt: '#8a4cc2', glasses: true };
+
+// Backgrounds, 400 x 230.
+function scene(where) {
+  switch (where) {
+    case 'garden':
+      return `<rect width="400" height="230" fill="#e3f2ff"/><circle cx="348" cy="44" r="22" fill="#ffd84d"/>
+        ${[30, 70, 110, 150, 190, 230, 270, 310, 350, 390].map(x => `<path d="M${x - 14} 176 V128 l14 -14 14 14 V176 Z" fill="#fff3d6" stroke="${INK}" stroke-width="1.5"/>`).join('')}
+        <path d="M0 150 H400" stroke="${INK}" stroke-width="2"/><path d="M0 172 H400 V230 H0Z" fill="#a3dc93"/><path d="M0 200 H400 V230 H0Z" fill="#9a6b4a" opacity=".55"/>`;
+    case 'pot':
+      return `<rect width="400" height="230" fill="#fff6e6"/><rect x="110" y="24" width="180" height="120" fill="#bfe3ff" stroke="#9a6b4a" stroke-width="7"/><path d="M200 24 V144 M110 84 H290" stroke="#9a6b4a" stroke-width="5"/>
+        <circle cx="250" cy="56" r="14" fill="#ffd84d"/><rect x="90" y="144" width="220" height="14" fill="#d39a5f" stroke="${INK}" stroke-width="2"/><rect y="200" width="400" height="30" fill="#e9d7b8"/>`;
+    case 'field':
+      return `<rect width="400" height="230" fill="#e3f2ff"/><circle cx="60" cy="46" r="22" fill="#ffd84d"/><path d="M0 140 Q200 110 400 140 V230 H0Z" fill="#f2cf6b"/>
+        ${Array.from({ length: 16 }, (_, i) => `<path d="M${12 + i * 25} 200 q4 -40 0 -64" fill="none" stroke="#c9a24a" stroke-width="3"/><ellipse cx="${12 + i * 25}" cy="132" rx="4" ry="9" fill="#c9a24a"/>`).join('')}
+        <path d="M0 196 H400 V230 H0Z" fill="#9a6b4a" opacity=".55"/>`;
+    case 'forest': {
+      const trees = [[30, '#3f9a58'], [88, '#57b36b'], [318, '#57b36b'], [374, '#3f9a58']]
+        .map(([x, c]) => `<rect x="${x - 6}" y="150" width="12" height="44" fill="#9a6b4a"/><path d="M${x} 62 L${x - 32} 154 H${x + 32} Z" fill="${c}"/><path d="M${x} 44 L${x - 24} 110 H${x + 24} Z" fill="${c}"/>`).join('');
+      return `<rect width="400" height="230" fill="#e8f5e3"/><path d="M0 184 Q200 164 400 184 V230 H0Z" fill="#7cc47f"/>${trees}<path d="M0 204 H400 V230 H0Z" fill="#9a6b4a" opacity=".5"/>`;
+    }
+    default:
+      return `<rect width="400" height="230" fill="#fbfcfd"/><path d="M24 214 H376" stroke="#d8dee7" stroke-width="3" stroke-dasharray="10 9" stroke-linecap="round"/>`;
+  }
+}
+const kidCards = (key, list) => `<div class="choices small kids">${list.map(k => card(key, k.id, k.name, `<svg viewBox="0 0 100 100" aria-hidden="true">${kid(k, 'happy', 50, 100, 100)}</svg>`)).join('')}</div>`;
+const picCards = (key, list) => `<div class="choices">${list.map(o => card(key, o.id, o.label, pic(o.pic))).join('')}</div>`;
+const placeCards = (key, list) => `<div class="choices">${list.map(p => card(key, p.id, p.label || p.at, `<span class="thumb"><svg viewBox="0 0 400 230" aria-hidden="true">${scene(p.scene || p.id)}</svg></span>`)).join('')}</div>`;
+const listCards = s => `<div class="choices">${s.list.map(o => card(s.key, o.id, o.label, pic(o.pic))).join('')}</div>`;
+const fromList = (list, val, own) => val === 'own' ? own.trim() : val ? pick(list, val).text() : '';
+const ownLines = (steps, from, parts) => steps.slice(from).forEach(s => { const t = fromList(s.list, st[s.key], st.own[s.key] || ''); if (t) parts[s.part].push({ id: s.key, text: t }); });
+
+/* ================= kind 1: the little seed =================
+   The hero is a seed with a flower inside it; the picture grows with the
+   story: seed, sprout, bud, flower. Seed and flower are masculine. */
+const seedMode = (() => {
+  const H = () => C[st.hero];
+  const PLACES = [
+    { id: 'garden', at: 'בַּגִּנָּה' },
+    { id: 'pot',    at: 'בְּעָצִיץ עַל הַחַלּוֹן' },
+    { id: 'field',  at: 'בַּשָּׂדֶה' },
+    { id: 'forest', at: 'בַּיַּעַר' },
+  ];
+  const HELPERS = [
+    { id: 'sun',  label: 'הַשֶּׁמֶשׁ', pic: 'sun',  text: () => 'הַשֶּׁמֶשׁ חִמְּמָה אוֹתוֹ בְּכָל בֹּקֶר.' },
+    { id: 'rain', label: 'הַגֶּשֶׁם', pic: 'rain', text: () => 'הַגֶּשֶׁם הִשְׁקָה אוֹתוֹ בְּטִפּוֹת קְטַנּוֹת.' },
+    { id: 'worm', label: 'תּוֹלַעַת', pic: 'worm', text: () => 'תּוֹלַעַת קְטַנָּה רִכְּכָה לוֹ אֶת הָאֲדָמָה.' },
+    { id: 'girl', label: 'יַלְדָּה', pic: 'girl', text: () => 'יַלְדָּה טוֹבָה הִשְׁקְתָה אוֹתוֹ כָּל בֹּקֶר.' },
+  ];
+  const FEELS = [
+    { id: 'happy',   label: 'שָׂמֵחַ', mood: 'happy',  text: () => 'לְאַט לְאַט יָצָא מֵהָאֲדָמָה נֶבֶט יָרֹק. הוּא הִרְגִּישׁ שָׂמֵחַ מְאוֹד.' },
+    { id: 'curious', label: 'סַקְרָן', mood: 'happy',  text: () => 'לְאַט לְאַט יָצָא מֵהָאֲדָמָה נֶבֶט יָרֹק. הוּא הָיָה סַקְרָן: מָה יֵשׁ לְמַעְלָה?' },
+    { id: 'wow',     label: 'מֻפְתָּע', mood: 'scared', text: () => 'לְאַט לְאַט יָצָא מֵהָאֲדָמָה נֶבֶט יָרֹק. הוּא הָיָה מֻפְתָּע מֵהָאוֹר הֶחָזָק.' },
+    { id: 'shy',     label: 'קְצָת מְפַחֵד', mood: 'sad', text: () => 'לְאַט לְאַט יָצָא מֵהָאֲדָמָה נֶבֶט יָרֹק. הוּא קְצָת פָּחַד מֵהָעוֹלָם הַגָּדוֹל.' },
+  ];
+  const PROBLEMS = [
+    { id: 'dry',   label: 'אֵין גֶּשֶׁם',   pic: 'dry',   text: () => 'אֲבָל לֹא יָרַד גֶּשֶׁם הַרְבֵּה יָמִים, וְהַנֶּבֶט הִתְחִיל לִנְבֹּל.' },
+    { id: 'cold',  label: 'קַר מְאוֹד',     pic: 'cold',  text: () => 'אֲבָל הִגִּיעַ לַיְלָה קַר מְאוֹד, וְהַנֶּבֶט רָעַד מִקֹּר.' },
+    { id: 'snail', label: 'שַׁבְּלוּל רָעֵב', pic: 'snail', text: () => 'אֲבָל שַׁבְּלוּל רָעֵב זָחַל אֵלָיו, וְרָצָה לֶאֱכֹל אֶת הֶעָלִים שֶׁלּוֹ.' },
+    { id: 'wind',  label: 'רוּחַ חֲזָקָה',  pic: 'wind',  text: () => 'אֲבָל נָשְׁבָה רוּחַ חֲזָקָה, וְהַנֶּבֶט כִּמְעַט נִשְׁבַּר.' },
+  ];
+  const SOLUTIONS = [
+    { id: 'rain',     label: 'גֶּשֶׁם',         pic: 'rain',     text: () => 'פִּתְאוֹם הִגִּיעוּ עֲנָנִים, וְיָרַד גֶּשֶׁם טוֹב.' },
+    { id: 'stick',    label: 'יֶלֶד עוֹזֵר',    pic: 'stick',    text: () => 'יֶלֶד שָׂם לְיָדוֹ מַקֵּל, וְקָשַׁר אוֹתוֹ בְּחוּט רַךְ.' },
+    { id: 'friends',  label: 'חֲבֵרִים שׁוֹמְרִים', pic: 'friends', text: () => 'הַצְּמָחִים שֶׁמִּסָּבִיב שָׁמְרוּ עָלָיו וְהֵגֵנּוּ עָלָיו.' },
+    { id: 'patience', label: 'סַבְלָנוּת',       pic: 'patience', text: () => 'הַנֶּבֶט חִכָּה בְּסַבְלָנוּת, וְהַשֶּׁמֶשׁ חָזְרָה לְחַמֵּם.' },
+  ];
+  const ENDINGS = [
+    { id: 'bloom',  label: 'פֶּרַח פּוֹרֵחַ',    pic: 'bloom',   text: () => `בַּסּוֹף, הַנִּצָּן נִפְתַּח, וְיָצָא פֶּרַח ${H().name} וְיָפֶה!` },
+    { id: 'bee',    label: 'דְּבוֹרָה מְבַקֶּרֶת', pic: 'bee',     text: () => `בַּסּוֹף, הַנִּצָּן נִפְתַּח, וּדְבוֹרָה בָּאָה לְבַקֵּר אֶת הַפֶּרַח ${H().def}. הֵם נִהְיוּ חֲבֵרִים.` },
+    { id: 'seeds',  label: 'זְרָעִים חֲדָשִׁים',  pic: 'seeds',   text: () => 'בְּסוֹף הַקַּיִץ, הַפֶּרַח נָתַן זְרָעִים קְטַנִּים, וְהַסִּפּוּר הִתְחִיל מֵחָדָשׁ.' },
+    { id: 'garden', label: 'גַּן פְּרָחִים',     pic: 'flowers', text: () => 'מֵאָז, כָּל הַמָּקוֹם מָלֵא פְּרָחִים צִבְעוֹנִיִּים כְּמוֹתוֹ.' },
+  ];
+  const steps = [
+    { key: 'hero',     part: 0, q: () => 'אֵיזֶה פֶּרַח יִצְמַח מֵהַזֶּרַע?' },
+    { key: 'place',    part: 0, q: () => 'אֵיפֹה שָׁתְלוּ אֶת הַזֶּרַע?' },
+    { key: 'helper',   part: 0, q: () => 'מִי עוֹזֵר לוֹ לִגְדֹּל?' },
+    { key: 'feel',     part: 0, q: () => 'אֵיךְ הַנֶּבֶט מַרְגִּישׁ?' },
+    { key: 'problem',  part: 1, q: () => 'מָה הַבְּעָיָה?', own: true, list: PROBLEMS },
+    { key: 'solution', part: 2, q: () => 'אֵיךְ פּוֹתְרִים אֶת הַבְּעָיָה?', own: true, list: SOLUTIONS },
+    { key: 'ending',   part: 3, q: () => 'אֵיךְ הַסִּפּוּר נִגְמָר?', own: true, list: ENDINGS },
+  ];
+  const TROUBLE = ['dry', 'cold', 'snail', 'wind'];
+  function stage() {
+    const trouble = TROUBLE.includes(st.problem) && !st.solution;
+    const growth = !st.feel ? 'seed' : !st.solution ? 'sprout' : !st.ending ? 'bud' : 'flower';
+    const feel = pick(FEELS, st.feel);
+    const mood = trouble ? (st.problem === 'cold' ? 'scared' : 'sad') : feel && growth === 'sprout' ? feel.mood : 'happy';
+    const hex = st.hero ? H().hex : '#fff';
+    const inPot = st.place === 'pot';
+    const bottom = inPot ? 168 : 206;
+    let back = '', front = '';
+    if (st.helper === 'sun' && st.place !== 'pot') back += place('sun', 330, 110, .7);
+    if (st.helper === 'rain' || st.solution === 'rain') back += place('rain', 110, 100, .8);
+    if (st.helper === 'worm') front += place('worm', 120, 226, .5);
+    if (st.helper === 'girl') back += kid(KID.maya, 'happy', 300, 214, 130);
+    if (inPot) front += `<path d="M156 168 H244 L234 214 H166 Z" fill="#d36a3a" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><rect x="150" y="160" width="100" height="14" rx="4" fill="#d36a3a" stroke="${INK}" stroke-width="3"/>`;
+    if (trouble && st.problem === 'cold') back += `<rect width="400" height="230" fill="#141a3a" opacity=".35"/>` + place('cold', 200, 110, .9);
+    if (trouble && st.problem === 'snail') front += BUG.snail(110, 214, .6);
+    if (trouble && st.problem === 'wind') back += place('wind', 90, 120, .8);
+    if (st.solution === 'stick') back += `<path d="M228 ${bottom} V${bottom - 150}" stroke="#9a6b4a" stroke-width="7" stroke-linecap="round"/>`;
+    if (st.solution === 'friends') back += [[80, '#ef3b44'], [320, '#fad21e']].map(([x, c]) => plant('flower', c, 'happy', x, 214, 90)).join('');
+    if (st.ending === 'bee') front += BUG.bee(300, 110, .6);
+    if (st.ending === 'seeds') front += place('seeds', 320, 120, .6);
+    if (st.ending === 'garden') back += [[60, '#ef3b44'], [110, '#1f6fd6'], [290, '#8a4cc2'], [340, '#fb7a2c']].map(([x, c]) => plant('flower', c, 'happy', x, 214, 80)).join('');
+    const hero = st.hero ? plant(growth, hex, mood, 200, bottom + (growth === 'seed' ? 16 : 0), growth === 'seed' ? 110 : 170) : ghost(200, 206, 110);
+    return `<svg viewBox="0 0 400 230" role="img" aria-label="${esc(titleText() || 'הַזֶּרַע')}">${scene(st.place || 'garden')}${back}${hero}${front}</svg>`;
+  }
+  return {
+    id: 'seed',
+    label: 'הַזֶּרַע הַקָּטָן',
+    hint: 'מִזֶּרַע לְנִצָּן וּלְפֶרַח',
+    parts: ['הַתְחָלָה', 'הַבְּעָיָה', 'הַפִּתְרוֹן', 'הַסּוֹף'],
+    steps,
+    later: [['problem', 'solution', 'ending'], ['solution', 'ending'], ['ending'], []],
+    fresh: () => ({ hero: null, place: null, helper: null, feel: null, problem: null, solution: null, ending: null,
+      own: { problem: '', solution: '', ending: '' } }),
+    story() {
+      const parts = [[], [], [], []];
+      if (!st.hero) return parts;
+      parts[0].push({ id: 'open', text: `פַּעַם הָיָה זֶרַע קָטָן. בְּתוֹכוֹ חִכָּה פֶּרַח ${H().name}.` });
+      if (st.place) parts[0].push({ id: 'place', text: `אֶת הַזֶּרַע שָׁתְלוּ ${pick(PLACES, st.place).at}.` });
+      if (st.helper) parts[0].push({ id: 'helper', text: pick(HELPERS, st.helper).text() });
+      if (st.feel) parts[0].push({ id: 'feel', text: pick(FEELS, st.feel).text() });
+      ownLines(steps, 4, parts);
+      return parts;
+    },
+    title: () => st.hero ? `הַזֶּרַע וְהַפֶּרַח ${H().def}` : '',
+    stage,
+    choices(s) {
+      switch (s.key) {
+        case 'hero': return `<div class="choices small">${COLORS.map(c => card('hero', c.id, c.name, `<svg viewBox="0 0 100 100" aria-hidden="true">${plant('flower', c.hex, 'happy', 50, 100, 100)}</svg>`)).join('')}</div>`;
+        case 'place': return placeCards('place', PLACES);
+        case 'helper': return picCards('helper', HELPERS);
+        case 'feel': return `<div class="choices small">${FEELS.map(f => card('feel', f.id, f.label, `<svg viewBox="0 0 100 100" aria-hidden="true">${plant('sprout', '#fff', f.mood, 50, 100, 100)}</svg>`)).join('')}</div>`;
+        default: return listCards(s);
+      }
+    },
+    options(s) {
+      if (s.key === 'hero') return COLORS.map(c => c.id);
+      const list = { place: PLACES, helper: HELPERS, feel: FEELS }[s.key] || s.list;
+      return list.map(o => o.id);
+    },
+    chose() {},
+    art: () => `<svg viewBox="0 0 220 120" aria-hidden="true">${plant('seed', '#fff', 'happy', 40, 120, 70)}${plant('sprout', '#fff', 'happy', 100, 120, 90)}${plant('flower', C.pink.hex, 'happy', 172, 120, 112)}</svg>`,
+  };
+})();
+
+/* ================= kind 2: our garden =================
+   Two named children plant a garden. Grammar follows the hero (v), the
+   friend (w) and both (הֵם for any boy in the pair, הֵן for two girls). */
+const gardenMode = (() => {
+  const H = () => st.hero ? KID[st.hero] : NOBODY;
+  const F = () => st.friend ? KID[st.friend] : NOBODY;
+  const v = (m, f) => H().g === 'f' ? f : m;
+  const w = (m, f) => F().g === 'f' ? f : m;
+  const both = (m, f) => H().g === 'f' && F().g === 'f' ? f : m;
+  const they = () => both('הֵם', 'הֵן');
+  const PLANTS = [
+    { id: 'tomato',    label: 'עַגְבָנִיּוֹת', pic: 'tomato',    full: 'בְּעַגְבָנִיּוֹת אֲדֻמּוֹת' },
+    { id: 'sunflower', label: 'חַמָּנִיּוֹת',  pic: 'sunflower', full: 'בְּחַמָּנִיּוֹת צְהֻבּוֹת וּגְבוֹהוֹת' },
+    { id: 'strawberry', label: 'תּוּתִים',     pic: 'strawberry', full: 'בְּתוּתִים אֲדֻמִּים וּמְתוּקִים' },
+    { id: 'lemon',     label: 'עֵץ לִימוֹן',   pic: 'lemon',     full: 'בְּלִימוֹנִים צְהֻבִּים' },
+  ];
+  const CARE = [
+    { id: 'water', label: 'מַשְׁקִים',    pic: 'water', text: () => `כָּל יוֹם ${they()} הִשְׁקוּ אֶת הַגִּנָּה.` },
+    { id: 'sing',  label: 'שָׁרִים',      pic: 'sing',  text: () => `כָּל יוֹם ${they()} שָׁרוּ לַצְּמָחִים שִׁיר.` },
+    { id: 'sign',  label: 'שֶׁלֶט',       pic: 'sign',  text: () => `${they()} הֵכִינוּ שֶׁלֶט: ״זְהִירוּת, גִּנָּה!״` },
+    { id: 'weeds', label: 'עוֹקְרִים עֲשָׂבִים', pic: 'weeds', text: () => `${they()} עָקְרוּ אֶת הָעֲשָׂבִים שֶׁהִפְרִיעוּ לַצְּמָחִים.` },
+  ];
+  const PROBLEMS = [
+    { id: 'birds',  label: 'צִפֳּרִים',      pic: 'bird',   text: () => 'אֲבָל צִפֳּרִים בָּאוּ וְאָכְלוּ אֶת הַזְּרָעִים!' },
+    { id: 'forgot', label: 'שָׁכְחוּ לְהַשְׁקוֹת', pic: 'forgot', text: () => `אֲבָל ${they()} שָׁכְחוּ לְהַשְׁקוֹת, וְהַצְּמָחִים נָבְלוּ.` },
+    { id: 'storm',  label: 'סוּפָה',        pic: 'storm',  text: () => 'אֲבָל הָיְתָה סוּפָה, וְהָרוּחַ הִפִּילָה אֶת הַשְּׁתִילִים.' },
+    { id: 'slow',   label: 'שׁוּם דָּבָר לֹא צוֹמֵחַ', pic: 'slow', text: () => `אֲבָל עָבְרוּ יָמִים, וְשׁוּם דָּבָר לֹא צָמַח. ${H().name} ${v('הִתְאַכְזֵב', 'הִתְאַכְזְבָה')}.` },
+  ];
+  const SOLUTIONS = [
+    { id: 'scarecrow', label: 'דַּחְלִיל',      pic: 'scarecrow', text: () => `${they()} בָּנוּ דַּחְלִיל מַצְחִיק, שֶׁשָּׁמַר עַל הַגִּנָּה.` },
+    { id: 'schedule',  label: 'לוּחַ תּוֹרָנוּת', pic: 'schedule',  text: () => `${they()} הֵכִינוּ לוּחַ תּוֹרָנוּת, וְכָל יוֹם מִישֶׁהוּ אַחֵר מַשְׁקֶה.` },
+    { id: 'replant',   label: 'שׁוֹתְלִים מֵחָדָשׁ', pic: 'replant', text: () => `${they()} שָׁתְלוּ מֵחָדָשׁ, וְהַפַּעַם קָשְׁרוּ כָּל שָׁתִיל לְמַקֵּל.` },
+    { id: 'grandma',   label: 'סַבְלָנוּת',      pic: 'grandma',   text: () => 'סָבְתָא אָמְרָה: ״צָרִיךְ סַבְלָנוּת, הַצְּמָחִים גְּדֵלִים לְאַט.״ וּבֶאֱמֶת, אַחֲרֵי כַּמָּה יָמִים יָצְאוּ נְבָטִים קְטַנִּים.' },
+  ];
+  const ENDINGS = [
+    { id: 'harvest', label: 'גִּנָּה מְלֵאָה', pic: 'basket',
+      text: () => `בַּסּוֹף, הַגִּנָּה הָיְתָה מְלֵאָה ${pick(PLANTS, st.plant) ? pick(PLANTS, st.plant).full : 'בִּצְמָחִים'}, ${both('וְהֵם הָיוּ גֵּאִים', 'וְהֵן הָיוּ גֵּאוֹת')}.` },
+    { id: 'share', label: 'מְחַלְּקִים לְכֻלָּם', pic: 'heart',
+      text: () => `${they()} חִלְּקוּ מֵהַגִּנָּה לְכָל הַשְּׁכֵנִים, וְכֻלָּם שָׂמְחוּ.` },
+    { id: 'picnic', label: 'פִּיקְנִיק', pic: 'picnic',
+      text: () => `בַּסּוֹף, ${they()} עָשׂוּ פִּיקְנִיק בַּגִּנָּה, וְהָיָה נִפְלָא.` },
+    { id: 'teach', label: 'מְלַמְּדִים אֲחֵרִים', pic: 'board',
+      text: () => `מֵאָז, ${H().name} ${F().and} ${both('מְלַמְּדִים', 'מְלַמְּדוֹת')} יְלָדִים אֲחֵרִים לִשְׁתֹּל.` },
+  ];
+  const steps = [
+    { key: 'hero',     part: 0, q: () => 'מִי בַּסִּפּוּר?' },
+    { key: 'plant',    part: 0, q: () => `מָה ${H().name} ${v('רוֹצֶה', 'רוֹצָה')} לִשְׁתֹּל?` },
+    { key: 'friend',   part: 0, q: () => 'מִי בָּא לַעֲזֹר?' },
+    { key: 'care',     part: 0, q: () => 'אֵיךְ שׁוֹמְרִים עַל הַגִּנָּה?' },
+    { key: 'problem',  part: 1, q: () => 'מָה הַבְּעָיָה?', own: true, list: PROBLEMS },
+    { key: 'solution', part: 2, q: () => 'אֵיךְ פּוֹתְרִים אֶת הַבְּעָיָה?', own: true, list: SOLUTIONS },
+    { key: 'ending',   part: 3, q: () => 'אֵיךְ הַסִּפּוּר נִגְמָר?', own: true, list: ENDINGS },
+  ];
+  const TROUBLE = ['birds', 'forgot', 'storm', 'slow'];
+  function stage() {
+    const trouble = TROUBLE.includes(st.problem) && !st.solution;
+    const p = pick(PLANTS, st.plant);
+    let back = '', front = '';
+    // the plant row grows with the story
+    const xs = [150, 200, 250];
+    if (st.plant) {
+      if (st.ending) front += xs.map(x => place(p.pic, x, 222, .48)).join('');
+      else if (st.care && !(trouble && (st.problem === 'birds' || st.problem === 'slow')))
+        front += xs.map(x => plant('sprout', '#fff', trouble ? 'sad' : 'happy', x, 222, 60).replace(trouble ? /#57b36b/g : /^$/, '#c9b27a')).join('');
+      else front += xs.map(x => `<ellipse cx="${x}" cy="214" rx="16" ry="6" fill="#7a5236"/>`).join('');
+    }
+    if (trouble && st.problem === 'birds') back += place('bird', 200, 90, .7);
+    if (trouble && st.problem === 'storm') back += `<rect width="400" height="230" fill="#141a3a" opacity=".25"/>` + place('storm', 200, 100, .8);
+    if (st.care === 'sign' && !st.ending) back += place('sign', 316, 200, .55);
+    if (st.solution === 'scarecrow') back += place('scarecrow', 330, 210, .9);
+    if (st.solution === 'schedule') back += place('schedule', 200, 120, .55);
+    if (st.solution === 'grandma') back += kid(GRANDMA, 'happy', 200, 206, 140);
+    if (st.ending === 'picnic') front += place('picnic', 200, 230, .7);
+    if (st.ending === 'share') front += place('heart', 200, 96, .4);
+    const mood = trouble ? 'sad' : 'happy';
+    const friend = st.friend ? kid(F(), mood, 80, 214, 128) : (st.step >= 2 ? kidGhost(80, 214, 128) : '');
+    const hero = st.hero ? kid(H(), mood, 320, 214, 136) : kidGhost(320, 214, 136);
+    return `<svg viewBox="0 0 400 230" role="img" aria-label="${esc(titleText() || 'הַגִּנָּה')}">${scene('garden')}${back}${friend}${hero}${front}</svg>`;
+  }
+  return {
+    id: 'garden',
+    label: 'הַגִּנָּה שֶׁלָּנוּ',
+    hint: 'שְׁנֵי יְלָדִים שׁוֹתְלִים גִּנָּה',
+    parts: ['הַתְחָלָה', 'הַבְּעָיָה', 'הַפִּתְרוֹן', 'הַסּוֹף'],
+    steps,
+    later: [['problem', 'solution', 'ending'], ['solution', 'ending'], ['ending'], []],
+    fresh: () => ({ hero: null, plant: null, friend: null, care: null, problem: null, solution: null, ending: null,
+      own: { problem: '', solution: '', ending: '' } }),
+    story() {
+      const parts = [[], [], [], []];
+      if (!st.hero) return parts;
+      const h = H(), f = F();
+      const p = pick(PLANTS, st.plant);
+      parts[0].push({ id: 'open', text: p ? `${h.name} ${v('רָצָה', 'רָצְתָה')} לִשְׁתֹּל ${p.label}.` : `${h.name} ${v('רָצָה', 'רָצְתָה')} לִשְׁתֹּל גִּנָּה.` });
+      if (st.friend) parts[0].push({ id: 'friend', text: `${f.name} ${w('בָּא', 'בָּאָה')} לַעֲזֹר, וְיַחַד ${they()} שָׁתְלוּ אֶת הַזְּרָעִים.` });
+      if (st.care) parts[0].push({ id: 'care', text: pick(CARE, st.care).text() });
+      ownLines(steps, 4, parts);
+      return parts;
+    },
+    title: () => st.hero ? (st.friend ? `הַגִּנָּה שֶׁל ${H().name} ${F().and}` : `הַגִּנָּה שֶׁל ${H().name}`) : '',
+    stage,
+    choices(s) {
+      switch (s.key) {
+        case 'hero': return kidCards('hero', KIDS);
+        case 'friend': return kidCards('friend', KIDS.filter(k => k.id !== st.hero));
+        case 'plant': return picCards('plant', PLANTS);
+        case 'care': return picCards('care', CARE);
+        default: return listCards(s);
+      }
+    },
+    options(s) {
+      if (s.key === 'hero') return KIDS.map(k => k.id);
+      if (s.key === 'friend') return KIDS.filter(k => k.id !== st.hero).map(k => k.id);
+      const list = { plant: PLANTS, care: CARE }[s.key] || s.list;
+      return list.map(o => o.id);
+    },
+    chose(key, id) { if (key === 'hero' && st.friend === id) st.friend = null; },
+    art: () => `<svg viewBox="0 0 220 120" aria-hidden="true">${kid(KID.shira, 'happy', 52, 120, 104)}${kid(KID.itai, 'happy', 168, 120, 104)}${place('sunflower', 110, 120, .7)}</svg>`,
+  };
+})();
+
+/* ================= kind 3: from caterpillar to butterfly =================
+   The hero is a caterpillar of the chosen color; it builds a cocoon and
+   comes out a butterfly of the same color. Caterpillar and butterfly are
+   masculine; the friend may be masculine or feminine. */
+const butterflyMode = (() => {
+  const H = () => C[st.hero];
+  const FRIENDS = [
+    { id: 'ant',     g: 'f', name: 'נְמָלָה קְטַנָּה', def: 'הַנְּמָלָה', label: 'נְמָלָה' },
+    { id: 'ladybug', g: 'f', name: 'פָּרַת מֹשֶׁה רַבֵּנוּ', def: 'פָּרַת מֹשֶׁה רַבֵּנוּ', label: 'פָּרַת מֹשֶׁה רַבֵּנוּ' },
+    { id: 'snail',   g: 'm', name: 'שַׁבְּלוּל אִטִּי', def: 'הַשַּׁבְּלוּל', label: 'שַׁבְּלוּל' },
+    { id: 'bee',     g: 'f', name: 'דְּבוֹרָה זְרִיזָה', def: 'הַדְּבוֹרָה', label: 'דְּבוֹרָה' },
+  ];
+  const F = () => pick(FRIENDS, st.friend) || { g: 'm', name: '___', def: '___' };
+  const w = (m, f) => F().g === 'f' ? f : m;
+  const FOODS = [
+    { id: 'leaves', label: 'עָלִים', pic: 'leaf',   text: 'עָלִים יְרֻקִּים' },
+    { id: 'apple',  label: 'תַּפּוּחַ', pic: 'apple',  text: 'תַּפּוּחַ אָדֹם' },
+    { id: 'pear',   label: 'אַגָּס',  pic: 'pear',   text: 'אַגָּס מָתוֹק' },
+    { id: 'flower', label: 'פֶּרַח',  pic: 'flower', text: 'עֲלֵי כּוֹתֶרֶת שֶׁל פֶּרַח' },
+  ];
+  const SPOTS = [
+    { id: 'branch', label: 'עַל עָנָף',       pic: 'branch',    at: 'עַל עָנָף שֶׁל עֵץ' },
+    { id: 'leaf',   label: 'מִתַּחַת לְעָלֶה', pic: 'underleaf', at: 'מִתַּחַת לְעָלֶה גָּדוֹל' },
+    { id: 'fence',  label: 'עַל גָּדֵר',       pic: 'fence',     at: 'עַל הַגָּדֵר שֶׁל הַגִּנָּה' },
+    { id: 'flowers', label: 'בֵּין פְּרָחִים', pic: 'between',   at: 'בֵּין הַפְּרָחִים' },
+  ];
+  const PROBLEMS = [
+    { id: 'search', label: 'הֶחָבֵר דּוֹאֵג', pic: 'search',
+      text: () => `אֲבָל ${F().def} ${w('חִפֵּשׂ', 'חִפְּשָׂה')} אֶת הַזַּחַל ${w('וְלֹא מָצָא', 'וְלֹא מָצְאָה')}. ״לְאָן הוּא נֶעְלַם?״` },
+    { id: 'bird', label: 'צִפּוֹר רְעֵבָה', pic: 'bird', text: () => 'אֲבָל צִפּוֹר רְעֵבָה עָפָה מֵעַל הַגֹּלֶם, וְחִפְּשָׂה מָה לֶאֱכֹל.' },
+    { id: 'rain', label: 'גֶּשֶׁם חָזָק', pic: 'rain', text: () => 'אֲבָל יָרַד גֶּשֶׁם חָזָק, וְהַגֹּלֶם הִתְנַדְנֵד בָּרוּחַ.' },
+    { id: 'scared', label: 'פַּחַד מִשִּׁנּוּי', pic: 'confused', text: () => 'אֲבָל בְּתוֹךְ הַגֹּלֶם, הַזַּחַל פָּחַד: ״מָה יִקְרֶה לִי?״' },
+  ];
+  const SOLUTIONS = [
+    { id: 'guard', label: 'חָבֵר שׁוֹמֵר', pic: 'guard', text: () => `${F().def} ${w('יָשַׁב', 'יָשְׁבָה')} לְיַד הַגֹּלֶם ${w('וְשָׁמַר', 'וְשָׁמְרָה')} עָלָיו כָּל הַזְּמַן.` },
+    { id: 'hide', label: 'מִסְתַּתְּרִים', pic: 'hide', text: () => 'הַגֹּלֶם הִתְחַבֵּא הֵיטֵב, וְאַף אֶחָד לֹא רָאָה אוֹתוֹ.' },
+    { id: 'sun', label: 'הַשֶּׁמֶשׁ חוֹזֶרֶת', pic: 'sun', text: () => 'הַשֶּׁמֶשׁ יָצְאָה, וְיִבְּשָׁה וְחִמְּמָה אֶת הַכֹּל.' },
+    { id: 'patience', label: 'סַבְלָנוּת', pic: 'patience', text: () => 'הַזַּחַל נָשַׁם עָמֹק, וְחִכָּה בְּסַבְלָנוּת.' },
+  ];
+  const ENDINGS = [
+    { id: 'hello', label: 'לְבַקֵּר חָבֵר', pic: 'hello', text: () => `הַפַּרְפַּר עָף אֶל ${F().def} וְקָרָא: ״זֶה אֲנִי, הַזַּחַל!״` },
+    { id: 'flowers', label: 'מִפֶּרַח לְפֶרַח', pic: 'fly', text: () => 'הַפַּרְפַּר עָף מִפֶּרַח לְפֶרַח, וְשָׂמַח מְאוֹד.' },
+    { id: 'show', label: 'כֻּלָּם בָּאִים לִרְאוֹת', pic: 'show', text: () => 'כָּל הַגִּנָּה בָּאָה לִרְאוֹת אֶת הַפַּרְפַּר הֶחָדָשׁ.' },
+    { id: 'sky', label: 'חֲבֵרִים בַּשָּׁמַיִם', pic: 'sky', text: () => 'בַּשָּׁמַיִם הוּא פָּגַשׁ עוֹד פַּרְפָּרִים, וְהֵם עָפוּ יַחַד.' },
+  ];
+  const steps = [
+    { key: 'hero',     part: 0, q: () => 'בְּאֵיזֶה צֶבַע הַזַּחַל?' },
+    { key: 'food',     part: 0, q: () => 'מָה הַזַּחַל אוֹכֵל?' },
+    { key: 'friend',   part: 0, q: () => 'מִי הֶחָבֵר שֶׁל הַזַּחַל?' },
+    { key: 'spot',     part: 1, q: () => 'אֵיפֹה הוּא בּוֹנֶה גֹּלֶם?' },
+    { key: 'problem',  part: 1, q: () => 'מָה הַבְּעָיָה?', own: true, list: PROBLEMS },
+    { key: 'solution', part: 2, q: () => 'מָה עוֹזֵר?', own: true, list: SOLUTIONS },
+    { key: 'ending',   part: 3, q: () => 'אֵיךְ הַסִּפּוּר נִגְמָר?', own: true, list: ENDINGS },
+  ];
+  const TROUBLE = ['search', 'bird', 'rain', 'scared'];
+  function friendBug(mood, cx) {
+    if (!st.friend) return st.step >= 2 ? ghost(cx, 214, 60) : '';
+    return BUG[st.friend](cx, 214, .62);
+  }
+  function stage() {
+    const trouble = TROUBLE.includes(st.problem) && !st.solution;
+    const hex = st.hero ? H().hex : '#fff';
+    let back = '', front = '', hero;
+    if (st.spot === 'branch' || st.spot === 'leaf' || (!st.spot && false)) back += `<path d="M180 70 H400" stroke="#9a6b4a" stroke-width="12" stroke-linecap="round"/>`;
+    if (st.spot === 'leaf') back += `<path d="M190 64 C230 40 300 40 330 70 C300 84 230 84 190 64 Z" fill="#2f9e55" stroke="${INK}" stroke-width="3"/>`;
+    if (st.spot === 'fence') back += [210, 250, 290].map(x => `<path d="M${x - 14} 214 V96 l14 -14 14 14 V214 Z" fill="#fff3d6" stroke="${INK}" stroke-width="2"/>`).join('') + `<path d="M180 120 H320" stroke="${INK}" stroke-width="3"/>`;
+    if (st.spot === 'flowers') back += [[200, '#ef3b44'], [300, '#fad21e']].map(([x, c]) => plant('flower', c, 'happy', x, 214, 120)).join('') + `<path d="M230 214 V70" stroke="#2f9e55" stroke-width="6"/>`;
+    const top = st.spot === 'fence' ? 120 : st.spot === 'flowers' ? 70 : 70;
+    if (st.ending) hero = butterfly(hex, 'happy', 250, 100, 120) + cocoon(260, top, 56).replace(/#a8743f/g, '#d6c08c');
+    else if (st.spot) hero = cocoon(260, top, 90) + (trouble && st.problem === 'scared' ? `<path d="M226 ${top + 40} q-8 8 0 16 M294 ${top + 40} q8 8 0 16" fill="none" stroke="#97a3b6" stroke-width="3"/>` : '');
+    else hero = st.hero ? caterpillar(hex, 'happy', 260, 214, 120) : ghost(260, 214, 110);
+    if (st.food && !st.spot) back += place(pick(FOODS, st.food).pic, 340, 214, .5);
+    if (trouble && st.problem === 'bird') back += place('bird', 120, 80, .7);
+    if (trouble && st.problem === 'rain') back += place('rain', 140, 90, .8);
+    if (st.solution === 'sun' || (!trouble && st.problem === 'rain')) back += place('sun', 80, 100, .6);
+    if (st.ending === 'flowers') back += [[80, '#ef3b44'], [140, '#1f6fd6']].map(([x, c]) => plant('flower', c, 'happy', x, 214, 90)).join('');
+    if (st.ending === 'sky') front += butterfly('#fad21e', 'happy', 120, 60, 60) + butterfly('#8a4cc2', 'happy', 350, 50, 50);
+    if (st.ending === 'show') front += place('clap', 120, 110, .7);
+    const fx = st.solution === 'guard' ? 200 : 110;
+    const friendMood = trouble && st.problem === 'search' ? 'sad' : 'happy';
+    return `<svg viewBox="0 0 400 230" role="img" aria-label="${esc(titleText() || 'הַזַּחַל')}">${scene('garden')}${back}${friendBug(friendMood, fx)}${hero}${front}</svg>`;
+  }
+  return {
+    id: 'butterfly',
+    label: 'מִזַּחַל לְפַרְפַּר',
+    hint: 'זַחַל, גֹּלֶם וּפַרְפַּר',
+    parts: ['הַתְחָלָה', 'הַגֹּלֶם', 'הָעֶזְרָה', 'הַסּוֹף'],
+    steps,
+    later: [['spot', 'problem', 'solution', 'ending'], ['solution', 'ending'], ['ending'], []],
+    fresh: () => ({ hero: null, food: null, friend: null, spot: null, problem: null, solution: null, ending: null,
+      own: { problem: '', solution: '', ending: '' } }),
+    story() {
+      const parts = [[], [], [], []];
+      if (!st.hero) return parts;
+      parts[0].push({ id: 'open', text: `פַּעַם הָיָה זַחַל ${H().name} וְקָטָן.` });
+      if (st.food) parts[0].push({ id: 'food', text: `הוּא אָכַל ${pick(FOODS, st.food).text}, וְגָדַל וְגָדַל.` });
+      if (st.friend) parts[0].push({ id: 'friend', text: `${w('הֶחָבֵר הֲכִי טוֹב שֶׁלּוֹ הָיָה', 'הַחֲבֵרָה הֲכִי טוֹבָה שֶׁלּוֹ הָיְתָה')} ${F().name}.` });
+      if (st.spot) parts[1].push({ id: 'spot', text: `יוֹם אֶחָד הַזַּחַל הִרְגִּישׁ עָיֵף מְאוֹד. הוּא בָּנָה לְעַצְמוֹ גֹּלֶם ${pick(SPOTS, st.spot).at}, וְנִרְדַּם בְּתוֹכוֹ.` });
+      ownLines(steps, 4, parts);
+      if (st.ending && st.ending !== 'own') parts[3].unshift({ id: 'out', text: `בַּסּוֹף, הַגֹּלֶם נִפְתַּח, וְיָצָא מִמֶּנּוּ פַּרְפַּר ${H().name} וְיָפֶה!` });
+      return parts;
+    },
+    title: () => st.hero ? `הַפַּרְפַּר ${H().def}` : '',
+    stage,
+    choices(s) {
+      switch (s.key) {
+        case 'hero': return `<div class="choices small">${COLORS.map(c => card('hero', c.id, c.name, `<svg viewBox="0 0 100 100" aria-hidden="true">${caterpillar(c.hex, 'happy', 50, 96, 100)}</svg>`)).join('')}</div>`;
+        case 'food': return picCards('food', FOODS);
+        case 'friend': return `<div class="choices">${FRIENDS.map(f => card('friend', f.id, f.label, `<svg viewBox="0 0 100 100" aria-hidden="true" style="max-width:110px">${BUG[f.id](50, 100, 1)}</svg>`)).join('')}</div>`;
+        case 'spot': return picCards('spot', SPOTS);
+        default: return listCards(s);
+      }
+    },
+    options(s) {
+      if (s.key === 'hero') return COLORS.map(c => c.id);
+      const list = { food: FOODS, friend: FRIENDS, spot: SPOTS }[s.key] || s.list;
+      return list.map(o => o.id);
+    },
+    chose() {},
+    art: () => `<svg viewBox="0 0 220 120" aria-hidden="true">${caterpillar(C.green.hex, 'happy', 52, 116, 84)}${cocoon(118, 20, 64)}${butterfly(C.orange.hex, 'happy', 180, 56, 80)}</svg>`,
+  };
+})();
+
+const MODES = { seed: seedMode, garden: gardenMode, butterfly: butterflyMode };
+
+/* ================= state =================
+   One draft per kind of story, kept in this browser only. */
+const KEY = 'nitzanim-story-lab';
+let store = { drafts: {}, sound: true, tasks: {} };
+try {
+  const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+  if (saved && saved.drafts) store = Object.assign(store, saved);
+} catch (e) {}
+let st = null, view = 'start';
+const M = () => MODES[st.mode];
+const newStory = mode => Object.assign({ mode, screen: 'step', step: 0, title: '', author: '', extra: [] }, MODES[mode].fresh());
+const save = () => {
+  if (st) store.drafts[st.mode] = st;
+  try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {}
+};
+
+const chosen = key => st[key] && (st[key] !== 'own' || st.own[key].trim());
+function story() {
+  const parts = M().story();
+  st.extra.forEach((t, i) => parts[3].push({ id: 'x' + i, text: t, extra: i }));
+  return parts;
+}
+const defaultTitle = () => M().title();
+const titleText = () => st.title.trim() || defaultTitle();
+
+/* ================= icons ================= */
+const I = {
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>',
+  next: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M11 6l-6 6 6 6"/></svg>',
+  speak: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6"/><path d="M18 6.5a8 8 0 0 1 0 11"/></svg>',
+  stop: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>',
+  note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/></svg>',
+  noteOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/><path d="M3 3l18 18" stroke-width="2.6"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><g fill="currentColor" stroke="none"><circle cx="8.5" cy="8.5" r="1.7"/><circle cx="15.5" cy="15.5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="15.5" cy="8.5" r="1.7"/><circle cx="8.5" cy="15.5" r="1.7"/></g></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  x: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4-4.7-4.4 6.4-.8z"/></svg>',
+  print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 9V3.5h10V9"/><rect x="3.5" y="9" width="17" height="8" rx="2"/><path d="M7 14h10v6.5H7z" fill="currentColor" fill-opacity=".15"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M3 5.5h6a3 3 0 0 1 3 3V20a2.5 2.5 0 0 0-2.5-2.5H3z"/><path d="M21 5.5h-6a3 3 0 0 0-3 3V20a2.5 2.5 0 0 1 2.5-2.5H21z"/></svg>',
+  save: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10.5l5 5 5-5"/><path d="M4.5 19.5h15"/></svg>',
+  palette: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3a9 9 0 1 0 0 18c1.4 0 2-1 1.6-2.2-.5-1.3.3-2.8 1.9-2.8H18a3 3 0 0 0 3-3C21 7 17 3 12 3z"/><circle cx="7.5" cy="11" r="1.5" fill="currentColor"/><circle cx="11" cy="7" r="1.5" fill="currentColor"/><circle cx="16" cy="8.5" r="1.5" fill="currentColor"/></svg>',
+};
+
+/* ================= sounds ================= */
+let actx = null;
+function tone(freq, at, dur, type = 'triangle', vol = 0.1) {
+  const t = actx.currentTime + at, o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const SFX = {
+  tap:   () => tone(700, 0, 0.07, 'sine', 0.06),
+  pick:  () => { tone(523, 0, 0.13); tone(784, 0.09, 0.2); },
+  back:  () => { tone(523, 0, 0.1, 'sine', 0.07); tone(392, 0.08, 0.14, 'sine', 0.07); },
+  magic: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * 0.06, 0.15, 'triangle', 0.07)),
+  done:  () => [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.13, i === 3 ? 0.6 : 0.2, 'triangle', 0.1)),
+};
+function sfx(name) {
+  if (!store.sound) return;
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (actx.state === 'suspended') actx.resume();
+    SFX[name]();
+  } catch (e) {}
+}
+
+/* ================= reading aloud ================= */
+const canSpeak = 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window;
+const readAllLabel = 'לְהַקְרִיא אֶת הַסִּפּוּר';
+let reading = 0;   // token of the current reading, 0 when silent
+function stopReading() {
+  reading = 0;
+  if (canSpeak) speechSynthesis.cancel();
+  app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+  app.querySelectorAll('[data-act="readAll"]').forEach(b => { b.innerHTML = `${I.speak}${readAllLabel}`; });
+}
+function read(items) {   // items: [{ id, text }]
+  if (!canSpeak) return;
+  stopReading();
+  const token = reading = Date.now();
+  const voice = speechSynthesis.getVoices().find(vo => /^(he|iw)/i.test(vo.lang));
+  let i = 0;
+  const next = () => {
+    if (reading !== token) return;
+    app.querySelectorAll('.sent.reading').forEach(el => el.classList.remove('reading'));
+    if (i >= items.length) { stopReading(); return; }
+    const it = items[i++];
+    const el = app.querySelector(`.sent[data-sid="${it.id}"]`);
+    if (el) el.classList.add('reading');
+    const u = new SpeechSynthesisUtterance(it.text.replace(/[״"]/g, ''));
+    u.lang = 'he-IL'; if (voice) u.voice = voice; u.rate = 0.85;
+    u.onend = next; u.onerror = next;
+    speechSynthesis.speak(u);
+  };
+  next();
+}
+function readAll(btn) {
+  if (reading) { stopReading(); return; }
+  const items = story().flat();
+  if (view === 'final') items.unshift({ id: 'title', text: titleText() });
+  read(items);
+  if (btn) btn.innerHTML = `${I.stop}לַעֲצֹר`;
+}
+
+/* ================= the printed book =================
+   Pages are drawn on canvas (A4 at 150 dpi): a cover, one page for each part
+   of the story with its picture at that moment, and a closing page. The same
+   page images feed the on-screen preview, printing, and the PDF. */
+const PW = 1240, PH = 1754, PAD = 90;
+const FONT_D = 'Rubik, "Noto Sans Hebrew", Arial, sans-serif';
+const FONT_B = '"Noto Sans Hebrew", Rubik, Arial, sans-serif';
+let bookPages = [];
+
+// The picture as it looked at the end of a given part.
+function stageAt(part) {
+  const keep = st;
+  const snap = Object.assign({}, st, { step: -1 });
+  M().later[part].forEach(k => { snap[k] = null; });
+  st = snap;
+  try { return M().stage(); } finally { st = keep; }
+}
+function svgImage(svg, w, h) {
+  const src = svg.replace('<svg ', `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" `);
+  return new Promise((ok, fail) => {
+    const img = new Image();
+    img.onload = () => ok(img); img.onerror = fail;
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(src);
+  });
+}
+function wrapLines(ctx, text, maxW) {
+  const lines = []; let line = '';
+  text.split(/\s+/).forEach(w => {
+    const test = line ? line + ' ' + w : w;
+    if (line && ctx.measureText(test).width > maxW) { lines.push(line); line = w; } else line = test;
+  });
+  if (line) lines.push(line);
+  return lines;
+}
+function blankPage(num) {
+  const c = document.createElement('canvas'); c.width = PW; c.height = PH;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, PW, PH);
+  ctx.strokeStyle = '#d8dee7'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(40, 40, PW - 80, PH - 80, 36) : ctx.rect(40, 40, PW - 80, PH - 80); ctx.stroke();
+  ctx.direction = 'rtl';
+  if (num) {
+    ctx.fillStyle = '#5a6476'; ctx.font = `500 30px ${FONT_D}`; ctx.textAlign = 'center';
+    ctx.fillText(String(num), PW / 2, PH - 78);
+  }
+  return { c, ctx };
+}
+function drawPicture(ctx, img, x, y, w, h) {
+  ctx.save();
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 28) : ctx.rect(x, y, w, h); ctx.clip();
+  ctx.drawImage(img, x, y, w, h);
+  ctx.restore();
+  ctx.strokeStyle = '#1d2431'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, 28) : ctx.rect(x, y, w, h); ctx.stroke();
+}
+function colorDots(ctx, y) {
+  const r = 13, gap = 44, x0 = PW / 2 - gap * 3;
+  COLORS.forEach((c, i) => { ctx.fillStyle = c.hex; ctx.beginPath(); ctx.arc(x0 + i * gap, y, r, 0, Math.PI * 2); ctx.fill(); });
+}
+// Lay out paragraphs at the largest size that fits; returns the size and lines per paragraph.
+function fitText(ctx, paras, maxW, maxH) {
+  for (const size of [50, 46, 42, 38, 34]) {
+    ctx.font = `400 ${size}px ${FONT_B}`;
+    const lh = size * 1.85, gap = size * 0.45;
+    const laid = paras.map(p => wrapLines(ctx, p, maxW));
+    const h = laid.reduce((s, l) => s + l.length * lh, 0) + gap * (paras.length - 1);
+    if (h <= maxH) return { size, lh, gap, laid, fits: true };
+  }
+  ctx.font = `400 34px ${FONT_B}`;
+  return { size: 34, lh: 34 * 1.85, gap: 34 * 0.45, laid: paras.map(p => wrapLines(ctx, p, maxW)), fits: false };
+}
+
+async function buildBook() {
+  try {
+    await Promise.all([
+      document.fonts.load(`700 80px Rubik`, 'אב'), document.fonts.load(`500 30px Rubik`, 'אב'),
+      document.fonts.load(`400 40px "Noto Sans Hebrew"`, 'אָב'),
+    ]);
+  } catch (e) {}
+  const pages = [];
+  const picW = PW - PAD * 2, picH = Math.round(picW * 230 / 400);
+
+  // cover
+  {
+    const { c, ctx } = blankPage(0);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#1d2431';
+    ctx.font = `700 88px ${FONT_D}`;
+    const lines = wrapLines(ctx, titleText(), PW - PAD * 2 - 40);
+    let y = 250;
+    lines.forEach(l => { ctx.fillText(l, PW / 2, y); y += 120; });
+    const img = await svgImage(M().stage(), picW, picH);
+    drawPicture(ctx, img, PAD, y - 30, picW, picH);
+    y += picH + 70;
+    if (st.author.trim()) {
+      ctx.font = `500 50px ${FONT_D}`; ctx.fillStyle = '#1d2431';
+      ctx.fillText(`מֵאֵת: ${st.author.trim()}`, PW / 2, y + 40);
+    }
+    colorDots(ctx, PH - 190);
+    ctx.font = `500 32px ${FONT_D}`; ctx.fillStyle = '#5a6476';
+    ctx.fillText('נִצָּנִים בְּשָׂפָה', PW / 2, PH - 120);
+    pages.push(c);
+  }
+
+  // one page for each part, continuing on text-only pages if a part is long
+  const parts = story();
+  for (let p = 0; p < 4; p++) {
+    let paras = parts[p].map(s => s.text);
+    if (!paras.length) continue;
+    const img = await svgImage(stageAt(p), picW, picH);
+    let first = true;
+    while (paras.length) {
+      const { c, ctx } = blankPage(pages.length + 1);
+      let y = 130;
+      if (first) { drawPicture(ctx, img, PAD, y, picW, picH); y += picH + 80; }
+      ctx.textAlign = 'right'; ctx.fillStyle = '#5a6476'; ctx.font = `500 34px ${FONT_D}`;
+      ctx.fillText(M().parts[p], PW - PAD, y);
+      y += 40;
+      const maxH = PH - 170 - y;
+      let fit = fitText(ctx, paras, PW - PAD * 2, maxH);
+      let take = paras.length;
+      if (!fit.fits) {   // keep as many whole paragraphs as fit, the rest goes on the next page
+        let h = 0; take = 0;
+        for (const l of fit.laid) { const add = l.length * fit.lh + (take ? fit.gap : 0); if (h + add > maxH && take) break; h += add; take++; }
+        fit = fitText(ctx, paras.slice(0, take), PW - PAD * 2, maxH);
+      }
+      ctx.font = `400 ${fit.size}px ${FONT_B}`; ctx.fillStyle = '#1d2431'; ctx.textAlign = 'right';
+      y += fit.lh * 0.8;
+      fit.laid.forEach((lines, i) => {
+        if (i) y += fit.gap;
+        lines.forEach(l => { ctx.fillText(l, PW - PAD, y); y += fit.lh; });
+      });
+      pages.push(c);
+      paras = paras.slice(take);
+      first = false;
+    }
+  }
+
+  // closing page
+  {
+    const { c, ctx } = blankPage(0);
+    const img = await svgImage(`<svg viewBox="0 0 400 140">${COLORS.map((c, i) => plant('flower', c.hex, 'happy', 32 + i * 56, 138, 92)).join('')}</svg>`, 1000, 350);
+    ctx.drawImage(img, (PW - 1000) / 2, 820, 1000, 350);
+    ctx.textAlign = 'center'; ctx.fillStyle = '#1d2431'; ctx.font = `700 150px ${FONT_D}`;
+    ctx.fillText('הַסּוֹף', PW / 2, 720);
+    pages.push(c);
+  }
+  return pages.map(c => c.toDataURL('image/jpeg', 0.9));
+}
+
+const JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+function loadScript(src) {
+  return new Promise((ok, fail) => {
+    if (window.jspdf) { ok(); return; }
+    const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = fail;
+    document.head.appendChild(s);
+  });
+}
+// Inside claude.ai the page hands files over through the downloads capability; opened as a file, it uses a normal download.
+const inViewer = !!(window.claude && window.claude.use);
+const downloadsReady = inViewer ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+const fileName = () => (titleText() || 'סיפור').replace(/[֑-ׇ]/g, '').replace(/[\\/:*?"<>|]/g, '').trim() + '.pdf';
+function bookStatus(text) { const el = document.getElementById('book-status'); if (el) el.textContent = text; }
+async function savePdf(btn) {
+  btn.disabled = true;
+  bookStatus('מְכִינִים אֶת הַקֹּבֶץ…');
+  try {
+    await loadScript(JSPDF);
+    const pdf = new window.jspdf.jsPDF({ unit: 'mm', format: 'a4', compress: true });
+    bookPages.forEach((url, i) => { if (i) pdf.addPage(); pdf.addImage(url, 'JPEG', 0, 0, 210, 297); });
+    const blob = pdf.output('blob');
+    if (inViewer) {
+      const dl = await downloadsReady;
+      if (!dl) { bookStatus('כָּאן אִי אֶפְשָׁר לִשְׁמֹר קְבָצִים.'); btn.hidden = true; return; }
+      await dl.save({ filename: fileName(), data: blob });
+    } else {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = fileName();
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }
+    sfx('done');
+    bookStatus('הַסֵּפֶר נִשְׁמַר. פּוֹתְחִים אֶת הַקֹּבֶץ וּמַדְפִּיסִים.');
+  } catch (e) {
+    if (e && e.code === 'declined') bookStatus('');
+    else if (e && (e.code === 'unavailable' || e.code === 'not_granted')) { bookStatus('כָּאן אִי אֶפְשָׁר לִשְׁמֹר קְבָצִים.'); btn.hidden = true; }
+    else bookStatus('לֹא הִצְלַחְנוּ לִשְׁמֹר אֶת הַסֵּפֶר. בִּדְקוּ שֶׁיֵּשׁ אִינְטֶרְנֶט וְנַסּוּ שׁוּב.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ================= נִצָּנִים בְּשָׂפָה: short language tasks =================
+   Two groups of four one-tap tasks below the stories. */
+/* ================= school words =================
+   Four sets of six one-tap questions for young readers: read a word and
+   find its picture, read the name of a pictured thing, one and many
+   (singular and plural, with a common wrong plural as the trap), and the
+   first letter of a word. A right answer on the first try earns a star;
+   a wrong one fades out and the child tries again. */
+const QUIZ_LEN = 6;
+// [picture, word, gender, plural, wrong plural, first letter, two other letters]
+const WORDS = [
+  ['book',     'סֵפֶר',     'm', 'סְפָרִים',     'סֵפֶרִים',     'ס', 'ש', 'צ'],
+  ['pencil',   'עִפָּרוֹן',  'm', 'עֶפְרוֹנוֹת',  'עִפָּרוֹנִים',  'ע', 'א', 'ה'],
+  ['bag',      'תִּיק',     'm', 'תִּיקִים',     'תִּיקוֹת',     'ת', 'ט', 'ד'],
+  ['ball',     'כַּדּוּר',   'm', 'כַּדּוּרִים',   'כַּדּוּרוֹת',   'כ', 'ק', 'ח'],
+  ['board',    'לוּחַ',     'm', 'לוּחוֹת',     'לוּחִים',      'ל', 'נ', 'ר'],
+  ['table',    'שֻׁלְחָן',   'm', 'שֻׁלְחָנוֹת',   'שֻׁלְחָנִים',   'ש', 'ס', 'צ'],
+  ['chair',    'כִּסֵּא',    'm', 'כִּסְאוֹת',    'כִּסְאִים',    'כ', 'ק', 'ח'],
+  ['notebook', 'מַחְבֶּרֶת', 'f', 'מַחְבָּרוֹת',  'מַחְבֶּרֶתִים', 'מ', 'נ', 'ב'],
+  ['bell',     'פַּעֲמוֹן',  'm', 'פַּעֲמוֹנִים', 'פַּעֲמוֹנוֹת',  'פ', 'ב', 'ו'],
+  ['ruler',    'סַרְגֵּל',   'm', 'סַרְגֵּלִים',  'סַרְגֵּלוֹת',   'ס', 'ש', 'ז'],
+].map(([id, word, g, plural, wrong, first, a, b]) => ({ id, word, g, plural, wrong, first, others: [a, b] }));
+const shuffle = list => { const a = [...list]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+// The first letter with its vowel marks, then the rest of the word.
+function splitFirst(word) {
+  const m = word.match(/^([א-ת][֑-ׇ]*)(.*)$/);
+  return m ? [m[1], m[2]] : [word, ''];
+}
+const many = id => `<svg viewBox="0 0 120 100" aria-hidden="true">${[[34, 86], [86, 86], [60, 54]].map(([x, y]) => place(id, x, y, .48)).join('')}</svg>`;
+
+const SCHOOL_TASKS = [
+  { id: 'read', title: 'קוֹרְאִים מִלִּים', hint: 'קוֹרְאִים מִלָּה וּבוֹחֲרִים תְּמוּנָה',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="34" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="28" fill="${INK}">תִּיק</text>${place('bag', 60, 84, .45)}</svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => ({
+      q: 'מָה כָּתוּב?',
+      prompt: `<div class="q-word">${o.word}</div>`,
+      answer: o.id,
+      options: shuffle([o, ...shuffle(WORDS.filter(x => x.id !== o.id)).slice(0, 3)]).map(x => ({ id: x.id, html: pic(x.id), label: x.word })),
+      kind: 'blobs',
+    })) },
+  { id: 'what', title: 'מָה בַּתְּמוּנָה?', hint: 'מִסְתַּכְּלִים וְקוֹרְאִים',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${place('pencil', 60, 84, .8)}</svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => ({
+      q: 'מָה בַּתְּמוּנָה?',
+      prompt: `<div class="q-pic">${pic(o.id)}</div>`,
+      answer: o.id,
+      options: shuffle([o, ...shuffle(WORDS.filter(x => x.id !== o.id)).slice(0, 2)]).map(x => ({ id: x.id, html: `<span class="q-opt-word">${x.word}</span>`, label: x.word })),
+      kind: 'words',
+    })) },
+  { id: 'many', title: 'אֶחָד וְהַרְבֵּה', hint: 'בּוֹחֲרִים אֶת הַמִּלָּה הַנְּכוֹנָה',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${place('book', 26, 70, .34)}<path d="M50 46 h18 m-6 -6 l6 6 -6 6" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" transform="rotate(180 59 46)"/>${[[84, 76], [104, 76], [94, 50]].map(([x, y]) => place('book', x, y, .26)).join('')}</svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => {
+      const one = `${o.word} ${o.g === 'f' ? 'אַחַת' : 'אֶחָד'}`;
+      const row = gap => `<div class="q-many"><div><div class="q-pic small">${pic(o.id)}</div><div class="q-sentence">${one}</div></div>
+        <div><div class="q-pic small">${many(o.id)}</div><div class="q-sentence">הַרְבֵּה ${gap}</div></div></div>`;
+      return {
+        q: 'אֵיךְ אוֹמְרִים הַרְבֵּה?',
+        prompt: row(`<span class="q-gap">${' '.repeat(8)}</span>`),
+        filled: row(`<span class="q-gap done">${o.plural}</span>`),
+        answer: 'right',
+        options: shuffle([{ id: 'right', w: o.plural }, { id: 'wrong', w: o.wrong }]).map(x => ({ id: x.id, html: `<span class="q-opt-word">${x.w}</span>`, label: x.w })),
+        kind: 'pair',
+        readAfter: `${one}, הַרְבֵּה ${o.plural}.`,
+      };
+    }) },
+  { id: 'letter', title: 'הָאוֹת הָרִאשׁוֹנָה', hint: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${place('ball', 40, 80, .5)}<text x="92" y="62" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="44" fill="${INK}">כ</text></svg>`,
+    make: () => shuffle(WORDS).slice(0, QUIZ_LEN).map(o => ({
+      q: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+      prompt: `<div class="q-pic">${pic(o.id)}</div>`,
+      filled: `<div class="q-pic">${pic(o.id)}</div><div class="q-word"><mark>${splitFirst(o.word)[0]}</mark>${splitFirst(o.word)[1]}</div>`,
+      sayWord: true,
+      word: o.word,
+      answer: o.first,
+      options: shuffle([o.first, ...o.others]).map(l => ({ id: l, html: `<span class="q-letter">${l}</span>`, label: l })),
+      kind: 'letters',
+    })) },
+];
+
+/* ================= colors =================
+   Four sets of six one-tap questions for young readers, all about colors:
+   reading a color word, reading the color of a thing, agreement (זָכָר,
+   נְקֵבָה, רַבִּים) and the first letter of a color word. A right answer on
+   the first try earns a star; a wrong one fades out and the child tries again. */
+const FORMS = {   // masculine, feminine, plural
+  red:    ['אָדֹם', 'אֲדֻמָּה', 'אֲדֻמִּים'],
+  orange: ['כָּתֹם', 'כְּתֻמָּה', 'כְּתֻמִּים'],
+  yellow: ['צָהֹב', 'צְהֻבָּה', 'צְהֻבִּים'],
+  green:  ['יָרֹק', 'יְרֻקָּה', 'יְרֻקִּים'],
+  blue:   ['כָּחֹל', 'כְּחֻלָּה', 'כְּחֻלִּים'],
+  purple: ['סָגֹל', 'סְגֻלָּה', 'סְגֻלִּים'],
+  pink:   ['וָרֹד', 'וְרֻדָּה', 'וְרֻדִּים'],
+};
+// Things to look at, drawn in a 120 x 100 box.
+const THINGS = {
+  sun: { def: 'הַשֶּׁמֶשׁ', g: 1, color: 'yellow', pic: () => `<g stroke="#f2a20c" stroke-width="5" stroke-linecap="round">${[0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+      const t = a * Math.PI / 180; return `<path d="M${60 + Math.cos(t) * 32} ${50 + Math.sin(t) * 32} L${60 + Math.cos(t) * 44} ${50 + Math.sin(t) * 44}"/>`; }).join('')}</g><circle cx="60" cy="50" r="24" fill="#fad21e" stroke="${INK}" stroke-width="3"/>` },
+  leaf: { def: 'הֶעָלֶה', g: 0, color: 'green', pic: () => `<path d="M20 82 C20 30 60 12 100 16 C104 56 80 90 20 82 Z" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><path d="M20 82 L84 30" stroke="#bde7c8" stroke-width="3"/>` },
+  strawberry: { def: 'הַתּוּת', g: 0, color: 'red', pic: () => `<path d="M60 92 C30 74 26 40 40 30 H80 C94 40 90 74 60 92 Z" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M40 30 L50 18 L60 28 L70 18 L80 30 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/>${[[50, 46], [68, 44], [58, 60], [46, 64], [72, 62], [60, 76]].map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="2" ry="3" fill="#ffe08a"/>`).join('')}` },
+  orange: { def: 'הַתַּפּוּז', g: 0, color: 'orange', pic: () => `<circle cx="60" cy="56" r="32" fill="#fb7a2c" stroke="${INK}" stroke-width="3"/><path d="M60 24 q10 -14 24 -8 q-8 12 -24 8 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2.5"/><circle cx="48" cy="46" r="3" fill="#fff" opacity=".6"/>` },
+  grapes: { def: 'הָעֲנָבִים', g: 2, color: 'purple', pic: () => `<path d="M60 10 V22" stroke="#9a6b4a" stroke-width="4" stroke-linecap="round"/>${[[46, 32], [60, 30], [74, 32], [40, 46], [54, 46], [68, 46], [80, 46], [48, 60], [62, 60], [74, 60], [56, 74], [68, 74], [62, 88]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="9" fill="#8a4cc2" stroke="${INK}" stroke-width="2.2"/>`).join('')}` },
+  sea: { def: 'הַיָּם', g: 0, color: 'blue', pic: () => `<path d="M6 40 q14 -12 27 0 t27 0 t27 0 t27 0 V92 H6 Z" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><path d="M6 60 q14 -10 27 0 t27 0 t27 0 t27 0" fill="none" stroke="#fff" stroke-width="3"/><path d="M12 78 q14 -8 27 0 t27 0 t27 0" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/>` },
+  sky: { def: 'הַשָּׁמַיִם', g: 2, color: 'blue', pic: () => `<rect x="6" y="8" width="108" height="84" rx="12" fill="#1f6fd6" stroke="${INK}" stroke-width="3"/><g fill="#fff" stroke="${INK}" stroke-width="2"><path d="M30 46 a8 8 0 0 1 2 -15 a11 11 0 0 1 20 -3 a9 9 0 0 1 12 10 a6 6 0 0 1 -2 8 Z"/><path d="M66 74 a7 7 0 0 1 2 -12 a9 9 0 0 1 16 -2 a7 7 0 0 1 10 8 a5 5 0 0 1 -2 6 Z"/></g>` },
+  pig: { def: 'הַחֲזִיר', g: 0, color: 'pink', pic: () => `<path d="M30 30 L26 10 L46 22 Z M90 30 L94 10 L74 22 Z" fill="#f58cb2" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><circle cx="60" cy="52" r="36" fill="#f58cb2" stroke="${INK}" stroke-width="3"/><circle cx="46" cy="42" r="4" fill="${INK}"/><circle cx="74" cy="42" r="4" fill="${INK}"/><ellipse cx="60" cy="62" rx="15" ry="11" fill="#ffb3cc" stroke="${INK}" stroke-width="2.5"/><circle cx="55" cy="62" r="3" fill="${INK}"/><circle cx="65" cy="62" r="3" fill="${INK}"/>` },
+  banana: { def: 'הַבָּנָנָה', g: 1, color: 'yellow', pic: () => `<path d="M18 30 C24 76 72 92 104 66 C96 64 92 60 90 56 C66 72 38 62 30 26 Z" fill="#fad21e" stroke="${INK}" stroke-width="3" stroke-linejoin="round"/><path d="M18 30 L24 22 L30 26" fill="none" stroke="#7a5236" stroke-width="4" stroke-linecap="round"/>` },
+  tomato: { def: 'הָעַגְבָנִיָּה', g: 1, color: 'red', pic: () => `<circle cx="60" cy="58" r="32" fill="#ef3b44" stroke="${INK}" stroke-width="3"/><path d="M60 26 L52 18 L58 30 L44 28 L58 34 L60 42 L62 34 L76 28 L62 30 L68 18 Z" fill="#2f9e55" stroke="${INK}" stroke-width="2" stroke-linejoin="round"/>` },
+  frog: { def: 'הַצְּפַרְדֵּעַ', g: 1, color: 'green', pic: () => `<ellipse cx="60" cy="62" rx="40" ry="28" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="34" r="12" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="80" cy="34" r="12" fill="#2f9e55" stroke="${INK}" stroke-width="3"/><circle cx="40" cy="33" r="6" fill="#fff"/><circle cx="80" cy="33" r="6" fill="#fff"/><circle cx="40" cy="34" r="3" fill="${INK}"/><circle cx="80" cy="34" r="3" fill="${INK}"/><path d="M44 66 q16 12 32 0" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>` },
+  carrots: { def: 'הַגְּזָרִים', g: 2, color: 'orange', pic: () => [[36, 0], [60, 4], [84, 0]].map(([x, d]) => `<path d="M${x - 9} ${26 + d} L${x + 9} ${26 + d} L${x} ${88 + d} Z" fill="#fb7a2c" stroke="${INK}" stroke-width="2.5" stroke-linejoin="round"/><path d="M${x} ${26 + d} l-6 -14 M${x} ${26 + d} l0 -16 M${x} ${26 + d} l6 -14" stroke="#2f9e55" stroke-width="3.5" stroke-linecap="round"/>`).join('') },
+};
+const LETTER_ITEMS = [   // [color, right letter, two other letters]
+  ['red', 'א', 'ע', 'ה'], ['blue', 'כ', 'ק', 'ח'], ['green', 'י', 'ו', 'ר'], ['yellow', 'צ', 'ס', 'ז'],
+  ['purple', 'ס', 'ש', 'צ'], ['pink', 'ו', 'ב', 'ז'], ['orange', 'כ', 'ק', 'ת'],
+];
+const blob = (hex, size = 70) => `<svg viewBox="0 0 100 100" aria-hidden="true" style="width:${size}px">${drop(hex, 'happy', 50, 98, 94)}</svg>`;
+const thingPic = t => `<svg viewBox="0 0 120 100" aria-hidden="true">${THINGS[t].pic()}</svg>`;
+
+const COLOR_TASKS = [
+  { id: 'read', title: 'קוֹרְאִים צְבָעִים', hint: 'קוֹרְאִים מִלָּה וּבוֹחֲרִים צֶבַע',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="44" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="30" fill="${INK}">כָּחֹל</text>${drop(C.blue.hex, 'happy', 60, 84, 34)}</svg>`,
+    make: () => shuffle(COLORS).slice(0, QUIZ_LEN).map(c => ({
+      q: 'אֵיזֶה צֶבַע כָּתוּב?',
+      prompt: `<div class="q-word">${c.name}</div>`,
+      answer: c.id,
+      options: shuffle([c, ...shuffle(COLORS.filter(o => o.id !== c.id)).slice(0, 3)]).map(o => ({ id: o.id, html: blob(o.hex), label: o.name })),
+      kind: 'blobs',
+    })) },
+  { id: 'thing', title: 'מָה הַצֶּבַע?', hint: 'מִסְתַּכְּלִים וְקוֹרְאִים',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><g transform="translate(20 0) scale(.8)">${THINGS.strawberry.pic()}</g></svg>`,
+    make: () => shuffle(['sun', 'leaf', 'strawberry', 'orange', 'grapes', 'sea', 'pig']).slice(0, QUIZ_LEN).map(t => {
+      const right = C[THINGS[t].color];
+      return {
+        q: `בְּאֵיזֶה צֶבַע ${THINGS[t].def}?`,
+        prompt: `<div class="q-pic">${thingPic(t)}</div>`,
+        answer: right.id,
+        options: shuffle([right, ...shuffle(COLORS.filter(o => o.id !== right.id)).slice(0, 2)]).map(o => ({ id: o.id, html: `<span class="q-opt-word">${o.name}</span>`, label: o.name })),
+        kind: 'words',
+      };
+    }) },
+  { id: 'agree', title: 'זָכָר, נְקֵבָה, רַבִּים', hint: 'מַשְׁלִימִים אֶת הַמִּשְׁפָּט',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true"><text x="60" y="36" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="22" fill="${INK}">הַשֶּׁמֶשׁ</text><rect x="28" y="50" width="64" height="24" rx="6" fill="none" stroke="#97a3b6" stroke-width="3" stroke-dasharray="6 5"/></svg>`,
+    make: () => shuffle(['sun', 'strawberry', 'leaf', 'banana', 'grapes', 'orange', 'tomato', 'sky', 'frog', 'carrots']).slice(0, QUIZ_LEN).map(t => {
+      const th = THINGS[t], forms = FORMS[th.color];
+      return {
+        q: 'אֵיזוֹ מִלָּה מַתְאִימָה?',
+        prompt: `<div class="q-pic small">${thingPic(t)}</div><div class="q-sentence">${th.def} <span class="q-gap">${' '.repeat(10)}</span>.</div>`,
+        filled: `<div class="q-pic small">${thingPic(t)}</div><div class="q-sentence">${th.def} <span class="q-gap done">${forms[th.g]}</span>.</div>`,
+        answer: String(th.g),
+        options: shuffle([0, 1, 2]).map(g => ({ id: String(g), html: `<span class="q-opt-word">${forms[g]}</span>`, label: forms[g] })),
+        kind: 'words',
+        readAfter: `${th.def} ${forms[th.g]}.`,
+      };
+    }) },
+  { id: 'letter', title: 'הָאוֹת הָרִאשׁוֹנָה', hint: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+    icon: () => `<svg viewBox="0 0 120 84" aria-hidden="true">${drop(C.red.hex, 'happy', 38, 80, 52)}<text x="88" y="62" text-anchor="middle" font-family="Rubik, Arial" font-weight="700" font-size="44" fill="${INK}">א</text></svg>`,
+    make: () => shuffle(LETTER_ITEMS).slice(0, QUIZ_LEN).map(([id, right, a, b]) => ({
+      q: 'בְּאֵיזוֹ אוֹת מַתְחִילָה הַמִּלָּה?',
+      prompt: `<div class="q-pic">${blob(C[id].hex, 120)}</div>`,
+      filled: `<div class="q-pic">${blob(C[id].hex, 120)}</div><div class="q-word"><mark>${splitFirst(C[id].name)[0]}</mark>${splitFirst(C[id].name)[1]}</div>`,
+      sayWord: true,
+      word: C[id].name,
+      answer: right,
+      options: shuffle([right, a, b]).map(l => ({ id: l, html: `<span class="q-letter">${l}</span>`, label: l })),
+      kind: 'letters',
+    })) },
+];
+
+const GROUPS = [
+  { title: 'מִלִּים מִבֵּית הַסֵּפֶר', tasks: SCHOOL_TASKS.map(t => Object.assign(t, { id: 'school-' + t.id })) },
+  { title: 'צְבָעִים', tasks: COLOR_TASKS.map(t => Object.assign(t, { id: 'colors-' + t.id })) },
+];
+const ALL_TASKS = GROUPS.flatMap(g => g.tasks);
+
+let quiz = null;   // { task, items, i, stars, missed, solved }
+function startQuiz(id) {
+  const task = ALL_TASKS.find(t => t.id === id);
+  quiz = { task, items: task.make(), i: 0, stars: 0, missed: new Set(), solved: false };
+  view = 'quiz'; render(); window.scrollTo(0, 0);
+  sayQuestion();
+}
+function sayQuestion() {
+  if (!quiz || view !== 'quiz') return;
+  const it = quiz.items[quiz.i];
+  read(it.sayWord ? [{ id: 'q', text: it.q }, { id: 'q', text: it.word }] : [{ id: 'q', text: it.q }]);
+}
+function quizStars(n, of) {
+  return `<span class="q-stars" aria-label="${n} מִתּוֹךְ ${of}">${Array.from({ length: of }, (_, k) => `<span class="${k < n ? 'on' : ''}">${I.star}</span>`).join('')}</span>`;
+}
+function tasksSection() {
+  return `<section class="tasks-sec">
+    <h2>מְשִׂימוֹת קְצָרוֹת</h2>
+    ${GROUPS.map(g => `<h3 class="grp-title">${g.title}</h3>
+      <div class="task-cards">${g.tasks.map(t => {
+        const best = store.tasks && store.tasks[t.id];
+        return `<button class="kind-card task-card" data-act="quiz" data-task="${t.id}" data-key="task-${t.id}">
+          ${t.icon()}<strong>${t.title}</strong><small>${t.hint}</small>
+          ${best !== undefined ? quizStars(best, QUIZ_LEN) : ''}
+        </button>`;
+      }).join('')}</div>`).join('')}
+  </section>`;
+}
+function quizView() {
+  const it = quiz.items[quiz.i];
+  const dots = quiz.items.map((_, k) => `<span class="q-dot${k < quiz.i ? ' done' : ''}${k === quiz.i ? ' cur' : ''}"></span>`).join('');
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <div class="q-dots" aria-label="שְׁאֵלָה ${quiz.i + 1} מִתּוֹךְ ${quiz.items.length}">${dots}</div>
+      ${soundBtn()}
+    </div>
+    <section class="quiz panel">
+      <div class="q-head">
+        ${canSpeak ? `<button class="spk" data-act="q-say" data-key="q-say" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+        <h2>${it.q}</h2>
+      </div>
+      <div class="q-prompt" id="q-prompt">${quiz.solved && it.filled ? it.filled : it.prompt}</div>
+      <div class="q-options ${it.kind}">${it.options.map(o => `<button class="q-opt${quiz.missed.has(o.id) ? ' miss' : ''}${quiz.solved && o.id === it.answer ? ' right' : ''}"
+          data-act="q-answer" data-id="${o.id}" data-key="opt-${o.id}" aria-label="${o.label}" ${quiz.missed.has(o.id) || quiz.solved ? 'disabled' : ''}>${o.html}</button>`).join('')}</div>
+      <p class="q-feedback ${quiz.solved ? 'good' : quiz.missed.size ? 'again' : ''}" role="status">${quiz.solved ? `${I.star}כָּל הַכָּבוֹד!` : quiz.missed.size ? 'נַסּוּ שׁוּב' : ''}</p>
+    </section>`;
+}
+function quizDoneView() {
+  const n = quiz.stars, of = quiz.items.length;
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <h2>${quiz.task.title}</h2>
+      ${soundBtn()}
+    </div>
+    <div class="start q-done">
+      ${quizStars(n, of)}
+      <h1>${n === of ? 'מְצֻיָּן!' : n >= of / 2 ? 'כָּל הַכָּבוֹד!' : 'יָפֶה מְאוֹד!'}</h1>
+      <p>${n === 1 ? 'כּוֹכָב אֶחָד' : `${n} כּוֹכָבִים`} מִתּוֹךְ ${of}</p>
+      <div class="actions">
+        <button class="act primary big" data-act="quiz" data-task="${quiz.task.id}" data-key="again">${I.next}עוֹד פַּעַם</button>
+        <button class="act" data-act="q-home" data-key="q-home">${I.book}לְכָל הַמְּשִׂימוֹת</button>
+      </div>
+    </div>`;
+}
+let quizTimer = null;
+function quizAnswer(id) {
+  const it = quiz.items[quiz.i];
+  if (quiz.solved) return;
+  if (id === it.answer) {
+    quiz.solved = true;
+    if (!quiz.missed.size) quiz.stars++;
+    sfx('pick');
+    render();
+    if (it.readAfter) read([{ id: 'q', text: it.readAfter }]);
+    quizTimer = setTimeout(() => {
+      if (view !== 'quiz') return;
+      if (quiz.i < quiz.items.length - 1) {
+        quiz.i++; quiz.missed = new Set(); quiz.solved = false;
+        render(); sayQuestion();
+      } else {
+        store.tasks = store.tasks || {};
+        store.tasks[quiz.task.id] = Math.max(store.tasks[quiz.task.id] || 0, quiz.stars);
+        view = 'quizDone'; sfx('done'); render(); window.scrollTo(0, 0);
+      }
+    }, it.readAfter ? 1800 : 1100);
+  } else {
+    quiz.missed.add(id);
+    sfx('back');
+    render();
+  }
+}
+// Handles the task screens' buttons; returns true when it did.
+function quizClick(b) {
+  switch (b.dataset.act) {
+    case 'quiz': clearTimeout(quizTimer); sfx('tap'); startQuiz(b.dataset.task); return true;
+    case 'q-answer': quizAnswer(b.dataset.id); return true;
+    case 'q-say': sayQuestion(); return true;
+    case 'q-home': clearTimeout(quizTimer); sfx('tap'); view = 'start'; render(); window.scrollTo(0, 0); return true;
+    case 'back':
+      if (view !== 'quiz' && view !== 'quizDone') return false;
+      clearTimeout(quizTimer); sfx('back'); view = 'start'; render(); window.scrollTo(0, 0); return true;
+  }
+  return false;
+}
+
+/* ================= rendering ================= */
+const app = document.getElementById('story-app');
+let lastSeen = new Set();   // sentences already shown, so only new ones animate
+
+function render() {
+  stopReading();
+  clearTimeout(advanceTimer);
+  const focusKey = document.activeElement && document.activeElement.dataset ? document.activeElement.dataset.key : null;
+  app.innerHTML = ({ start: startView, step: stepView, final: finalView, book: bookView, quiz: quizView, quizDone: quizDoneView })[view]();
+  if (focusKey) {
+    const el = app.querySelector(`[data-key="${focusKey}"]`);
+    if (el && !el.disabled) el.focus();
+  }
+  save();
+}
+
+function soundBtn() {
+  return `<button class="icon-btn${store.sound ? '' : ' off'}" data-act="sound" data-key="sound" aria-pressed="${store.sound}" aria-label="צְלִילִים">${store.sound ? I.note : I.noteOff}</button>`;
+}
+
+function startView() {
+  const kinds = Object.values(MODES).map(m => {
+    const draft = store.drafts[m.id] && store.drafts[m.id].hero;
+    return `<div class="kind">
+      <button class="kind-card" data-act="${draft ? 'resume' : 'new'}" data-mode="${m.id}" data-key="kind-${m.id}">
+        ${m.art()}<strong>${m.label}</strong><small>${m.hint}</small>
+      </button>
+      ${draft ? `<div class="kind-actions">
+        <button class="act primary" data-act="resume" data-mode="${m.id}" data-key="resume-${m.id}">${I.next}לְהַמְשִׁיךְ</button>
+        <button class="act" data-act="new" data-mode="${m.id}" data-key="new-${m.id}">${I.plus}סִפּוּר חָדָשׁ</button>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+  return `<div class="bar"><span style="flex:1"></span>${soundBtn()}</div>
+    <div class="start">
+      <h1>נִצָּנִים בְּשָׂפָה</h1>
+      <p>סִפּוּרִים עַל דְּבָרִים שֶׁגְּדֵלִים</p>
+      <div class="kinds">${kinds}</div>
+      ${tasksSection()}
+    </div>`;
+}
+
+function stepsBar() {
+  const steps = M().steps;
+  return `<nav class="steps" aria-label="שְׁלַבִּים">${steps.map((s, i) => {
+    const open = steps.slice(0, i).every(p => chosen(p.key));
+    const cls = (chosen(s.key) ? ' done' : '') + (view === 'step' && i === st.step ? ' cur' : '');
+    return `<button class="stepdot${cls}" data-act="goto" data-i="${i}" data-key="dot${i}" aria-label="שָׁלָב ${i + 1}"
+      ${i === st.step && view === 'step' ? 'aria-current="step"' : ''} ${open ? '' : 'disabled'}>${i + 1}</button>`;
+  }).join('')}</nav>`;
+}
+
+function card(key, id, label, pic) {
+  const on = st[key] === id;
+  return `<button class="card${on ? ' on' : ''}" data-act="choose" data-k="${key}" data-id="${id}" data-key="${key}-${id}" aria-pressed="${on}">
+    ${pic}<span>${label}</span></button>`;
+}
+
+function storyHTML(final) {
+  const parts = story(), cur = M().steps[st.step];
+  const seen = new Set();
+  const body = parts.map((list, p) => {
+    const blank = !final && !list.length && cur.part === p;
+    if (!list.length && !blank) return '';
+    const rows = list.map(s => {
+      seen.add(s.id + s.text);
+      const isNew = !lastSeen.has(s.id + s.text) && lastSeen.size;
+      return `<div class="sent${isNew ? ' fresh' : ''}" data-sid="${s.id}">
+        ${canSpeak ? `<button class="spk" data-act="readOne" data-sid="${s.id}" data-key="say-${s.id}" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+        <span class="txt">${esc(s.text)}</span>
+        ${final && s.extra !== undefined ? `<button class="spk del" data-act="delExtra" data-i="${s.extra}" data-key="del-${s.extra}" aria-label="לִמְחֹק">${I.x}</button>` : ''}
+      </div>`;
+    }).join('') || `<div class="sent blank"><span class="txt">. . . . . .</span></div>`;
+    return `<section class="part"><h3>${M().parts[p]}</h3>${rows}</section>`;
+  }).join('');
+  lastSeen = seen;
+  const any = parts.some(l => l.length);
+  return `<div class="story-head"><h2>הַסִּפּוּר שֶׁלִּי</h2>
+      ${canSpeak && any && !final ? `<button class="act" data-act="readAll" data-key="readAll">${I.speak}${readAllLabel}</button>` : ''}</div>
+    ${body || '<div class="sent blank"><span class="txt">. . . . . .</span></div>'}`;
+}
+
+function stepView() {
+  const steps = M().steps, s = steps[st.step], last = st.step === steps.length - 1;
+  const own = s.own ? `<input class="own${st[s.key] === 'own' ? ' filled' : ''}" type="text" id="own-${s.key}" data-own="${s.key}" data-key="own-${s.key}"
+      value="${esc(st.own[s.key])}" placeholder="אוֹ כִּתְבוּ מִשְׁפָּט מִשֶּׁלָּכֶם" aria-label="אוֹ כִּתְבוּ מִשְׁפָּט מִשֶּׁלָּכֶם" maxlength="220">` : '';
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${stepsBar()}
+      ${soundBtn()}
+    </div>
+    <div class="work">
+      <section class="ask panel" aria-live="polite">
+        <h2>${s.q()}</h2>
+        ${M().choices(s)}
+        ${own}
+        <div class="tools">
+          <button class="act" data-act="surprise" data-key="surprise">${I.dice}הַפְתִּיעוּ אוֹתִי</button>
+          <button class="act primary" data-act="next" data-key="next" ${chosen(s.key) ? '' : 'disabled'}>${last ? `${I.star}סִיַּמְנוּ!` : `הַלְאָה${I.next}`}</button>
+        </div>
+      </section>
+      <div class="stage panel">${M().stage()}</div>
+      <section class="story panel" id="story">${storyHTML(false)}</section>
+    </div>`;
+}
+
+function finalView() {
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      ${stepsBar()}
+      ${soundBtn()}
+    </div>
+    <div class="work final">
+      <div class="stage panel">${M().stage()}</div>
+      <section class="story panel" id="story">
+        <label class="label" for="title">שֵׁם לַסִּפּוּר</label>
+        <div class="sent" data-sid="title">
+          ${canSpeak ? `<button class="spk" data-act="readOne" data-sid="title" data-key="say-title" aria-label="לְהַקְשִׁיב">${I.speak}</button>` : ''}
+          <input id="title" class="title-in txt" type="text" data-key="title" value="${esc(st.title)}" placeholder="${esc(defaultTitle())}" maxlength="60">
+        </div>
+        ${storyHTML(true)}
+      </section>
+      <section class="more panel">
+        <label class="label" for="extra">רוֹצִים לְהוֹסִיף עוֹד מִשְׁפָּט?</label>
+        <div class="add-row">
+          <input id="extra" class="own" type="text" data-key="extra" placeholder="כִּתְבוּ עוֹד מִשְׁפָּט" maxlength="220">
+          <button class="act primary" data-act="addExtra" data-key="addExtra" aria-label="לְהוֹסִיף">${I.plus}לְהוֹסִיף</button>
+        </div>
+        <label class="label" for="author">מִי כָּתַב אֶת הַסִּפּוּר?</label>
+        <input id="author" class="own" type="text" data-key="author" value="${esc(st.author)}" placeholder="הַשֵּׁם שֶׁלִּי" maxlength="40">
+        <div class="actions" style="margin-top:6px">
+          <button class="act primary big" data-act="book" data-key="book">${I.book}סֵפֶר לְהַדְפָּסָה</button>
+          ${canSpeak ? `<button class="act" data-act="readAll" data-key="readAll">${I.speak}${readAllLabel}</button>` : ''}
+          <button class="act" data-act="home" data-key="home">${I.plus}סִפּוּר חָדָשׁ</button>
+        </div>
+      </section>
+    </div>`;
+}
+
+function bookView() {
+  return `<div class="bar">
+      <button class="icon-btn" data-act="back" data-key="back" aria-label="חֲזָרָה">${I.back}</button>
+      <h2>הַסֵּפֶר שֶׁלִּי</h2>
+      ${soundBtn()}
+    </div>
+    <div class="book">
+      <div class="actions book-actions">
+        <button class="act primary big" data-act="pdf" data-key="pdf" disabled>${I.save}לִשְׁמֹר לְהַדְפָּסָה (PDF)</button>
+        ${inViewer ? '' : `<button class="act" data-act="print" data-key="print" disabled>${I.print}לְהַדְפִּיס</button>`}
+      </div>
+      <p class="book-status" id="book-status" role="status">מְכִינִים אֶת הַסֵּפֶר…</p>
+      <div class="pages" id="pages"></div>
+    </div>`;
+}
+async function showBook() {
+  const token = Symbol();
+  showBook.token = token;
+  try {
+    const pages = await buildBook();
+    if (showBook.token !== token || view !== 'book') return;
+    bookPages = pages;
+    const el = document.getElementById('pages');
+    el.innerHTML = pages.map((src, i) => `<figure class="page"><img src="${src}" alt="${i ? `עַמּוּד ${i + 1}` : 'כְּרִיכָה'}"></figure>`).join('');
+    app.querySelectorAll('[data-act="pdf"], [data-act="print"]').forEach(b => { b.disabled = false; });
+    bookStatus(`${pages.length} עַמּוּדִים`);
+  } catch (e) {
+    if (view === 'book') bookStatus('לֹא הִצְלַחְנוּ לְהָכִין אֶת הַסֵּפֶר. נַסּוּ שׁוּב.');
+  }
+}
+
+// Live update of the story while typing, without rebuilding the inputs.
+function refreshStory() {
+  stopReading();
+  const el = document.getElementById('story');
+  if (el && view === 'step') el.innerHTML = storyHTML(false);
+  const next = app.querySelector('[data-act="next"]');
+  if (next) next.disabled = !chosen(M().steps[st.step].key);
+  const stage = app.querySelector('.stage');
+  if (stage) stage.innerHTML = M().stage();
+  save();
+}
+
+/* ================= actions ================= */
+let advanceTimer = null;
+function go(nextView, step) {
+  if (step !== undefined) st.step = step;
+  view = nextView;
+  if (st) st.screen = view === 'final' || view === 'book' ? 'final' : 'step';
+  render();
+  window.scrollTo(0, 0);
+  if (view === 'book') showBook();
+}
+function forward() {
+  if (!chosen(M().steps[st.step].key)) return;
+  if (st.step < M().steps.length - 1) { sfx('tap'); go('step', st.step + 1); }
+  else { sfx('done'); go('final'); }
+}
+function choose(key, id) {
+  st[key] = id;
+  if (st.own[key] !== undefined) st.own[key] = '';
+  M().chose(key, id);
+  sfx('pick');
+  render();
+  // one tap is enough: move on after the child has seen the choice
+  advanceTimer = setTimeout(forward, 700);
+}
+let spinning = false;
+function surprise() {
+  if (spinning) return;
+  const s = M().steps[st.step];
+  const ids = M().options(s), pool = ids.filter(id => id !== st[s.key]);
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+  const cards = [...app.querySelectorAll(`.card[data-k="${s.key}"]`)];
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  sfx('magic');
+  if (reduce || !cards.length) { choose(s.key, winner); return; }
+  spinning = true;
+  let n = 0;
+  const spin = () => {
+    cards.forEach(c => c.classList.remove('flash'));
+    if (n >= 7) { spinning = false; choose(s.key, winner); return; }
+    cards[(n * 3 + 1) % cards.length].classList.add('flash');
+    n++;
+    setTimeout(spin, 95);
+  };
+  spin();
+}
+
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || b.disabled || spinning) return;
+  clearTimeout(advanceTimer);
+  if (quizClick(b)) return;
+  switch (b.dataset.act) {
+    case 'new': st = newStory(b.dataset.mode); lastSeen = new Set(); sfx('tap'); go('step', 0); break;
+    case 'resume': {
+      st = Object.assign(newStory(b.dataset.mode), store.drafts[b.dataset.mode]);
+      lastSeen = new Set(); sfx('tap');
+      go(st.screen === 'final' ? 'final' : 'step');
+      break;
+    }
+    case 'home': sfx('tap'); view = 'start'; render(); window.scrollTo(0, 0); break;
+    case 'sound': store.sound = !store.sound; render(); sfx('tap'); break;
+    case 'choose': choose(b.dataset.k, b.dataset.id); break;
+    case 'surprise': surprise(); break;
+    case 'next': forward(); break;
+    case 'back':
+      sfx('back');
+      if (view === 'book') go('final');
+      else if (view === 'final') go('step', M().steps.length - 1);
+      else if (st.step > 0) go('step', st.step - 1);
+      else { view = 'start'; render(); }
+      break;
+    case 'goto': sfx('tap'); go('step', +b.dataset.i); break;
+    case 'readOne': {
+      const sid = b.dataset.sid;
+      if (sid === 'title') { read([{ id: 'title', text: titleText() }]); break; }
+      const s = story().flat().find(x => x.id === sid);
+      if (s) read([s]);
+      break;
+    }
+    case 'readAll': readAll(b); break;
+    case 'addExtra': addExtra(); break;
+    case 'delExtra': st.extra.splice(+b.dataset.i, 1); sfx('back'); render(); break;
+    case 'book': sfx('tap'); go('book'); break;
+    case 'pdf': savePdf(b); break;
+    case 'print': window.print(); break;
+  }
+});
+
+function addExtra() {
+  const input = document.getElementById('extra');
+  const t = input && input.value.trim();
+  if (!t) { if (input) input.focus(); return; }
+  st.extra.push(t);
+  sfx('pick');
+  render();
+  const again = document.getElementById('extra');
+  if (again) again.focus();
+}
+
+app.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.own) {
+    const key = t.dataset.own;
+    st.own[key] = t.value;
+    if (t.value.trim()) st[key] = 'own';
+    else if (st[key] === 'own') st[key] = null;
+    t.classList.toggle('filled', st[key] === 'own');
+    app.querySelectorAll(`.card[data-k="${key}"]`).forEach(c => {
+      const on = st[key] === c.dataset.id;
+      c.classList.toggle('on', on); c.setAttribute('aria-pressed', on);
+    });
+    clearTimeout(advanceTimer);
+    refreshStory();
+  } else if (t.id === 'title') { st.title = t.value; save(); }
+  else if (t.id === 'author') { st.author = t.value; save(); }
+});
+app.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  if (e.target.id === 'extra') { e.preventDefault(); addExtra(); }
+  else if (e.target.dataset.own && chosen(e.target.dataset.own)) { e.preventDefault(); forward(); }
+});
+
+if (canSpeak) speechSynthesis.getVoices();   // some browsers load voices lazily
+render();
+})();
+</script>
+<footer class="hh-credit" dir="rtl" lang="he" style="text-align:center;font-size:15px;line-height:1.5;margin:24px 16px 16px;color:inherit;opacity:.8;font-family:inherit">נוצר על ידי הדס הרצמן</footer>
+</body>
+</html>
