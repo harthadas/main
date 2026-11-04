@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>גלגלים ורגליים</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gveret+Levin&family=Secular+One&family=Varela+Round&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg1:#fff5ec; --bg2:#ffe3cf; --bg3:#ffd2b8;
+  --ink:#4a2b20; --ink-soft:#7a5446; --card:#ffffff; --line:#f1d2bf;
+  --peach-soft:#ffeee4; --pepper:#c2311f; --pepper-soft:#f7c9c0; --stem:#4f8a3c;
+  --good:#2b8a52; --good-soft:#dff3e6; --gold:#f2b705; --bad:#c2311f; --bad-soft:#fde4e1;
+  --park:#c2621f; --zoo:#2b8a52; --more:#6a4fb3; --k:var(--park);
+  --bar:rgba(255,248,242,.8); --radius:22px; --shadow:0 10px 26px -14px rgba(150,70,30,.45);
+  --road:#e9ddd3; --road-line:#fff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg1:#2a1b16; --bg2:#33211a; --bg3:#3d271e;
+    --ink:#fbe9df; --ink-soft:#d9b9a8; --card:#3a2820; --line:#5a3c30;
+    --peach-soft:#4a3025; --pepper:#ff7a5c; --pepper-soft:#5e2b22; --stem:#8cc56f;
+    --good:#6fd39a; --good-soft:#1f3a2a; --bad:#ff7a5c; --bad-soft:#4a2421;
+    --park:#ff9a5c; --zoo:#6fd39a; --more:#b9a2ff;
+    --bar:rgba(42,27,22,.8); --shadow:0 10px 26px -14px rgba(0,0,0,.7); --road:#47332a; --road-line:#6b4e40;
+  }
+}
+:root[data-theme="dark"]{
+  --bg1:#2a1b16; --bg2:#33211a; --bg3:#3d271e;
+  --ink:#fbe9df; --ink-soft:#d9b9a8; --card:#3a2820; --line:#5a3c30;
+  --peach-soft:#4a3025; --pepper:#ff7a5c; --pepper-soft:#5e2b22; --stem:#8cc56f;
+  --good:#6fd39a; --good-soft:#1f3a2a; --bad:#ff7a5c; --bad-soft:#4a2421;
+  --park:#ff9a5c; --zoo:#6fd39a; --more:#b9a2ff;
+  --bar:rgba(42,27,22,.8); --shadow:0 10px 26px -14px rgba(0,0,0,.7); --road:#47332a; --road-line:#6b4e40;
+}
+*{box-sizing:border-box} [hidden]{display:none!important}
+html,body{margin:0}
+body{font-family:"Varela Round",system-ui,sans-serif;font-size:18px;line-height:1.6;color:var(--ink);background:var(--bg1);
+  background-image:radial-gradient(1100px 560px at 85% -10%,var(--bg3),transparent 60%),linear-gradient(180deg,var(--bg1),var(--bg2));background-attachment:fixed;min-height:100vh;overflow-x:hidden}
+h1,h2,h3,h4,.btn{font-family:"Secular One",system-ui,sans-serif;font-weight:400;margin:0;line-height:1.3}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.m{font-family:"Gveret Levin",cursive;color:var(--pepper);font-size:1.15em}
+.sig{display:inline-block;width:170px;aspect-ratio:900/271;background:var(--ink);-webkit-mask:url(images/sig.png) center/contain no-repeat;mask:url(images/sig.png) center/contain no-repeat;transform:rotate(-3deg)}
+.pep{width:20px;height:20px;display:inline-block;vertical-align:middle}
+.peps{display:inline-flex;line-height:0;direction:ltr}
+.peps .pep{margin-left:-3px}
+
+/* bar */
+.bar{position:sticky;top:0;z-index:20;background:var(--bar);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.bar .in{max-width:1440px;margin:0 auto;padding:6px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:68px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-family:"Secular One";font-size:22px;line-height:1.1}
+.brand img{height:56px;width:auto;display:block}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-inline-start:auto;align-items:center}
+.nav a{font-family:"Secular One";text-decoration:none;padding:7px 15px;border-radius:999px;color:var(--ink-soft)}
+.nav a.on{background:var(--ink);color:var(--bg1)}
+.ghostbtn{border:2px solid var(--line);background:transparent;border-radius:999px;min-height:40px;padding:0 14px;font-size:15px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:52px;padding:4px 22px;border-radius:999px;border:2px solid var(--k);background:var(--k);color:#fff;font-size:18px;text-decoration:none;transition:transform .15s}
+:root[data-theme="dark"] .btn:not(.ghost){color:#2a1b16}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn:not(.ghost){color:#2a1b16}}
+.btn:hover{transform:translateY(-2px)}
+.btn.ghost{background:var(--card);color:var(--k)}
+.btn.small{min-height:40px;padding:2px 14px;font-size:16px}
+.btn.gold{background:var(--gold);border-color:var(--gold);color:#3b2a00!important}
+
+/* home */
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+.hero{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:center;padding:30px 0 10px}
+.hero h1{font-size:clamp(38px,5.4vw,64px);line-height:1.1}
+.tag{font-family:"Secular One";color:var(--park);font-size:clamp(19px,2.2vw,24px);margin:4px 0 10px}
+.hero p{margin:0 0 8px;color:var(--ink-soft);max-width:34em}
+.heroart{display:flex;flex-direction:column;align-items:center;gap:6px}
+.heroart svg{width:100%;max-width:470px;height:auto}
+.sigline{display:flex;align-items:center;gap:10px;color:var(--ink-soft);font-size:15px}
+.world{margin:26px 0 6px}
+.world h2{font-size:30px;color:var(--k)}
+.world p{margin:2px 0 0;color:var(--ink-soft)}
+.qs{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:26px 22px;padding:16px 0 8px}
+.qc{position:relative;display:flex;flex-direction:column;gap:6px;text-decoration:none;color:var(--ink);background:var(--card);border:2px solid var(--line);padding:22px 20px 18px;
+  border-radius:46% 54% 42% 58% / 16% 13% 17% 14%;box-shadow:var(--shadow);transform:rotate(var(--r,0deg));transition:transform .2s}
+.qc:nth-child(3n+2){border-radius:54% 46% 58% 42% / 13% 16% 13% 17%}
+.qc:hover{transform:rotate(0) translateY(-4px)}
+.qc::before{content:"";position:absolute;top:-2px;inset-inline:20%;height:7px;border-radius:999px;background:var(--k)}
+.qc h3{font-size:21px}
+.qc .ic{display:flex;gap:2px;height:40px}
+.qc .ic svg{height:40px;width:auto}
+.qc .row{display:flex;justify-content:space-between;align-items:center;font-size:15px;color:var(--ink-soft)}
+.closing{text-align:center;font-family:"Secular One";font-size:21px;color:var(--ink-soft);margin:26px 0 0}
+footer{border-top:1px solid var(--line);margin-top:20px;padding:18px 0 26px;display:flex;justify-content:center;align-items:center;gap:12px;color:var(--ink-soft)}
+
+/* game */
+.game{max-width:1440px;margin:0 auto;padding:10px 16px 12px;display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;height:calc(100dvh - 69px);min-height:520px}
+.side{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;padding:2px}
+.box{background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:10px 14px;border-top:7px solid var(--k)}
+.qhead{display:flex;align-items:center;gap:8px;justify-content:space-between}
+.qhead h2{font-size:21px;color:var(--k)}
+.qtext{font-family:"Secular One";font-size:20px;line-height:1.45;margin:6px 0}
+.rules{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0 2px}
+.rule{display:flex;align-items:center;gap:4px;background:var(--peach-soft);border-radius:12px;padding:2px 8px 2px 4px;font-size:14.5px}
+.rule svg{height:28px;width:auto}
+.tasks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.task{display:flex;gap:8px;align-items:flex-start;padding:6px 8px;border-radius:14px;border:2px solid var(--line);font-size:16px;line-height:1.4}
+.task .mk{flex:none;width:24px;height:24px;border-radius:50%;border:2px solid var(--k);display:grid;place-items:center;font-size:14px;color:var(--k);margin-top:1px}
+.task.done{background:var(--good-soft);border-color:var(--good)}
+.task.done .mk{background:var(--good);border-color:var(--good);color:#fff}
+.task .ans{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}
+.task input{width:90px;min-height:38px;border-radius:12px;border:2px solid var(--line);background:var(--card);padding:0 10px;text-align:center}
+.task .think{margin-top:4px;background:var(--peach-soft);border-radius:10px;padding:4px 8px;font-size:15px}
+.linkbtn{background:none;border:none;color:var(--k);text-decoration:underline;padding:0;font-size:15px}
+.fb{min-height:1.4em;font-size:16px;margin:2px 0 0}
+.fb.good{color:var(--good)} .fb.bad{color:var(--bad)}
+.hintbox{background:var(--peach-soft);border-radius:14px;padding:6px 10px;font-size:15.5px;line-height:1.45}
+.saved{display:flex;flex-wrap:wrap;gap:6px}
+.saved span{background:var(--good-soft);border:1.5px solid var(--good);border-radius:999px;padding:1px 10px;font-size:14.5px}
+.acts{display:flex;flex-wrap:wrap;gap:6px}
+
+.play{display:flex;flex-direction:column;gap:10px;min-height:0}
+.lot{flex:1 1 auto;min-height:0;overflow:auto;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:10px 14px;display:flex;flex-direction:column;gap:8px;
+  background-image:repeating-linear-gradient(90deg,transparent 0 120px,var(--line) 120px 122px)}
+.lane{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px;align-items:center;background:var(--card);border:2px dashed var(--line);border-radius:18px;padding:6px 10px;min-height:76px}
+.lane .ctl{display:flex;flex-direction:column;align-items:center;gap:2px}
+.lane .nm{font-family:"Secular One";font-size:16px;text-align:center;line-height:1.2}
+.lane .per{font-size:13px;color:var(--ink-soft)}
+.stepper{display:flex;align-items:center;gap:6px}
+.stepper button{width:38px;height:38px;border-radius:50%;border:2px solid var(--k);background:var(--card);color:var(--k);font-family:"Secular One";font-size:20px;line-height:1}
+.stepper button:disabled{opacity:.35;cursor:default}
+.stepper output{min-width:34px;text-align:center;font-family:"Secular One";font-size:22px}
+.tokens{display:flex;flex-wrap:wrap;gap:2px 4px;align-items:center;min-height:44px}
+.tokens svg{height:44px;width:auto}
+.tokens svg.nw{animation:pop .3s ease}
+.tokens.many svg{height:32px}
+.tokens .more{font-family:"Secular One";color:var(--ink-soft);font-size:16px;padding:0 6px}
+@keyframes pop{from{transform:scale(.6);opacity:.3}to{transform:none;opacity:1}}
+.meter{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--card);border:2px solid var(--line);border-radius:var(--radius);padding:8px 14px}
+.meter .big{font-family:"Secular One";font-size:24px}
+.meter .big b{font-weight:400;color:var(--k)}
+.meter .sp{flex:1}
+.meter .hid{color:var(--ink-soft);font-size:16px}
+
+.gbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.gbar select{min-height:40px;border-radius:999px;border:2px solid var(--line);background:var(--card);padding:2px 12px;font-family:"Secular One";font-size:15px;max-width:290px}
+
+/* own question */
+.own{max-width:860px;margin:20px auto;padding:0 16px}
+.own .box{padding:18px 20px}
+.own h2{font-size:28px;color:var(--more)}
+.own .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+.own label{display:flex;flex-direction:column;gap:4px;font-size:16px}
+.own select,.own input{min-height:44px;border-radius:14px;border:2px solid var(--line);background:var(--card);padding:0 10px}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(40,20,10,.45);display:grid;place-items:center;z-index:50;padding:16px}
+.mcard{background:var(--card);border-radius:var(--radius);border-top:7px solid var(--k);max-width:720px;width:100%;max-height:88vh;overflow:auto;padding:18px 22px;position:relative}
+.mcard h3{font-size:24px;color:var(--k);margin-bottom:6px}
+.mcard h4{font-size:18px;margin:10px 0 2px}
+.mcard p,.mcard li{font-size:16.5px;margin:2px 0}
+.mcard .x{position:absolute;top:10px;left:12px;width:40px;height:40px;border-radius:50%;border:2px solid var(--line);background:var(--card);font-size:22px}
+.sols{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.sols span{background:var(--peach-soft);border-radius:999px;padding:2px 12px;font-size:15px}
+
+@media (max-width:980px){
+  .game{grid-template-columns:1fr;height:auto}
+  .lot{min-height:300px}
+  .hero{grid-template-columns:1fr}
+  .heroart{order:-1}
+}
+@media (max-width:560px){
+  .wrap{padding:0 16px}
+  .brand img{height:38px}.brand{font-size:19px}
+  .bar .in{min-height:56px;gap:6px}
+  .lane{grid-template-columns:1fr;gap:4px}
+  .lane .ctl{flex-direction:row;justify-content:space-between;width:100%}
+  .own .grid{grid-template-columns:1fr}
+  .gbar select{max-width:100%}
+}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}.qc,.qc:hover{transform:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="pep" viewBox="0 0 32 32">
+    <path d="M21.5 8.5c3.6 1.6 4.9 5.6 3.3 10.2C22.7 24.6 15 29.6 6.2 28.6c-1.2-.1-1.3-1.1-.3-1.6 6.4-3.1 9.6-8.3 10.5-13.6.6-3.6 2.4-5.8 5.1-4.9z" fill="var(--pepper)"/>
+    <path d="M19.6 11.4c-.6 3.8-2.4 8.4-6.4 11.8" stroke="#fff" stroke-opacity=".45" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+    <path d="M21 8.8c.2-2.4 1.6-4.4 4.4-5.6" stroke="var(--stem)" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+    <path d="M18.6 9.6c1.6-1.8 4.6-2 6.6-.2" stroke="var(--stem)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+  </symbol>
+</defs></svg>
+
+<header class="bar"><div class="in">
+  <a class="brand" href="#home" aria-label="גלגלים ורגליים, דף הבית">
+    <img src="images/100-bameah.webp" alt="100 במאה: קידום תהליכי מצוינות ואפיקי הצטיינות">
+    <span>גלגלים ורגליים</span>
+  </a>
+  <nav class="nav" aria-label="ניווט">
+    <a href="#home" data-r="home">כל השאלות</a>
+    <a href="#own" data-r="own">שאלה משלכם</a>
+    <button class="ghostbtn" id="teachBtn" type="button">למורה ℹ️</button>
+    <button class="ghostbtn" id="theme" type="button" aria-label="החלפת מצב בהיר וכהה">בהיר / כהה</button>
+  </nav>
+</div></header>
+
+<main id="app"></main>
+
+<div class="modal" id="modal" hidden><div class="mcard" id="mcard" role="dialog" aria-modal="true"></div></div>
+
+<script>
+/* ================= types ================= */
+const UNIT={w:['גלגלים','גַּלְגַּלִּים','גלגל'],l:['רגליים','רַגְלַיִם','רגל'],a:['זרועות','זְרוֹעוֹת','זרוע']};
+const T={
+  car:{n:'מכונית',pl:'מכוניות',nk:'מְכוֹנִיּוֹת',per:4,u:'w',c:'#e07a5f'},
+  moto:{n:'אופנוע',pl:'אופנועים',nk:'אוֹפַנּוֹעִים',per:2,u:'w',c:'#3d85c6'},
+  bus:{n:'אוטובוס',pl:'אוטובוסים',nk:'אוֹטוֹבּוּסִים',per:6,u:'w',c:'#e9a20b'},
+  truck:{n:'משאית',pl:'משאיות',nk:'מַשָּׂאִיּוֹת',per:10,u:'w',c:'#5f9e4a'},
+  uni:{n:'חד־אופן',pl:'חד־אופן',nk:'חַד־אוֹפַן',per:1,u:'w',c:'#b55fc4'},
+  bike:{n:'אופניים',pl:'אופניים',nk:'אוֹפַנַּיִם',per:2,u:'w',c:'#2f9c9c'},
+  tri:{n:'תלת־אופן',pl:'תלת־אופן',nk:'תְּלַת־אוֹפַן',per:3,u:'w',c:'#d0577a'},
+  hen:{n:'תרנגולת',pl:'תרנגולות',nk:'תַּרְנְגוֹלוֹת',per:2,u:'l',c:'#e8a33d'},
+  rabbit:{n:'ארנב',pl:'ארנבים',nk:'אַרְנָבִים',per:4,u:'l',c:'#a88f80'},
+  spider:{n:'עכביש',pl:'עכבישים',nk:'עַכָּבִישִׁים',per:8,u:'l',c:'#6b5b7b'},
+  beetle:{n:'חיפושית',pl:'חיפושיות',nk:'חִפּוּשִׁיּוֹת',per:6,u:'l',c:'#3f8f5a'},
+  duck:{n:'ברווז',pl:'ברווזים',nk:'בַּרְוָזִים',per:2,u:'l',c:'#e3c23a'},
+  goat:{n:'עז',pl:'עזים',nk:'עִזִּים',per:4,u:'l',c:'#9b7b5b'},
+  snake:{n:'נחש',pl:'נחשים',nk:'נְחָשִׁים',per:0,u:'l',c:'#4f9d3a'},
+  table:{n:'שולחן',pl:'שולחנות',nk:'שֻׁלְחָנוֹת',per:4,u:'l',c:'#b07a4a'},
+  stool:{n:'שרפרף',pl:'שרפרפים',nk:'שְׁרַפְרַפִּים',per:3,u:'l',c:'#c98a52'},
+  star:{n:'כוכב ים',pl:'כוכבי ים',nk:'כּוֹכְבֵי יָם',per:5,u:'a',c:'#ef7f5f'},
+  octo:{n:'תמנון',pl:'תמנונים',nk:'תְּמָנוּנִים',per:8,u:'a',c:'#c25b9a'}
+};
+
+/* ================= drawings: every wheel / leg / arm is drawn so children can count ================= */
+function wheels(n,x0,x1,y,r){let s='';for(let i=0;i<n;i++){const x=n===1?(x0+x1)/2:x0+(x1-x0)*i/(n-1);
+  s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="#3a3a3a" stroke="#b9b9b9" stroke-width="1.2"/><circle cx="${x}" cy="${y}" r="${r*.42}" fill="#d9d9d9"/>`}return s}
+function legs(n,x0,x1,y0,len,col){let s='';for(let i=0;i<n;i++){const x=n===1?(x0+x1)/2:x0+(x1-x0)*i/(n-1);
+  s+=`<path d="M${x} ${y0}l${(i%2?1.5:-1.5)} ${len}" stroke="${col}" stroke-width="2.6" stroke-linecap="round"/>`}return s}
+function icon(t){
+  const c=T[t].c;let b='',vb='0 0 80 56';
+  switch(t){
+    case 'car': b=`<path d="M8 36v-9q0-4 4-5l10-2 8-9h22l9 9 9 2q3 1 3 5v9z" fill="${c}"/><path d="M33 13h8v8H26zM44 13h7l6 8H44z" fill="#cfe8f5"/>${wheels(4,15,65,40,6)}`;break;
+    case 'moto': b=`<path d="M18 34l12-12h14l6-8h6l-4 10 10 10z" fill="${c}"/><path d="M50 14l6-4" stroke="#555" stroke-width="3"/>${wheels(2,16,62,40,8)}`;break;
+    case 'bus': b=`<rect x="4" y="8" width="72" height="28" rx="5" fill="${c}"/>${[0,1,2,3,4].map(i=>`<rect x="${9+i*13}" y="13" width="10" height="9" rx="1.5" fill="#cfe8f5"/>`).join('')}${wheels(6,9,71,40,5)}`;break;
+    case 'truck': vb='0 0 92 56'; b=`<rect x="2" y="6" width="62" height="30" rx="3" fill="${c}"/><path d="M66 14h12l10 10v12H66z" fill="${c}" opacity=".85"/><path d="M70 17h7l6 7H70z" fill="#cfe8f5"/>${wheels(10,7,85,41,4.2)}`;break;
+    case 'uni': b=`<path d="M40 30V12" stroke="${c}" stroke-width="4"/><rect x="31" y="7" width="18" height="6" rx="3" fill="${c}"/>${wheels(1,40,40,40,11)}`;break;
+    case 'bike': b=`<path d="M20 38l14-18h16l10 18M34 20l6 18 10-18M32 16h8M50 20l2-6h6" stroke="${c}" stroke-width="3.4" fill="none" stroke-linejoin="round"/>${wheels(2,20,60,38,10)}`;break;
+    case 'tri': b=`<path d="M18 38l20-20h10l6 20M38 18l-2-6h8M18 38h50" stroke="${c}" stroke-width="3.4" fill="none" stroke-linejoin="round"/>${wheels(3,14,66,40,8)}`;break;
+    case 'hen': b=`${legs(2,34,44,38,12,'#d98a1a')}<ellipse cx="38" cy="30" rx="18" ry="12" fill="${c}"/><circle cx="54" cy="18" r="8" fill="${c}"/><path d="M61 18l7 2-7 2z" fill="#e05a2b"/><path d="M50 9q3-6 6 0q3-5 5 1" fill="#e04040"/><circle cx="56" cy="16" r="1.6" fill="#222"/><path d="M20 26q-8-6-2-12q4 6 6 8" fill="${c}"/>`;break;
+    case 'duck': b=`${legs(2,34,44,38,12,'#e07b1a')}<ellipse cx="38" cy="30" rx="19" ry="11" fill="${c}"/><circle cx="55" cy="17" r="8" fill="${c}"/><path d="M61 17q8 0 9 3q-5 2-9 1z" fill="#e07b1a"/><circle cx="57" cy="15" r="1.6" fill="#222"/>`;break;
+    case 'rabbit': b=`${legs(4,24,52,34,14,c)}<ellipse cx="38" cy="30" rx="20" ry="11" fill="${c}"/><circle cx="58" cy="22" r="8" fill="${c}"/><ellipse cx="56" cy="8" rx="3" ry="9" fill="${c}"/><ellipse cx="62" cy="9" rx="3" ry="9" fill="${c}"/><circle cx="61" cy="21" r="1.6" fill="#222"/><circle cx="17" cy="27" r="4.5" fill="#f4ece6"/>`;break;
+    case 'goat': b=`${legs(4,22,52,32,16,c)}<rect x="16" y="18" width="42" height="18" rx="9" fill="${c}"/><circle cx="62" cy="16" r="8" fill="${c}"/><path d="M58 9q-2-8 4-8M64 9q2-7 7-5" stroke="#6b5440" stroke-width="2.4" fill="none"/><path d="M63 24l-1 7" stroke="${c}" stroke-width="3"/><circle cx="65" cy="15" r="1.6" fill="#222"/>`;break;
+    case 'spider': b=`${[0,1,2,3].map(i=>`<path d="M34 ${24+i*3}q-12 ${-8+i*5} -24 ${-2+i*8}" stroke="${c}" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M46 ${24+i*3}q12 ${-8+i*5} 24 ${-2+i*8}" stroke="${c}" stroke-width="2.4" fill="none" stroke-linecap="round"/>`).join('')}<ellipse cx="40" cy="30" rx="10" ry="12" fill="${c}"/><circle cx="40" cy="16" r="6" fill="${c}"/><circle cx="38" cy="15" r="1.4" fill="#fff"/><circle cx="42" cy="15" r="1.4" fill="#fff"/>`;break;
+    case 'beetle': b=`${[0,1,2].map(i=>`<path d="M32 ${22+i*8}l-12 ${-4+i*5}M48 ${22+i*8}l12 ${-4+i*5}" stroke="${c}" stroke-width="2.8" stroke-linecap="round"/>`).join('')}<ellipse cx="40" cy="30" rx="11" ry="15" fill="${c}"/><path d="M40 16v29" stroke="#1f4a2c" stroke-width="1.5"/><circle cx="40" cy="13" r="5.5" fill="#2a6b40"/><path d="M37 9l-4-6M43 9l4-6" stroke="${c}" stroke-width="1.8"/>`;break;
+    case 'snake': b=`<path d="M8 38q8-14 16 0t16 0 16 0 12-6" stroke="${c}" stroke-width="7" fill="none" stroke-linecap="round"/><circle cx="68" cy="31" r="6" fill="${c}"/><circle cx="70" cy="29" r="1.5" fill="#222"/><path d="M74 32l5 1-5 1" stroke="#d33" stroke-width="1.3" fill="none"/>`;break;
+    case 'table': b=`<rect x="8" y="12" width="64" height="7" rx="2" fill="${c}"/>${legs(4,14,66,19,30,c).replace(/stroke-width="2.6"/g,'stroke-width="4"')}`;break;
+    case 'stool': b=`<ellipse cx="40" cy="14" rx="20" ry="5" fill="${c}"/>${legs(3,26,54,17,32,c).replace(/stroke-width="2.6"/g,'stroke-width="4"')}`;break;
+    case 'star': b=`<path d="M40 4l8 17 18 3-13 12 3 18-16-9-16 9 3-18-13-12 18-3z" fill="${c}"/><circle cx="37" cy="27" r="1.6" fill="#222"/><circle cx="43" cy="27" r="1.6" fill="#222"/>`;break;
+    case 'octo': b=`${[0,1,2,3,4,5,6,7].map(i=>`<path d="M${25+i*4.3} 30q${(i-3.5)*2} 14 ${(i-3.5)*4.4} 22" stroke="${c}" stroke-width="3.2" fill="none" stroke-linecap="round"/>`).join('')}<ellipse cx="40" cy="20" rx="16" ry="15" fill="${c}"/><circle cx="35" cy="20" r="2" fill="#fff"/><circle cx="45" cy="20" r="2" fill="#fff"/>`;break;
+  }
+  return `<svg viewBox="${vb}" role="img" aria-label="${T[t].n}">${b}</svg>`;
+}
+const pepIcons=n=>`<span class="peps" role="img" aria-label="${n} פלפלים">${'<svg class="pep" aria-hidden="true"><use href="#pep"/></svg>'.repeat(n)}</span>`;
+
+/* ================= questions =================
+   types: kinds in the question.  W: total wheels/legs/arms.  N: total items (optional).
+   min: minimum of each kind.  ex: extra condition.  nk: question for grades א׳–ב׳ (with nikud).
+   tasks: one | all(n) | min | max | maxT(t) | num(ans) | think(a) */
+const WORLDS={park:['במגרש החנייה','גלגלים של מכוניות, אופנועים, אוטובוסים ומשאיות','--park'],
+  zoo:['בפינת החי','רגליים של תרנגולות, ארנבים, עכבישים ועוד','--zoo'],
+  more:['ועוד הפתעות','שולחנות, אופניים, כוכבי ים ותמנונים','--more']};
+const Q=[
+ {id:'p1',w:'park',p:1,types:['car','moto'],given:{car:3,moto:2},
+  nk:'בַּחֲנָיָה עוֹמְדוֹת 3 מְכוֹנִיּוֹת וְ-2 אוֹפַנּוֹעִים. כַּמָּה גַּלְגַּלִּים יֵשׁ בַּחֲנָיָה?',
+  tasks:[{k:'num',t:'כַּמָּה גַּלְגַּלִּים יֵשׁ בַּחֲנָיָה?',ans:16}],
+  hints:['סִפְרוּ אֶת הַגַּלְגַּלִּים בַּתְּמוּנָה, אֶחָד אֶחָד.','לְכָל מְכוֹנִית 4 גַּלְגַּלִּים: 4, 8, 12. עַכְשָׁו הוֹסִיפוּ אֶת הָאוֹפַנּוֹעִים.'],
+  sol:'3 מכוניות: 4+4+4=12. 2 אופנועים: 2+2=4. ביחד 16 גלגלים.'},
+ {id:'z1',w:'zoo',p:1,types:['rabbit','hen'],given:{rabbit:2,hen:3},
+  nk:'בְּפִנַּת הַחַי יֵשׁ 2 אַרְנָבִים וְ-3 תַּרְנְגוֹלוֹת. כַּמָּה רַגְלַיִם יֵשׁ לְכֻלָּם יַחַד?',
+  tasks:[{k:'num',t:'כַּמָּה רַגְלַיִם יֵשׁ לְכֻלָּם?',ans:14}],
+  hints:['לְאַרְנָב יֵשׁ 4 רַגְלַיִם, וּלְתַרְנְגֹלֶת 2.','2 אַרְנָבִים: 4+4=8. עַכְשָׁו הַתַּרְנְגוֹלוֹת: 2+2+2.'],
+  sol:'2 ארנבים: 8 רגליים. 3 תרנגולות: 6 רגליים. ביחד 14.'},
+ {id:'p2',w:'park',p:1,types:['car','moto'],W:10,min:1,
+  nk:'סָפַרְתִּי בַּחֲנָיָה 10 גַּלְגַּלִּים. הָיוּ שָׁם גַּם מְכוֹנִיּוֹת וְגַם אוֹפַנּוֹעִים. מָה יָכוֹל הָיָה לַעֲמֹד בַּחֲנָיָה?',
+  tasks:[{k:'one'},{k:'all',n:2}],
+  hints:['הַתְחִילוּ מִמְּכוֹנִית אַחַת. כַּמָּה גַּלְגַּלִּים עוֹד חֲסֵרִים?','וְאִם יֵשׁ 2 מְכוֹנִיּוֹת? כַּמָּה גַּלְגַּלִּים נִשְׁאֲרוּ לָאוֹפַנּוֹעִים?'],
+  sol:'מכונית אחת ו-3 אופנועים (4+6), או 2 מכוניות ואופנוע אחד (8+2). 3 מכוניות כבר 12 גלגלים, יותר מדי.'},
+ {id:'z2',w:'zoo',p:2,types:['hen','rabbit'],W:20,min:1,
+  nk:'סָפַרְתִּי בְּפִנַּת הַחַי 20 רַגְלַיִם. יֵשׁ שָׁם גַּם תַּרְנְגוֹלוֹת וְגַם אַרְנָבִים. כַּמָּה מִכָּל אֶחָד יָכוֹל לִהְיוֹת?',
+  tasks:[{k:'one'},{k:'all',n:4},{k:'min'}],
+  hints:['נַסּוּ אַרְנָב אֶחָד: 4 רַגְלַיִם. כַּמָּה רַגְלַיִם נִשְׁאֲרוּ לַתַּרְנְגוֹלוֹת?','כָּל אַרְנָב נוֹסָף "לוֹקֵחַ" 4 רַגְלַיִם, כְּמוֹ 2 תַּרְנְגוֹלוֹת. כָּךְ מוֹצְאִים אֶת כָּל הַדְּרָכִים.'],
+  sol:'ארנב 1 ו-8 תרנגולות, 2 ארנבים ו-6 תרנגולות, 3 ארנבים ו-4 תרנגולות, 4 ארנבים ו-2 תרנגולות. הכי מעט חיות: 4 ארנבים ו-2 תרנגולות (6 חיות).'},
+ {id:'p3',w:'park',p:2,types:['car','moto'],W:24,N:8,
+  nk:'בַּחֲנָיָה יֵשׁ 8 כְּלֵי רֶכֶב: מְכוֹנִיּוֹת וְאוֹפַנּוֹעִים. סָפַרְתִּי 24 גַּלְגַּלִּים. כַּמָּה מְכוֹנִיּוֹת וְכַמָּה אוֹפַנּוֹעִים?',
+  tasks:[{k:'one'}],
+  hints:['נַסּוּ: כָּל 8 הַכֵּלִים הֵם אוֹפַנּוֹעִים. כַּמָּה גַּלְגַּלִּים יֵשׁ? כַּמָּה חֲסֵרִים?','כְּשֶׁמַּחְלִיפִים אוֹפַנּוֹעַ בִּמְכוֹנִית, מִסְפַּר הַגַּלְגַּלִּים גָּדֵל בְּ-2.'],
+  sol:'4 מכוניות ו-4 אופנועים: 16+8=24 גלגלים, 8 כלי רכב. אסטרטגיה: אם כולם אופנועים יש 16 גלגלים. חסרים 8, וכל החלפה במכונית מוסיפה 2, אז מחליפים 4.'},
+ {id:'m1',w:'more',p:2,types:['bike','tri'],W:17,min:1,
+  nk:'בַּגַּן יֵשׁ אוֹפַנַּיִם וּתְלַת־אוֹפַן. סָפַרְתִּי 17 גַּלְגַּלִּים. כַּמָּה מִכָּל סוּג?',
+  tasks:[{k:'one'},{k:'all',n:3},{k:'min'}],
+  hints:['17 הוּא מִסְפָּר אִי־זוּגִי. אֳפַנַּיִם תָּמִיד נוֹתְנִים מִסְפָּר זוּגִי. מָה זֶה אוֹמֵר עַל הַתְּלַת־אוֹפַן?','מִסְפַּר הַתְּלַת־אוֹפַן חַיָּב לִהְיוֹת אִי־זוּגִי: 1, 3 אוֹ 5.'],
+  sol:'1 תלת־אופן ו-7 אופניים, 3 תלת־אופן ו-4 אופניים, 5 תלת־אופן ואופניים אחד. הכי מעט כלים: 5 תלת־אופן ואופניים אחד (6 כלים).'},
+ {id:'p4',w:'park',p:3,types:['car','moto','bus'],W:100,min:1,
+  q:'ספרתי במגרש החנייה 100 גלגלים. היו שם מכוניות, אופנועים ואוטובוסים, לפחות אחד מכל סוג. כמה כלי רכב היו שם?',
+  tasks:[{k:'one'},{k:'all',n:3},{k:'min'},{k:'max'}],
+  hints:['התחילו מאוטובוס אחד, מכונית אחת ואופנוע אחד: 12 גלגלים. כמה עוד חסרים?','כדי שיהיו מעט כלים, כדאי להשתמש בכלים עם הרבה גלגלים. כדי שיהיו הרבה כלים, כדאי להשתמש בכלים עם מעט גלגלים.','כל אוטובוס "שווה" 3 אופנועים, וכל מכונית "שווה" 2 אופנועים.'],
+  sol:'יש הרבה תשובות! הכי מעט כלי רכב: 18 (15 אוטובוסים, 2 מכוניות, אופנוע אחד). הכי הרבה: 47 (אוטובוס אחד, מכונית אחת ו-45 אופנועים). כל מספר של כלי רכב מ-18 עד 47 אפשרי.'},
+ {id:'z3',w:'zoo',p:3,types:['hen','rabbit'],W:34,N:12,
+  q:'בפינת החי יש תרנגולות וארנבים. ספרתי 12 ראשים ו-34 רגליים. כמה תרנגולות וכמה ארנבים יש?',
+  tasks:[{k:'one'}],
+  hints:['12 ראשים = 12 חיות.','אם כל 12 החיות היו תרנגולות, היו 24 רגליים. כמה רגליים חסרות? כל ארנב מוסיף עוד 2 רגליים.'],
+  sol:'7 תרנגולות ו-5 ארנבים: 14+20=34. אם כולן תרנגולות יש 24 רגליים, חסרות 10, וכל ארנב מוסיף 2, ולכן יש 5 ארנבים.'},
+ {id:'m2',w:'more',p:3,types:['table','stool'],W:31,min:1,
+  q:'בכיתה יש שולחנות (4 רגליים) ושרפרפים (3 רגליים), לפחות אחד מכל סוג. ספרתי 31 רגליים. מה יכול להיות בכיתה?',
+  tasks:[{k:'one'},{k:'all',n:3},{k:'max'}],
+  hints:['נסו שולחן אחד: נשארו 27 רגליים. האם 27 מתחלק ב-3?','כשמוסיפים 3 שולחנות (12 רגליים) צריך להוריד 4 שרפרפים (12 רגליים).'],
+  sol:'שולחן אחד ו-9 שרפרפים, 4 שולחנות ו-5 שרפרפים, 7 שולחנות ושרפרף אחד. הכי הרבה רהיטים: שולחן אחד ו-9 שרפרפים (10).'},
+ {id:'z4',w:'zoo',p:4,types:['spider','beetle'],W:54,min:1,
+  q:'בפינת החרקים יש עכבישים (8 רגליים) וחיפושיות (6 רגליים), לפחות אחד מכל סוג. ספרתי 54 רגליים. כמה מכל סוג?',
+  tasks:[{k:'one'},{k:'all',n:2}],
+  hints:['כמה רגליים נשארות אחרי עכביש אחד? האם המספר מתחלק ב-6?','מספר העכבישים חייב להיות כזה ש-54 פחות הרגליים שלהם יתחלק ב-6. נסו 3 ו-6.'],
+  sol:'3 עכבישים ו-5 חיפושיות (24+30), או 6 עכבישים וחיפושית אחת (48+6).'},
+ {id:'p5',w:'park',p:4,types:['car','moto','truck'],W:120,N:30,ex:c=>c.car===c.truck,exMsg:'צריך מספר שווה של מכוניות ומשאיות.',
+  q:'בחניון יש מכוניות, אופנועים ומשאיות (10 גלגלים). יש בו 30 כלי רכב ו-120 גלגלים, ומספר המכוניות שווה למספר המשאיות. כמה מכל סוג?',
+  tasks:[{k:'one'}],
+  hints:['זוג של מכונית ומשאית = 2 כלים ו-14 גלגלים.','נסו 5 זוגות: 10 כלים ו-70 גלגלים. כמה אופנועים חסרים עד 30 כלים? כמה גלגלים יוצאים?'],
+  sol:'6 מכוניות, 6 משאיות ו-18 אופנועים: 24+60+36=120 גלגלים, 30 כלי רכב.'},
+ {id:'m3',w:'more',p:4,types:['bike','tri'],W:54,N:23,
+  q:'בחנות האופניים יש 23 כלים, אופניים ותלת־אופן. ספרתי 54 גלגלים. כמה מכל סוג?',
+  tasks:[{k:'one'}],
+  hints:['אם כל 23 הכלים היו אופניים, כמה גלגלים היו?','כל תלת־אופן במקום אופניים מוסיף גלגל אחד.'],
+  sol:'15 אופניים ו-8 תלת־אופן: 30+24=54. אם כולם אופניים יש 46 גלגלים, חסרים 8, ולכן 8 תלת־אופן.'},
+ {id:'m4',w:'more',p:5,types:['star','octo'],W:100,min:1,
+  q:'בבריכת הגאות בחוף יש כוכבי ים (5 זרועות) ותמנונים (8 זרועות), לפחות אחד מכל סוג. ספרתי 100 זרועות. כמה מכל סוג?',
+  tasks:[{k:'one'},{k:'all',n:2},{k:'min'}],
+  hints:['100 מתחלק ב-5. מה זה אומר על הזרועות של התמנונים?','הזרועות של התמנונים צריכות להתחלק גם ב-5 וגם ב-8. נסו 5 תמנונים.'],
+  sol:'12 כוכבי ים ו-5 תמנונים (60+40), או 4 כוכבי ים ו-10 תמנונים (20+80). הכי מעט חיות: 14.'},
+ {id:'z5',w:'zoo',p:5,types:['duck','goat','spider'],W:50,N:13,min:1,
+  q:'בפינת החי יש ברווזים, עזים ועכבישים, לפחות אחד מכל סוג. יש 13 בעלי חיים ו-50 רגליים. מה יכול להיות?',
+  tasks:[{k:'one'},{k:'all',n:3},{k:'think',t:'באיזו דרך יש הכי הרבה ברווזים? למה?',a:'7 ברווזים, 3 עזים ו-3 עכבישים. כשיש יותר עכבישים צריך פחות עזים, ונשארים יותר "מקומות" לברווזים.'}],
+  hints:['אם כל 13 החיות היו ברווזים: 26 רגליים. חסרות 24.','עז במקום ברווז מוסיפה 2 רגליים. עכביש במקום ברווז מוסיף 6. איך מגיעים ל-24?'],
+  sol:'ברווזים 3, עזים 9, עכביש 1. ברווזים 5, עזים 6, עכבישים 2. ברווזים 7, עזים 3, עכבישים 3.'},
+ {id:'z6',w:'zoo',p:5,types:['hen','goat','spider'],W:100,N:30,ex:c=>c.spider===2,exMsg:'בשאלה יש בדיוק 2 עכבישים.',
+  q:'החוואי ספר בפינת החי 30 ראשים ו-100 רגליים. יש תרנגולות, עזים ובדיוק 2 עכבישים. כמה תרנגולות וכמה עזים?',
+  tasks:[{k:'one'}],
+  hints:['קודם מורידים את העכבישים: כמה ראשים וכמה רגליים נשארו?','נשארו 28 ראשים ו-84 רגליים. אם כולן תרנגולות?'],
+  sol:'2 עכבישים (16 רגליים), 14 תרנגולות (28) ו-14 עזים (56). ביחד 30 ראשים ו-100 רגליים.'},
+ {id:'p6',w:'park',p:6,types:['car','moto','bus','truck'],W:200,N:40,min:3,
+  q:'בחניון הגדול יש מכוניות, אופנועים, אוטובוסים ומשאיות, לפחות 3 מכל סוג. יש 40 כלי רכב ו-200 גלגלים. מצאו סידור אפשרי. מה המספר הגדול ביותר של אוטובוסים?',
+  tasks:[{k:'one'},{k:'maxT',t:'bus'}],
+  hints:['אם כל 40 הכלים היו אופנועים: 80 גלגלים. כל מכונית מוסיפה 2, כל אוטובוס 4 וכל משאית 8. צריך להוסיף 120.','בלשון חשבון: מכוניות + 2×אוטובוסים + 4×משאיות = 60. כדי שיהיו הרבה אוטובוסים, שמים מעט מכוניות ומשאיות.'],
+  sol:'למשל 4 מכוניות, 11 אופנועים, 22 אוטובוסים ו-3 משאיות. 22 הוא המספר הגדול ביותר של אוטובוסים. עם 3 מכוניות לא מסתדר, כי אז נשאר מספר אי־זוגי.'},
+ {id:'m5',w:'more',p:6,types:['uni','bike','tri'],W:50,N:25,
+  q:'בתחרות רכיבה יש חד־אופן, אופניים ותלת־אופן. יש 25 כלים ו-50 גלגלים. מצאו כמה דרכים. מה מגלים?',
+  tasks:[{k:'one'},{k:'all',n:3},{k:'think',t:'מה משותף לכל הדרכים שמצאתם? האם זה תמיד כך?',a:'תמיד יש מספר שווה של חד־אופן ותלת־אופן! 50 גלגלים ל-25 כלים זה בממוצע 2 לכל כלי. כל תלת־אופן "נותן" גלגל אחד יותר מ-2, וכל חד־אופן גלגל אחד פחות, ולכן הם חייבים לאזן זה את זה.'}],
+  hints:['נסו רק אופניים: 25 אופניים = 50 גלגלים. זו כבר דרך אחת!','מה קורה אם מחליפים 2 אופניים בחד־אופן ותלת־אופן?'],
+  sol:'למשל: 25 אופניים. או חד־אופן אחד, 23 אופניים ותלת־אופן אחד. או 5 חד־אופן, 15 אופניים ו-5 תלת־אופן. בכל דרך מספר החד־אופן שווה למספר התלת־אופן.'},
+ {id:'p7',w:'park',p:7,types:['car','moto','tri'],W:100,N:30,min:1,
+  q:'ספרתי 100 גלגלים של מכוניות, אופנועים ותלת־אופן, לפחות אחד מכל סוג. היו 30 כלים. כמה פתרונות יש בסך הכול?',
+  tasks:[{k:'one'},{k:'all',n:4},{k:'num',t:'כמה פתרונות יש בסך הכול?',ans:9},{k:'think',t:'מה תמיד נכון לגבי מספר התלת־אופן? למה?',a:'מספר התלת־אופן תמיד זוגי. אם כולם אופנועים יש 60 גלגלים, וחסרים 40. מכונית מוסיפה 2 ותלת־אופן מוסיף 1, אז 2×מכוניות + תלת־אופן = 40, ולכן תלת־אופן = 40 פחות מספר זוגי.'}],
+  hints:['אם כל 30 הכלים היו אופנועים: 60 גלגלים. חסרים 40.','2×מכוניות + תלת־אופן = 40. נסו 11 מכוניות. כמה תלת־אופן? כמה אופנועים?','המכוניות יכולות להיות מ-11 עד 19. למה לא 10? למה לא 20?'],
+  sol:'מכוניות מ-11 עד 19, תלת־אופן = 40 − 2×מכוניות, אופנועים = מכוניות − 10. למשל 11 מכוניות, 18 תלת־אופן ואופנוע אחד. בסך הכול 9 פתרונות.'},
+ {id:'z7',w:'zoo',p:7,types:['beetle','spider','snake'],W:100,N:20,min:1,
+  q:'בגן החיות הקטן יש חיפושיות (6 רגליים), עכבישים (8 רגליים) ונחשים (בלי רגליים בכלל!), לפחות אחד מכל סוג. יש 20 בעלי חיים ו-100 רגליים. מה יכול להיות? מה המספר הגדול ביותר של נחשים?',
+  tasks:[{k:'one'},{k:'all',n:4},{k:'maxT',t:'snake'}],
+  hints:['הנחשים לא מוסיפים רגליים, רק ראשים. אז קודם מחלקים את 100 הרגליים בין חיפושיות לעכבישים.','6×חיפושיות + 8×עכבישים = 100. נסו 2 עכבישים. אחר כך 5, 8, 11.','כמה שפחות חרקים, כך יותר נחשים.'],
+  sol:'14 חיפושיות, 2 עכבישים, 4 נחשים. 10 חיפושיות, 5 עכבישים, 5 נחשים. 6 חיפושיות, 8 עכבישים, 6 נחשים. 2 חיפושיות, 11 עכבישים, 7 נחשים. הכי הרבה נחשים: 7.'}
+];
+
+/* ================= solver ================= */
+const sumW=(q,c)=>q.types.reduce((s,t)=>s+T[t].per*(c[t]||0),0);
+const sumN=(q,c)=>q.types.reduce((s,t)=>s+(c[t]||0),0);
+function ok(q,c){
+  if(q.given)return q.types.every(t=>(c[t]||0)===q.given[t]);
+  if(sumW(q,c)!==q.W)return false;
+  if(q.N!=null&&sumN(q,c)!==q.N)return false;
+  if(q.min&&q.types.some(t=>(c[t]||0)<q.min))return false;
+  if(q.ex&&!q.ex(c))return false;
+  return true;
+}
+function solve(q){
+  if(q.given)return[q.given];
+  const out=[],ts=q.types,c={};
+  const cap=t=>T[t].per?Math.floor(q.W/T[t].per):(q.N!=null?q.N:0);
+  (function rec(i,w,n){
+    if(out.length>500)return;
+    if(i===ts.length){if(ok(q,c))out.push({...c});return}
+    const t=ts[i];for(let k=q.min||0;k<=cap(t);k++){
+      const w2=w+T[t].per*k,n2=n+k;if(w2>q.W)break;if(q.N!=null&&n2>q.N)break;c[t]=k;rec(i+1,w2,n2)}
+    delete c[t];
+  })(0,0,0);
+  return out;
+}
+const key=(q,c)=>q.types.map(t=>c[t]||0).join('-');
+const describe=(q,c)=>q.types.filter(t=>(c[t]||0)>0||q.types.length<=3).map(t=>`${c[t]||0} ${T[t].pl}`).join(', ');
+
+/* ================= state ================= */
+let S=null;
+const app=document.getElementById('app');
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const nkMode=q=>q.p<=2;
+const qText=q=>q.nk||q.q;
+const unit=(q,i=0)=>UNIT[T[q.types[0]].u][nkMode(q)&&i===0?1:i];
+const tname=(q,t)=>nkMode(q)?T[t].nk:T[t].pl;
+const taskText=(q,tk)=>{const nk=nkMode(q);
+  switch(tk.k){
+    case 'one': return nk?'מִצְאוּ דֶּרֶךְ אַחַת שֶׁמַּתְאִימָה':'מצאו דרך אחת שמתאימה';
+    case 'all': return nk?`מִצְאוּ ${tk.n} דְּרָכִים שׁוֹנוֹת`:`מצאו ${tk.n} דרכים שונות`;
+    case 'min': return nk?'מִצְאוּ אֶת הַדֶּרֶךְ עִם הֲכִי מְעַט':`מצאו את הדרך עם הכי מעט ${q.w==='park'?'כלי רכב':q.w==='zoo'?'בעלי חיים':'פריטים'}`;
+    case 'max': return `מצאו את הדרך עם הכי הרבה ${q.w==='park'?'כלי רכב':q.w==='zoo'?'בעלי חיים':'פריטים'}`;
+    case 'maxT': return `מצאו את הדרך עם הכי הרבה ${T[tk.t].pl}`;
+    default: return tk.t;
+  }};
+
+function startQ(q){
+  const c={};q.types.forEach(t=>c[t]=q.given?q.given[t]:(q.min||0));
+  const sols=solve(q);
+  S={q,c,sols,saved:[],done:{},hint:0,fb:'',fbc:'',showMeter:!q.given&&q.p>=3,think:{}};
+}
+
+/* ================= views ================= */
+function home(){
+  document.documentElement.style.setProperty('--k','var(--park)');
+  const ws=Object.keys(WORLDS).map(w=>{
+    const [title,sub,col]=WORLDS[w];
+    const qs=Q.filter(q=>q.w===w).sort((a,b)=>a.p-b.p);
+    return `<section class="world" style="--k:var(${col})"><h2>${title}</h2><p>${sub}</p>
+      <div class="qs">${qs.map((q,i)=>`<a class="qc" href="#q-${q.id}" style="--r:${[-2,1.5,-1,2.5,-3,1][i%6]}deg">
+        <div class="ic">${q.types.map(icon).join('')}</div>
+        <h3>${esc(shortTitle(q))}</h3>
+        <div class="row"><span>${q.given?'כמה ביחד?':solve(q).length===1?'תשובה אחת':'כמה תשובות'}</span>${pepIcons(q.p)}</div>
+      </a>`).join('')}</div></section>`}).join('');
+  app.innerHTML=`<div class="wrap">
+    <section class="hero">
+      <div>
+        <h1>גלגלים ורגליים</h1>
+        <p class="tag">סופרים, מנחשים, בונים ובודקים</p>
+        <p>ספרתי במגרש החנייה 100 גלגלים. כמה כלי רכב היו שם? בשאלות כאלה יש לפעמים תשובה אחת, ולפעמים הרבה תשובות. בונים במגרש, בודקים, ומחפשים עוד דרכים.</p>
+        <p>לכל שאלה יש פלפלים: פלפל אחד לכיתה א׳, ועד שבעה פלפלים לחשיבה מתקדמת במיוחד.</p>
+      </div>
+      <div class="heroart">
+        <svg viewBox="0 0 470 250" aria-hidden="true">
+          <rect x="0" y="150" width="470" height="70" rx="20" fill="var(--road)"/>
+          <path d="M20 185h430" stroke="var(--road-line)" stroke-width="4" stroke-dasharray="22 16"/>
+          <g transform="translate(20 110) scale(1.5)">${icon('bus').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>
+          <g transform="translate(150 125) scale(1.25)">${icon('car').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>
+          <g transform="translate(265 130) scale(1.1)">${icon('moto').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>
+          <g transform="translate(360 125) scale(1.2)">${icon('tri').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>
+          <g transform="translate(60 20) scale(1.3)">${icon('hen').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>
+          <g transform="translate(190 15) scale(1.3)">${icon('rabbit').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>
+          <g transform="translate(320 10) scale(1.3)">${icon('spider').replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g>
+        </svg>
+        <div class="sigline"><span>נוצר על ידי</span><span class="sig" role="img" aria-label="הדס הרצמן לפשיץ"></span></div>
+      </div>
+    </section>
+    ${ws}
+    <p class="closing">כל הפעילויות נוצרו על ידי הדס הרצמן לפשיץ</p>
+  </div>
+  <footer><span>נוצר על ידי</span><span class="sig" role="img" aria-label="הדס הרצמן לפשיץ"></span></footer>`;
+}
+function shortTitle(q){
+  const u=UNIT[T[q.types[0]].u][0];
+  if(q.given)return `${q.types.map(t=>`${q.given[t]} ${T[t].pl}`).join(' ו-')}: כמה ${u}?`;
+  return `${q.W} ${u}${q.N!=null?`, ${q.N} ${q.w==='park'?'כלים':q.w==='zoo'?'ראשים':'כלים'}`:''}`;
+}
+
+function game(){
+  const s=S,q=s.q,nk=nkMode(q);
+  document.documentElement.style.setProperty('--k',`var(${WORLDS[q.w][2]})`);
+  const W=sumW(q,s.c),N=sumN(q,s.c);
+  const list=Q.map(x=>`<option value="${x.id}" ${x===q?'selected':''}>${'🌶'.repeat(x.p)} ${esc(shortTitle(x))}</option>`).join('');
+  const opts=Q.includes(q)?list:`<option selected>השאלה שלכם</option>${list}`;
+  const tasks=q.tasks.map((tk,i)=>{
+    const d=s.done[i];
+    let extra='';
+    if(tk.k==='num'&&!d)extra=`<div class="ans"><input id="num${i}" type="number" inputmode="numeric" aria-label="תשובה"><button class="btn small" data-num="${i}">בדיקה</button></div>`;
+    if(tk.k==='num'&&d)extra=`<div class="think">${tk.ans}</div>`;
+    if(tk.k==='think')extra=s.think[i]?`<div class="think">${esc(tk.a)}</div>`:`<button class="linkbtn" data-think="${i}">חשבנו יחד, להציג תשובה</button>`;
+    if(tk.k==='all')extra=`<div class="per">${s.saved.length} מתוך ${tk.n}</div>`;
+    return `<li class="task ${d?'done':''}"><span class="mk">${d?'✓':i+1}</span><div>${esc(taskText(q,tk))}${extra}</div></li>`}).join('');
+  const lanes=q.types.map(t=>{const n=s.c[t]||0,lock=!!q.given;
+    const shown=Math.min(n,48);
+    return `<div class="lane"><div class="ctl"><div class="nm">${esc(tname(q,t))}</div><div class="per">${T[t].per} ${UNIT[T[t].u][0]} ל${T[t].n}</div>
+      ${lock?`<div class="stepper"><output>${n}</output></div>`:`<div class="stepper"><button data-add="${t}" aria-label="להוסיף ${T[t].n}">+</button><output aria-live="polite">${n}</output><button data-sub="${t}" aria-label="להוריד ${T[t].n}" ${n<=(q.min||0)?'disabled':''}>−</button></div>`}</div>
+      <div class="tokens ${n>14?'many':''}">${Array.from({length:shown},(_,i)=>i===shown-1&&s.last===t?icon(t).replace('<svg ','<svg class="nw" '):icon(t)).join('')}${n>shown?`<span class="more">ועוד ${n-shown}</span>`:''}</div></div>`}).join('');
+  const target=q.given?'':`<span class="big">${unit(q,0)}: <b>${s.showMeter?W:'?'}</b> / ${q.W}</span>${q.N!=null?`<span class="big">${q.w==='zoo'?'ראשים':'כלים'}: <b>${s.showMeter?N:'?'}</b> / ${q.N}</span>`:`<span class="big">${q.w==='zoo'?'בעלי חיים':'כלים'}: <b>${s.showMeter?N:'?'}</b></span>`}`;
+  app.innerHTML=`<div class="game">
+    <aside class="side">
+      <div class="box">
+        <div class="qhead"><h2>${WORLDS[q.w][0]}</h2>${pepIcons(q.p)}</div>
+        <p class="qtext">${esc(qText(q))}</p>
+        <div class="rules">${q.types.map(t=>`<span class="rule">${icon(t)} ${T[t].per} ${UNIT[T[t].u][0]}</span>`).join('')}</div>
+        <div class="acts"><button class="btn ghost small" id="readBtn">🔊 הקראה</button><button class="btn ghost small" id="hintBtn">רמז</button><button class="btn ghost small" id="solBtn">הצגת הפתרון</button></div>
+        ${s.hint?`<div class="hintbox">${q.hints.slice(0,s.hint).map(esc).join('<br>')}</div>`:''}
+      </div>
+      <div class="box"><h3 style="font-size:18px">משימות</h3><ul class="tasks">${tasks}</ul>
+        ${s.saved.length?`<h3 style="font-size:16px;margin-top:6px">הדרכים שמצאתם</h3><div class="saved">${s.saved.map(k=>`<span>${esc(describe(q,Object.fromEntries(q.types.map((t,i)=>[t,+k.split('-')[i]]))))}</span>`).join('')}</div>`:''}
+      </div>
+      <div class="gbar"><select id="qSel" aria-label="בחירת שאלה">${opts}</select></div>
+    </aside>
+    <section class="play">
+      <div class="lot" aria-label="המגרש">${lanes}</div>
+      <div class="meter">${target}<span class="sp"></span>
+        ${q.given?'':`<button class="btn ghost small" id="meterBtn">${s.showMeter?'הסתרת המונה':'הצגת המונה'}</button><button class="btn ghost small" id="resetBtn">מתחילים מחדש</button><button class="btn" id="checkBtn">בדיקה</button>`}
+      </div>
+      <p class="fb ${s.fbc}" role="status">${s.fb}</p>
+    </section>
+  </div>`;
+  bind();
+}
+
+function bind(){
+  const s=S,q=s.q;
+  app.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{const t=b.dataset.add;s.c[t]=(s.c[t]||0)+1;s.fb='';s.last=t;game();focusBtn('add',t)});
+  app.querySelectorAll('[data-sub]').forEach(b=>b.onclick=()=>{const t=b.dataset.sub;s.c[t]=Math.max(q.min||0,(s.c[t]||0)-1);s.fb='';s.last=null;game();focusBtn('sub',t)});
+  app.querySelectorAll('[data-num]').forEach(b=>b.onclick=()=>{const i=+b.dataset.num,v=+document.getElementById('num'+i).value;
+    if(v===q.tasks[i].ans){s.done[i]=true;s.fb=nkMode(q)?'נָכוֹן! כָּל הַכָּבוֹד.':'נכון! כל הכבוד.';s.fbc='good'}
+    else{s.fb=nkMode(q)?'עוֹד לֹא. סִפְרוּ שׁוּב, אוֹ בַּקְּשׁוּ רֶמֶז.':'עוד לא. בדקו שוב, או בקשו רמז.';s.fbc='bad'}game()});
+  app.querySelectorAll('[data-think]').forEach(b=>b.onclick=()=>{s.think[+b.dataset.think]=true;s.done[+b.dataset.think]=true;game()});
+  on('hintBtn',()=>{s.hint=Math.min(q.hints.length,s.hint+1);if(s.hint===q.hints.length&&!q.hints.length){s.fb='אין רמז לשאלה הזו.'}game()});
+  on('solBtn',solution);
+  on('readBtn',()=>{try{const u=new SpeechSynthesisUtterance(qText(q));u.lang='he-IL';u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u)}catch(e){}});
+  on('meterBtn',()=>{s.showMeter=!s.showMeter;game()});
+  on('resetBtn',()=>{q.types.forEach(t=>s.c[t]=q.min||0);s.fb='';game()});
+  on('checkBtn',check);
+  const sel=document.getElementById('qSel');if(sel)sel.onchange=e=>{location.hash='q-'+e.target.value};
+}
+function on(id,f){const el=document.getElementById(id);if(el)el.onclick=f}
+function focusBtn(k,t){const b=app.querySelector(`[data-${k}="${t}"]`);if(b&&!b.disabled)b.focus()}
+
+function check(){
+  const s=S,q=s.q,c=s.c,W=sumW(q,c),N=sumN(q,c),U=UNIT[T[q.types[0]].u][0],nk=nkMode(q);
+  if(!ok(q,c)){
+    const m=[];
+    if(W!==q.W)m.push(nk?`יֵשׁ ${W} ${unit(q,0)}, וְצָרִיךְ ${q.W}.`:`יש ${W} ${U}, וצריך ${q.W}.`);
+    if(q.N!=null&&N!==q.N)m.push(`יש ${N} ${q.w==='zoo'?'בעלי חיים':'כלים'}, וצריך ${q.N}.`);
+    if(q.min&&q.types.some(t=>(c[t]||0)<q.min))m.push(`צריך לפחות ${q.min} מכל סוג.`);
+    if(q.ex&&!q.ex(c)&&!m.length)m.push(q.exMsg);
+    if(!m.length&&q.ex&&!q.ex(c))m.push(q.exMsg);
+    s.fb=(nk?'עוֹד לֹא. ':'עוד לא. ')+m.join(' ');s.fbc='bad';game();return;
+  }
+  const k=key(q,c),isNew=!s.saved.includes(k);
+  if(isNew)s.saved.push(k);
+  const msgs=[nk?'מַתְאִים!':(isNew?'מתאים! הדרך נשמרה.':'מתאים, אבל את הדרך הזו כבר מצאתם.')];
+  const Ns=s.sols.map(x=>sumN(q,x));
+  q.tasks.forEach((tk,i)=>{
+    if(s.done[i])return;
+    if(tk.k==='one')s.done[i]=true;
+    if(tk.k==='all'&&s.saved.length>=tk.n)s.done[i]=true;
+    if(tk.k==='min'){if(N===Math.min(...Ns))s.done[i]=true;else msgs.push('אפשר גם עם פחות?')}
+    if(tk.k==='max'){if(N===Math.max(...Ns))s.done[i]=true;else msgs.push('אפשר גם עם יותר?')}
+    if(tk.k==='maxT'){const best=Math.max(...s.sols.map(x=>x[tk.t]));if(c[tk.t]===best)s.done[i]=true;else msgs.push(`אפשר עם יותר ${T[tk.t].pl}?`)}
+  });
+  const allDone=q.tasks.every((tk,i)=>s.done[i]);
+  if(allDone)msgs.push(nk?'כָּל הַמְּשִׂימוֹת הֻשְׁלְמוּ!':'כל המשימות הושלמו! נסו שאלה עם עוד פלפל.');
+  s.fb=msgs.join(' ');s.fbc='good';game();
+}
+
+function solution(){
+  const s=S,q=s.q,sols=s.sols;
+  const show=sols.slice(0,24);
+  modal(`<h3>הפתרון</h3><p>${esc(q.sol||'')}</p>
+    ${q.given?'':`<h4>${sols.length===1?'יש פתרון אחד':`יש ${sols.length} פתרונות`}</h4><div class="sols">${show.map(x=>`<span>${esc(describe(q,x))}</span>`).join('')}${sols.length>show.length?`<span>ועוד ${sols.length-show.length}</span>`:''}</div>`}
+    <h4>לדיון</h4><p>איך חיפשתם? ניסוי וטעייה, טבלה, או "מה אם כולם…"? איזו דרך הייתה הכי מהירה?</p>`);
+}
+
+function teacher(){
+  modal(`<h3>למורה – גלגלים ורגליים</h3>
+  <h4>מתי</h4><p>פתיחת שיעור בפתרון בעיות, עבודה בזוגות על הלוח החכם, או "אתגר השבוע". כל שאלה לוקחת 5–15 דקות.</p>
+  <h4>שלבים</h4><ol>
+    <li>קוראים יחד את השאלה (בכיתות א׳–ב׳ יש כפתור הקראה) ומסמנים מה ידוע: כמה גלגלים או רגליים לכל סוג, וכמה יש בסך הכול.</li>
+    <li>הילדים מנחשים דרך ראשונה ובונים אותה במגרש בכפתורי + ו-−.</li>
+    <li>"בדיקה" אומרת אם הדרך מתאימה, ואם לא, כמה חסר או עודף. כל דרך נכונה נשמרת ברשימה.</li>
+    <li>ממשיכים למשימות הבאות: עוד דרכים, הדרך עם הכי מעט, הדרך עם הכי הרבה.</li>
+    <li>בסוף משווים אסטרטגיות. "הצגת הפתרון" מראה את כל הפתרונות.</li>
+  </ol>
+  <h4>המונה</h4><p>בשאלות של פלפל אחד ושניים המונה מוסתר, והילדים סופרים את הגלגלים בתמונה. אפשר להציג או להסתיר אותו בכל שאלה.</p>
+  <h4>טיפ: "מה אם כולם…"</h4><p>אם כל 8 הכלים היו אופנועים, היו 16 גלגלים. חסרים 8, וכל החלפה של אופנוע במכונית מוסיפה 2, ולכן מחליפים 4. בקשו מהילדים להסביר למה זה עובד, ואז לנסות את זה על שאלה אחרת.</p>
+  <h4>מקום לילדים</h4><p>בלשונית "שאלה משלכם" הילדים כותבים שאלה חדשה לכיתה. אם אין לה פתרון, שואלים: למה אין?</p>`);
+}
+function modal(html){const m=document.getElementById('modal');document.getElementById('mcard').innerHTML=`<button class="x" id="mx" aria-label="סגירה">×</button>${html}`;m.hidden=false;document.getElementById('mx').onclick=closeModal;document.getElementById('mx').focus()}
+function closeModal(){document.getElementById('modal').hidden=true}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+document.getElementById('teachBtn').onclick=teacher;
+
+/* ================= own question ================= */
+let ownQ=null;
+function ownPage(){
+  document.documentElement.style.setProperty('--k','var(--more)');
+  const opts=sel=>Object.keys(T).map(t=>`<option value="${t}" ${t===sel?'selected':''}>${T[t].pl} (${T[t].per})</option>`).join('');
+  app.innerHTML=`<div class="own"><div class="box">
+    <h2>שאלה משלכם</h2>
+    <p>בוחרים שניים או שלושה סוגים, כמה גלגלים או רגליים ספרתם, ואם רוצים גם כמה יש בסך הכול. הכיתה פותרת.</p>
+    <div class="grid">
+      <label>סוג ראשון<select id="o1">${opts('car')}</select></label>
+      <label>סוג שני<select id="o2">${opts('moto')}</select></label>
+      <label>סוג שלישי (לא חובה)<select id="o3"><option value="">בלי</option>${opts('')}</select></label>
+      <label>כמה גלגלים או רגליים ספרתם?<input id="oW" type="number" min="1" max="400" value="30"></label>
+      <label>כמה יש בסך הכול? (לא חובה)<input id="oN" type="number" min="1" max="200" placeholder="בלי"></label>
+      <label>לפחות מכל סוג<select id="oM"><option value="1">לפחות אחד</option><option value="0">אפשר גם אפס</option></select></label>
+    </div>
+    <button class="btn" id="oGo">יוצאים לדרך</button>
+    <p class="fb bad" id="oMsg"></p>
+  </div></div>
+  <footer><span>נוצר על ידי</span><span class="sig" role="img" aria-label="הדס הרצמן לפשיץ"></span></footer>`;
+  document.getElementById('oGo').onclick=()=>{
+    const ts=[...new Set(['o1','o2','o3'].map(i=>document.getElementById(i).value).filter(Boolean))];
+    const W=+document.getElementById('oW').value,Nv=document.getElementById('oN').value,N=Nv?+Nv:null,min=+document.getElementById('oM').value;
+    const msg=document.getElementById('oMsg');
+    if(ts.length<2){msg.textContent='בחרו שני סוגים שונים לפחות.';return}
+    if(!(W>0&&W<=400)){msg.textContent='בחרו מספר מ-1 עד 400.';return}
+    if(ts.some(t=>T[t].per===0)&&N==null){msg.textContent='כשיש נחשים צריך לכתוב גם כמה יש בסך הכול, אחרת אפשר להוסיף נחשים בלי סוף.';return}
+    const u=UNIT[T[ts[0]].u][0];
+    const q={id:'own',w:'more',p:Math.min(7,ts.length+(N!=null?2:0)+(W>60?1:0)),types:ts,W,N,min,
+      q:`ספרתי ${W} ${u}. היו ${ts.map(t=>T[t].pl).join(', ')}${min?', לפחות אחד מכל סוג':''}.${N!=null?` היו ${N} בסך הכול.`:''} מה יכול להיות?`,
+      tasks:[{k:'one'}],hints:['התחילו מאחד מכל סוג וחשבו כמה חסר.','נסו את אסטרטגיית "מה אם כולם…".'],sol:''};
+    const sols=solve(q);
+    if(!sols.length){msg.textContent='לשאלה הזו אין פתרון! זה בעצמו חידה טובה לכיתה: למה אין? נסו מספר אחר.';return}
+    if(sols.length>1)q.tasks.push({k:'all',n:Math.min(3,sols.length)});
+    if(sols.length>2&&N==null)q.tasks.push({k:'min'});
+    q.sol=sols.length===1?'לשאלה שלכם יש פתרון אחד בלבד.':`לשאלה שלכם יש ${sols.length>500?'יותר מ-500':sols.length} פתרונות.`;
+    ownQ=q;location.hash='q-own';
+  };
+}
+
+/* ================= routing ================= */
+function route(){
+  const h=location.hash.slice(1)||'home';
+  document.querySelectorAll('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.r===(h==='own'?'own':h==='home'?'home':'')));
+  closeModal();
+  const m=/^q-(.+)$/.exec(h);
+  if(m){const q=m[1]==='own'?ownQ:Q.find(x=>x.id===m[1]);
+    if(q){if(!S||S.q!==q)startQ(q);game();window.scrollTo(0,0);return}}
+  if(h==='own'){ownPage();window.scrollTo(0,0);return}
+  home();window.scrollTo(0,0);
+}
+document.getElementById('theme').onclick=()=>{const r=document.documentElement;
+  const dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark'};
+addEventListener('hashchange',route);
+route();
+</script>
+</body>
+</html>
